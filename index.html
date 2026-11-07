@@ -4,6 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Trolhuizen</title>
+<meta name="description" content="Bouw trolhuizen op een grasveld en trol iedereen die langskomt.">
+<meta name="theme-color" content="#7a4cc2">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="icon" href="icons/icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Trolhuizen">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gochi+Hand&family=Patrick+Hand&display=swap" rel="stylesheet">
@@ -25,14 +35,16 @@
 [hidden]{display:none!important}
 html,body{margin:0;height:100%;overflow:hidden;background:var(--sky);
   font-family:'Patrick Hand','Comic Sans MS',cursive;color:var(--ink);
-  -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+  -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;
+  -webkit-touch-callout:none;touch-action:manipulation;overscroll-behavior:none}
+input{-webkit-user-select:text;user-select:text}
 #scene{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:manipulation}
 #scene.building{cursor:crosshair}
 
 /* ---------- HUD ---------- */
 .card{background:var(--paper);border:3px solid var(--ink);border-radius:14px 18px 12px 16px;
   box-shadow:4px 5px 0 rgba(42,24,70,.35)}
-.top{position:fixed;top:12px;left:16px;right:16px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;pointer-events:none}
+.top{position:fixed;top:max(12px,env(safe-area-inset-top));left:max(16px,env(safe-area-inset-left));right:max(16px,env(safe-area-inset-right));display:flex;justify-content:space-between;align-items:flex-start;gap:12px;pointer-events:none}
 .title{padding:6px 18px 8px;transform:rotate(-1.5deg);pointer-events:auto}
 .title h1{margin:0;font-family:'Gochi Hand','Comic Sans MS',cursive;font-size:clamp(28px,4vw,44px);line-height:1;color:var(--purple-dark);letter-spacing:.5px}
 .title h1 span{color:#e2361f}
@@ -49,7 +61,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--sky);
 .btn{font:inherit;font-size:24px;cursor:pointer;pointer-events:auto;color:#fff;background:var(--purple);
   border:3px solid var(--ink);border-radius:16px 12px 18px 14px;padding:10px 22px 12px;
   box-shadow:4px 5px 0 var(--ink);transition:transform .1s, box-shadow .1s;display:inline-flex;align-items:center;gap:10px}
-.btn:hover{transform:translate(-1px,-2px);box-shadow:5px 7px 0 var(--ink)}
+@media (hover:hover){.btn:hover{transform:translate(-1px,-2px);box-shadow:5px 7px 0 var(--ink)}}
 .btn:active{transform:translate(3px,4px);box-shadow:1px 1px 0 var(--ink)}
 .btn.secondary{background:var(--paper);color:var(--ink)}
 .btn.danger{background:#ffe3e3;color:#a61e1e}
@@ -91,14 +103,15 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--sky);
 .room svg{width:58px;height:28px}
 .room .p{display:flex;align-items:center;gap:3px;font-size:15px;opacity:.8}
 .room.owned{background:#e5dbff;border-color:#5f3dc4}
-.room:not(.owned):hover{transform:translateY(-1px);box-shadow:2px 3px 0 var(--ink)}
+@media (hover:hover){.room:not(.owned):hover{transform:translateY(-1px);box-shadow:2px 3px 0 var(--ink)}}
+.room:active{transform:translateY(1px)}
 .room.cant{opacity:.55}
 
 /* ---------- binnen ---------- */
 body.inside-mode .top, body.inside-mode .bottom, body.inside-mode #panel{display:none}
 #inside{position:fixed;inset:0;z-index:10;background:#22163a}
 #insideSvg{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
-.in-top{position:fixed;top:12px;left:16px;right:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.in-top{position:fixed;top:max(12px,env(safe-area-inset-top));left:max(16px,env(safe-area-inset-left));right:max(16px,env(safe-area-inset-right));display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .btn.exit{background:#23a55a;color:#0d220f;letter-spacing:2px;font-size:22px;padding:6px 18px 8px}
 .in-title{padding:4px 14px 6px;display:flex;flex-direction:column;line-height:1.1}
 .in-title b{font-family:'Gochi Hand','Comic Sans MS',cursive;font-size:24px;color:var(--purple-dark)}
@@ -122,9 +135,15 @@ body.inside-mode .top, body.inside-mode .bottom, body.inside-mode #panel{display
   border:3px solid var(--ink);box-shadow:3px 4px 0 rgba(0,0,0,.35);touch-action:none;-webkit-user-select:none;user-select:none}
 .touch button.down{transform:translate(2px,3px);box-shadow:1px 1px 0 rgba(0,0,0,.35);background:#e5dbff}
 .touch .jump{width:92px;height:92px;background:#ffe066}
-@media (pointer:coarse){.touch{display:flex}.in-hint{display:none}}
+body.touch-ui .touch{display:flex}
+body.touch-ui .in-hint{display:none}
 .turn-tip{display:none;position:fixed;left:0;right:0;top:130px;text-align:center;color:#fff;opacity:.7;font-size:18px;pointer-events:none}
-@media (pointer:coarse) and (orientation:portrait){.turn-tip{display:block}}
+@media (orientation:portrait){body.touch-ui .turn-tip{display:block}}
+.touch{left:max(16px,env(safe-area-inset-left));right:max(16px,env(safe-area-inset-right))}
+.pill.install{font:inherit;font-size:19px;cursor:pointer;background:#ffe066;color:var(--ink)}
+#updateCard{position:fixed;left:50%;bottom:max(90px,calc(env(safe-area-inset-bottom) + 90px));transform:translateX(-50%) rotate(-1deg);z-index:30;
+  display:flex;align-items:center;gap:12px;padding:10px 12px 10px 18px;font-size:20px;width:max-content;max-width:calc(100vw - 32px)}
+#updateCard .btn{font-size:19px;padding:6px 14px 8px}
 .finish{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-1deg);padding:18px 26px 22px;text-align:center;width:min(400px,calc(100vw - 32px));z-index:12}
 .finish h2{margin:0;font-family:'Gochi Hand','Comic Sans MS',cursive;font-size:56px;line-height:1;color:var(--purple-dark)}
 .finish p{margin:8px 0;font-size:20px}
@@ -140,7 +159,7 @@ body.inside-mode .top, body.inside-mode .bottom, body.inside-mode #panel{display
 .house{cursor:pointer}
 #scene.building .house{cursor:crosshair}
 .house-inner{transform-box:fill-box;transform-origin:50% 100%}
-.house:hover .house-inner{filter:drop-shadow(0 0 5px #fff)}
+@media (hover:hover){.house:hover .house-inner{filter:drop-shadow(0 0 5px #fff)}}
 #scene.building .house:hover .house-inner{filter:none}
 .house.moving{opacity:.25}
 .sel{opacity:0;transition:opacity .2s}
@@ -355,6 +374,7 @@ body.inside-mode .top, body.inside-mode .bottom, body.inside-mode #panel{display
       <b id="coins">0</b>
     </div>
     <div class="pill rare" id="rarePill" title="Er loopt iemand zeldzaams rond" hidden><span>✦</span> zeldzaam!</div>
+    <button class="pill install" id="installBtn" hidden>Installeren</button>
     <div class="pill" id="trolPill" title="Mensen getrold">
       <span>getrold</span><b id="trolled">0</b>
     </div>
@@ -418,11 +438,16 @@ body.inside-mode .top, body.inside-mode .bottom, body.inside-mode #panel{display
 </div>
 
 <div id="toast" class="card"></div>
+<div id="updateCard" class="card" hidden><span>Er is een nieuwe versie!</span><button class="btn" id="updateBtn">Bijwerken</button></div>
 
 
 <script>
 (() => {
 'use strict';
+/* touchscreen: knoppen tonen zodra er een touchscreen is of iemand het scherm aanraakt */
+if (matchMedia('(any-pointer:coarse)').matches) document.body.classList.add('touch-ui');
+addEventListener('pointerdown', e => { if (e.pointerType === 'touch') document.body.classList.add('touch-ui'); }, { capture: true, passive: true });
+addEventListener('keydown', e => { if (e.key.startsWith('Arrow') || e.key === ' ') document.body.classList.remove('touch-ui'); }, { capture: true });
 const NS = 'http://www.w3.org/2000/svg';
 const W = 1600, H = 1000, HORIZON = 360;
 const FIELD = { x0: 90, x1: 1510, y0: 420, y1: 955 };
@@ -1008,7 +1033,7 @@ const ROOMS = {
   trampoline: { name: 'Trampoline', price: 20, desc: 'Blijf op de schommeltrampoline!', width: 1700 },
   weg:        { name: 'Weg',        price: 2,  desc: 'Ren! De plank brokkelt af', width: 1500 },
   touw:       { name: 'Touw',       price: 7,  desc: 'Hou je evenwicht met ← en →', width: 1700 },
-  spinnen:    { name: 'Spinnen',    price: 8,  desc: 'Spring over de spinnen, niet aanraken!', width: 1600 },
+  spinnen:    { name: 'Spinnen',    price: 8,  desc: 'Ga onder de spinnen door, niet aanraken!', width: 1600 },
   schommel:   { name: 'Schommel',   price: 8,  desc: 'Spring eraf voor de schaar het touw doorknipt!', width: 1700 },
 };
 const ROOM_ORDER = ['hindernis', 'trampoline', 'weg', 'touw', 'spinnen', 'schommel'];
@@ -1150,7 +1175,7 @@ function drawStartHall(g, h) {
   el('rect', { x: dx + 15, y: FLOOR - 312, width: 140, height: 46, rx: 4, fill: '#23a55a', stroke: '#0f5a2f', 'stroke-width': 5 }, g);
   txt(g, dx + 85, FLOOR - 276, 'EXIT', 38, { fill: '#0d220f', 'letter-spacing': 3 });
   txt(g, 500, 290, h.name, 66, { ...WALL_TEXT, transform: 'rotate(-2 500 290)' });
-  const touch = matchMedia('(pointer:coarse)').matches;
+  const touch = document.body.classList.contains('touch-ui');
   txt(g, 500, 400, touch ? 'gebruik de knoppen onderin' : '← →  lopen', 38, { fill: '#fff', opacity: .92 });
   txt(g, 500, 450, touch ? 'om te lopen en te springen' : '↑ of spatie  springen', 38, { fill: '#fff', opacity: .92 });
   el('rect', { x: 618, y: FLOOR - 120, width: 12, height: 120, fill: '#8a5a2b' }, g);
@@ -1254,7 +1279,7 @@ const BUILDERS = {
     P(bg, `M${nx - 66} ${lineY + 8} l16 -26 l10 34 l14 -38 l12 40 l14 -38 l10 36 l14 -32 l10 28 l12 -22`, { stroke: '#7048e8', 'stroke-width': 9, fill: 'none', 'stroke-linejoin': 'round', 'stroke-linecap': 'round' });
     P(bg, `M${nx - 50} ${lineY + 22} q40 10 96 -6`, { stroke: '#b197fc', 'stroke-width': 5, fill: 'none', 'stroke-linecap': 'round' });
     [[430, 3.2, 0], [720, 2.7, 1.9], [1010, 3.6, 3.7], [1300, 2.9, 5.1]].forEach(([x, period, phase]) => {
-      const thread = el('line', { x1: ox + x, y1: lineY, x2: ox + x, y2: FLOOR - 40, stroke: 'rgba(255,255,255,.85)', 'stroke-width': 2 }, dyn);
+      const thread = el('line', { x1: ox + x, y1: lineY, x2: ox + x, y2: FLOOR - 40, stroke: 'rgba(255,255,255,.9)', 'stroke-width': 3 }, dyn);
       const g = el('g', {}, dyn);
       for (const side of [-1, 1]) for (let i = 0; i < 4; i++) {
         P(g, `M${side * 10} ${-4 + i * 4} L${side * 30} ${-15 + i * 8} L${side * 37} ${5 + i * 6}`, { stroke: '#1b1b1b', 'stroke-width': 3.5, fill: 'none', 'stroke-linejoin': 'round', 'stroke-linecap': 'round' });
@@ -1389,7 +1414,7 @@ function updateSwings(dt) {
 }
 function updateSpiders() {
   for (const sp of IN.L.spiders) {
-    const f = clamp(0.5 + 0.85 * Math.sin(2 * Math.PI * IN.t / sp.period + sp.phase), 0, 1);
+    const f = clamp(0.35 + 0.9 * Math.sin(2 * Math.PI * IN.t / sp.period + sp.phase), 0, 1);
     sp.y = sp.top + (sp.bottom - sp.top) * f;
     sp.g.setAttribute('transform', `translate(${sp.x} ${sp.y.toFixed(1)}) rotate(${(Math.sin(IN.t * 7 + sp.phase) * 6).toFixed(1)})`);
     sp.thread.setAttribute('y2', (sp.y - 17).toFixed(1));
@@ -1399,6 +1424,8 @@ function spiderHit(p) {
   for (const sp of IN.L.spiders) {
     const cx = clamp(sp.x, p.x - 16, p.x + 16), cy = clamp(sp.y, p.y - 125, p.y - 4);
     if (Math.hypot(sp.x - cx, sp.y - cy) < 22) return true;
+    // de draad is ook plakkerig: je mag alleen onder een spin door, niet erover
+    if (Math.abs(p.x - sp.x) < 18 && p.y - 125 < sp.y) return true;
   }
   return false;
 }
@@ -1472,9 +1499,11 @@ function enterHouse(id) {
   if (!h || !h.rooms.length) return;
   select(null);
   IN.active = true; IN.h = h;
+  try { history.pushState({ inside: true }, ''); } catch (e) { /* file:// mag soms geen history */ }
   document.body.classList.add('inside-mode');
   $('inside').hidden = false;
   $('inName').textContent = h.name;
+  $('inside').oncontextmenu = e => e.preventDefault();
   fitInside();
   buildLevel(h);
   makePlayerFigure();
@@ -1482,6 +1511,12 @@ function enterHouse(id) {
   restartRun();
 }
 function leaveHouse() {
+  if (!IN.active) return;
+  if (history.state && history.state.inside) { history.back(); return; }   // popstate ruimt op
+  closeHouse();
+}
+addEventListener('popstate', () => { if (IN.active) closeHouse(); });
+function closeHouse() {
   if (!IN.active) return;
   const id = IN.h.id;
   IN.active = false;
@@ -1527,7 +1562,7 @@ addEventListener('keyup', e => { const k = KEYMAP[e.key]; if (k) keys[k] = false
 addEventListener('blur', () => { keys.left = keys.right = keys.jump = false; });
 document.querySelectorAll('#touch button').forEach(b => {
   const k = b.dataset.k;
-  const on = e => { e.preventDefault(); b.setPointerCapture?.(e.pointerId); keys[k] = true; if (k === 'jump') IN.jumpBuf = 0.14; b.classList.add('down'); };
+  const on = e => { e.preventDefault(); try { b.setPointerCapture(e.pointerId); } catch (err) { /* geen capture, knop werkt toch */ } keys[k] = true; if (k === 'jump') IN.jumpBuf = 0.14; b.classList.add('down'); };
   const off = () => { keys[k] = false; b.classList.remove('down'); };
   b.addEventListener('pointerdown', on);
   b.addEventListener('pointerup', off); b.addEventListener('pointercancel', off); b.addEventListener('lostpointercapture', off);
@@ -1571,7 +1606,7 @@ function die(kind = 'slijm') {
   $('balance').hidden = true;
   if (kind === 'spin') {
     puffs(p.x, p.y - 70, 1.4, 10, '#b197fc', lvlFx);
-    toast(pick(['Au! Een spin! Getrold!', 'Iiieek, een spin!', 'Niet aan de spinnen komen!']));
+    toast(pick(['Au! Een spin! Getrold!', 'Iiieek, een spin!', 'Niet aanraken! Ga eronder door.']));
   } else {
     puffs(p.x, SLIME + 10, 1.6, 12, '#8ce99a', lvlFx);
     toast(pick(['Plons! Getrold!', 'Iel, trolslijm!', 'Haha, in het slijm!', 'Getrold door het huis!']));
@@ -1759,6 +1794,49 @@ function updateInside(dt) {
   const target = clamp(P_.x - IN.vw * 0.4, -60, Math.max(-60, L.width - IN.vw + 60));
   IN.camX = IN.camX == null ? target : IN.camX + (target - IN.camX) * Math.min(1, dt * 5);
   inSvg.setAttribute('viewBox', `${IN.camX.toFixed(1)} ${IN.y0.toFixed(1)} ${IN.vw.toFixed(1)} ${IN.vh.toFixed(1)}`);
+}
+
+/* ---------- installeren en bijwerken (service worker) ---------- */
+let installEvent = null;
+const standalone = matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches || navigator.standalone;
+addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  installEvent = e;
+  if (!standalone) $('installBtn').hidden = false;
+});
+$('installBtn').addEventListener('click', async () => {
+  if (!installEvent) return;
+  installEvent.prompt();
+  await installEvent.userChoice.catch(() => {});
+  installEvent = null;
+  $('installBtn').hidden = true;
+});
+addEventListener('appinstalled', () => { $('installBtn').hidden = true; toast('Trolhuizen staat nu op je beginscherm!'); });
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || ['localhost', '127.0.0.1'].includes(location.hostname))) {
+  addEventListener('load', async () => {
+    try {
+      const reg = await navigator.serviceWorker.register('./sw.js');
+      let waiting = null, wantReload = false;
+      const offerUpdate = w => { waiting = w; $('updateCard').hidden = false; };
+      if (reg.waiting && navigator.serviceWorker.controller) offerUpdate(reg.waiting);
+      reg.addEventListener('updatefound', () => {
+        const w = reg.installing;
+        if (w) w.addEventListener('statechange', () => {
+          if (w.state === 'installed' && navigator.serviceWorker.controller) offerUpdate(w);
+        });
+      });
+      $('updateBtn').addEventListener('click', () => {
+        if (!waiting) return;
+        wantReload = true;
+        waiting.postMessage({ type: 'SKIP_WAITING' });
+        $('updateBtn').textContent = 'Even geduld...';
+      });
+      navigator.serviceWorker.addEventListener('controllerchange', () => { if (wantReload) location.reload(); });
+      const check = () => reg.update().catch(() => {});
+      setInterval(check, 30 * 60 * 1000);
+      document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') check(); });
+    } catch (e) { /* zonder service worker werkt het spel gewoon online */ }
+  });
 }
 
 if (location.search.includes('debug')) window.__trol = { enterHouse, IN, keys, get state() { return state; } };

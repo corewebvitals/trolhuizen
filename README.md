@@ -5,7 +5,11 @@ Alle huizen, personen en kamers komen uit de tekeningen in deze map.
 
 ## Spelen
 
-Open `index.html` in een browser. Er is geen installatie nodig.
+Speel online op **https://corewebvitals.github.io/trolhuizen/** of open `index.html` in een browser.
+
+Het spel werkt met muis en toetsenbord én met een touchscreen. Je kunt het installeren als app:
+in Chrome of Edge met de knop **Installeren** in het spel, op een iPhone of iPad via **Deel → Zet op beginscherm**.
+Na de eerste keer werkt het ook zonder internet.
 
 - **Buiten:** bouw trolhuizen (70 $). Wie langs een huis loopt, wordt getrold en dat levert munten op.
   Soms komt er een zeldzame bezoeker langs, die is 25 $ waard.
@@ -20,7 +24,7 @@ Open `index.html` in een browser. Er is geen installatie nodig.
 | Trampoline | 20 $ | op een schuivende trampoline blijven |
 | Weg | 2 $ | over een plank rennen die afbrokkelt |
 | Touw | 7 $ | over een touw lopen en je evenwicht houden |
-| Spinnen | 8 $ | over spinnen springen zonder ze te raken |
+| Spinnen | 8 $ | onder de spinnen door lopen zonder ze of hun draad te raken |
 | Schommel | 8 $ | van de schommel springen voordat de vliegende schaar het touw doorknipt |
 
 ## Tekeningen
@@ -28,6 +32,11 @@ Open `index.html` in een browser. Er is geen installatie nodig.
 - `huis-schets1.jpg`: het trolhuis
 - `personen-schets1.jpg`: de bezoekers (de onderste is zeldzaam)
 - `kamers-schets1.jpg` en `kamers-schets2.jpg`: de kamers
+
+## Nieuwe versie uitbrengen
+
+Verhoog `VERSION` in `sw.js` (bijvoorbeeld `trolhuizen-v1` → `trolhuizen-v2`) en push naar `main`.
+Spelers met de app krijgen dan de melding **Er is een nieuwe versie!** en werken met één tik bij.
 
 ## Handig bij het testen
 

@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512"><defs>
+<pattern id="hatchWall" width="9" height="40" patternUnits="userSpaceOnUse" patternTransform="rotate(8)"><path d="M2 0 Q4 20 2 40" stroke="rgba(30,0,60,.22)" stroke-width="2.2" fill="none"/><path d="M6.5 3 Q5 20 7 38" stroke="rgba(255,255,255,.10)" stroke-width="1.6" fill="none"/></pattern>
+<pattern id="hatchRoof" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(-35)"><path d="M0 5 H10" stroke="rgba(0,0,0,.16)" stroke-width="2"/></pattern>
+<radialGradient id="lampGlowGrad"><stop offset="0" stop-color="#fff3a6" stop-opacity=".95"/><stop offset="1" stop-color="#ffd34d" stop-opacity="0"/></radialGradient>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5aa9e6"/><stop offset="1" stop-color="#c9ecff"/></linearGradient>
+</defs><clipPath id="c"><rect width="512" height="512" rx="0"/></clipPath><g clip-path="url(#c)"><rect width="512" height="512" rx="0" fill="url(#sky)"/><circle cx="440" cy="70" r="56" fill="#ffe066" stroke="#f59f00" stroke-width="5"/><path d="M0 380 Q130 350 256 366 T512 360 V512 H0 Z" fill="#62bb48"/><path d="M0 410 Q160 392 300 404 T512 400 V512 H0 Z" fill="#4fae3e"/><g transform="translate(106.0 92.0) scale(1.500)">
+      <!-- muur -->
+      <path d="M28 101 L172 98 L174 196 L26 196 Z" fill="#7a4cc2" stroke="#3a1d66" stroke-width="2.5" stroke-linejoin="round"/>
+      <path d="M28 101 L172 98 L174 196 L26 196 Z" fill="url(#hatchWall)"/>
+      <!-- dak -->
+      <path d="M13 105 Q55 66 100 21 Q142 60 187 103 Z" fill="#b8b8c1" stroke="#4d4d58" stroke-width="2.5" stroke-linejoin="round"/>
+      <path d="M13 105 Q55 66 100 21 Q142 60 187 103 Z" fill="url(#hatchRoof)"/>
+      <path d="M100 22 Q103 40 107 57" stroke="#2b2b33" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+      <path d="M13 105 L28 101 L30 125 L19 129 Z" fill="#26222e"/>
+      <!-- zolderraam -->
+      <rect x="87" y="50" width="26" height="22" fill="#fdfdfd" stroke="#444" stroke-width="1.6"/>
+      <path d="M100 50 V72 M87 61 H113" stroke="#444" stroke-width="1.4"/>
+      <!-- torentje met lamp -->
+      <path d="M137 102 C137 86 147 77 157 77 C168 77 177 86 177 101 Z" fill="#7a4cc2" stroke="#3a1d66" stroke-width="2.5" stroke-linejoin="round"/>
+      <path d="M137 102 C137 86 147 77 157 77 C168 77 177 86 177 101 Z" fill="rgba(20,0,40,.25)"/>
+      <path d="M142 92 Q157 86 172 92 M139 99 Q157 93 175 99 M152 80 L150 101 M162 80 L164 100" stroke="rgba(20,0,40,.45)" stroke-width="1.2" fill="none"/>
+      <path d="M150 101 V107 H144 V110" stroke="#222" stroke-width="2" fill="none"/>
+      <circle class="lampglow" cx="144" cy="116" r="13" fill="url(#lampGlowGrad)"/>
+      <path d="M139 110 H149 L147 119 H141 Z" fill="#222"/>
+      <circle cx="144" cy="117" r="2.2" fill="#ffd34d"/>
+      <!-- bord "Trol" met rode palen -->
+      <rect x="55" y="96" width="5" height="32" rx="1.5" fill="#e2361f"/>
+      <rect x="116" y="96" width="5" height="46" rx="1.5" fill="#e2361f"/>
+      <rect x="58" y="102" width="61" height="17" rx="2" fill="#f4a77c" stroke="#9a4a22" stroke-width="1.5"/>
+      <text x="88" y="115" text-anchor="middle" font-family="Gochi Hand, Patrick Hand, Comic Sans MS, cursive" font-size="15" fill="#1d1d1d">Trol</text>
+      <path d="M100 117 L113 117 L110 115 M113 117 L110 119" stroke="#1d1d1d" stroke-width=".9" fill="none"/>
+      <!-- raam links -->
+      <rect x="36" y="134" width="26" height="18" fill="#fdfdfd" stroke="#3a1d66" stroke-width="1.6"/>
+      <path d="M49 134 V152 M36 143 H62" stroke="#3a1d66" stroke-width="1.3"/>
+      <!-- raam met de getrolde gezichtjes -->
+      <rect x="82" y="124" width="27" height="21" fill="#fff6e3" stroke="#3a1d66" stroke-width="1.6"/>
+      <circle cx="91" cy="138" r="5" fill="#f2a33a" stroke="#8a4b0e" stroke-width=".9"/>
+      <path d="M88 136 l2 2 m0 -2 l-2 2 M92 136 l2 2 m0 -2 l-2 2 M89 141.5 h4" stroke="#3a1d0e" stroke-width=".8"/>
+      <circle cx="101" cy="140" r="5" fill="#f2a33a" stroke="#8a4b0e" stroke-width=".9"/>
+      <path d="M99 139 v.1 M103 139 v.1" stroke="#3a1d0e" stroke-width="1.6" stroke-linecap="round"/>
+      <path d="M98.6 141.6 Q101 144 103.4 141.6" stroke="#3a1d0e" stroke-width=".9" fill="none"/>
+      <text x="97" y="133" font-family="Patrick Hand, Comic Sans MS, cursive" font-size="9" fill="#3a1d66">?</text>
+      <!-- balkonnetje -->
+      <ellipse cx="141" cy="137" rx="16" ry="5.5" fill="#7a4cc2" stroke="#3a1d66" stroke-width="2"/>
+      <ellipse cx="141" cy="137" rx="16" ry="5.5" fill="rgba(20,0,40,.3)"/>
+      <!-- raam rechtsboven met web -->
+      <rect x="152" y="112" width="19" height="15" fill="#fdfdfd" stroke="#3a1d66" stroke-width="1.6"/>
+      <path d="M161.5 112 V127 M152 119.5 H171" stroke="#3a1d66" stroke-width="1.3"/>
+      <path d="M171 112 l-6 0 M171 112 l0 6 M171 112 l-4.5 4.5 M166.5 112 Q167.5 115 171 116.5 M168.5 112 Q169 114 171 114.5" stroke="#777" stroke-width=".6" fill="none"/>
+      <!-- raam rechtsonder -->
+      <rect x="143" y="156" width="23" height="15" fill="#fdfdfd" stroke="#3a1d66" stroke-width="1.6"/>
+      <path d="M154.5 156 V171 M143 163.5 H166" stroke="#3a1d66" stroke-width="1.3"/>
+      <!-- EXIT bord (boven de ingang, haha) -->
+      <rect x="77" y="148" width="44" height="13" rx="1.5" fill="#23a55a" stroke="#0f5a2f" stroke-width="1.5"/>
+      <text x="99" y="158.6" text-anchor="middle" font-family="Patrick Hand, Comic Sans MS, cursive" font-size="11.5" fill="#0d220f" letter-spacing="1">EXIT</text>
+      <rect x="117" y="149.5" width="2.5" height="10" fill="#7a2a12"/>
+      <!-- deur -->
+      <rect x="71" y="164" width="56" height="32" fill="#f6b892" stroke="#8d4a2a" stroke-width="2"/>
+      <path d="M99 164 L97.5 171 L100 178 L98 186 L99.5 196" stroke="#8d4a2a" stroke-width="1.5" fill="none"/>
+      <path d="M85 181 C82 177 77 180 85 186 C93 180 88 177 85 181 Z" fill="#3a1d66"/>
+      <path d="M113 181 C110 177 105 180 113 186 C121 180 116 177 113 181 Z" fill="#3a1d66"/>
+      <path d="M110 181 l6 4 M116 181 l-6 4" stroke="#f6b892" stroke-width=".8"/>
+      <!-- spinnenweb + spin -->
+      <path d="M127 164 l-14 0 M127 164 l0 14 M127 164 l-10 10 M127 164 l-13 6 M122 164 Q122.5 167.5 127 169 M118 164 Q119 170 127 173" stroke="#555" stroke-width=".7" fill="none"/>
+      <path d="M121 170 V178" stroke="#333" stroke-width=".6"/>
+      <g transform="translate(121 180)">
+        <path d="M-3.5 -2 l-2 -1.5 M-3.5 0 l-2.5 0 M-3.5 2 l-2 1.5 M3.5 -2 l2 -1.5 M3.5 0 l2.5 0 M3.5 2 l2 1.5" stroke="#1b1b1b" stroke-width=".8"/>
+        <ellipse rx="3.4" ry="2.6" fill="#1b1b1b"/>
+      </g>
+      <!-- grassprietjes -->
+      <path d="M30 196 q-2 -6 -5 -9 M33 196 q0 -7 2 -10 M168 196 q1 -6 -1 -10 M172 196 q2 -5 6 -8 M64 196 q-1 -5 -4 -7 M136 196 q1 -6 4 -8" stroke="#2f7d2a" stroke-width="2" fill="none" stroke-linecap="round"/>
+    </g></g></svg>
