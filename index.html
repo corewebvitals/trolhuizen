@@ -1333,7 +1333,7 @@ const ROOMS = {
   hoed:       { name: 'Vallende hoed', price: 8, desc: 'Ren eronder door voor hij valt!', width: 1700, deco: { picture: false, titleY: 205 } },
   ogen:       { name: 'Ogen dicht', price: 10, desc: 'Loop alleen als haar ogen dicht zijn', width: 1700, deco: { picture: false } },
   drank:      { name: 'Toverdrank', price: 15, desc: 'Spring tegen de plank: goede dingen, goede volgorde', width: 1800, deco: { picture: false, window: false } },
-  pballon:    { name: 'P-ballon',   price: 20, desc: "Beuk alle P's weg voor de tijd op is!", width: 1900 },
+  pballon:    { name: 'Ballon',     price: 20, desc: 'Beuk alle heksenhoedjes weg voor de tijd op is!', width: 1900 },
 };
 const ROOM_ORDER = ['hindernis', 'trampoline', 'weg', 'touw', 'spinnen', 'schommel', 'hoed', 'ogen', 'drank', 'pballon'];
 const ROOM_ICONS = {
@@ -1346,7 +1346,7 @@ const ROOM_ICONS = {
   hoed: '<svg viewBox="0 0 60 30" aria-hidden="true"><path d="M30 0 V6" stroke="#7048e8" stroke-width="2"/><path d="M22 18 L29 6 Q30 4 33 4 Q31 7 31 9 L38 18 Z" fill="#2b2b2b"/><ellipse cx="30" cy="18" rx="13" ry="3" fill="#1f1f1f"/><path d="M10 6 v14 m-4 -4 l4 4 l4 -4 M50 6 v14 m-4 -4 l4 4 l4 -4" stroke="#7048e8" stroke-width="2" fill="none" stroke-linecap="round"/></svg>',
   ogen: '<svg viewBox="0 0 60 30" aria-hidden="true"><circle cx="22" cy="15" r="12" fill="#f7c08f" stroke="#2b2b2b" stroke-width="1.5"/><path d="M15 13 q3 -4 6 0 M23 13 q3 -4 6 0" stroke="#2b2b2b" stroke-width="1.6" fill="none"/><path d="M18 20 q4 3 8 0" stroke="#2b2b2b" stroke-width="1.4" fill="none"/><path d="M14 6 q8 -6 16 0" stroke="#f9d71c" stroke-width="3" fill="none"/><path d="M40 15 h14 m-5 -5 l5 5 l-5 5" stroke="#2a1846" stroke-width="2" fill="none" stroke-linecap="round"/></svg>',
   drank: '<svg viewBox="0 0 60 30" aria-hidden="true"><path d="M2 8 H40" stroke="#8a5a2b" stroke-width="3"/><rect x="5" y="0" width="5" height="8" fill="#38d9a9"/><circle cx="18" cy="5" r="3" fill="#e03131"/><rect x="25" y="1" width="6" height="7" fill="#ffe066" stroke="#1d1d1d" stroke-width=".8"/><path d="M38 14 Q36 28 46 28 H52 Q62 28 60 14 Z" fill="#2b2b2b"/><ellipse cx="49" cy="14" rx="11" ry="3" fill="#69db7c"/></svg>',
-  pballon: '<svg viewBox="0 0 60 30" aria-hidden="true"><circle cx="30" cy="13" r="11" fill="#fff" stroke="#2a1846" stroke-width="1.6"/><text x="30" y="18" text-anchor="middle" font-size="14" font-family="Gochi Hand, cursive" fill="#7048e8">P</text><text x="8" y="14" font-size="11" font-family="Gochi Hand, cursive" fill="#2a1846">P</text><circle cx="52" cy="20" r="6" fill="none" stroke="#2a1846" stroke-width="1.2"/><text x="52" y="24" text-anchor="middle" font-size="9" font-family="Gochi Hand, cursive" fill="#2a1846">P</text></svg>',
+  pballon: '<svg viewBox="0 0 60 30" aria-hidden="true"><circle cx="30" cy="13" r="11" fill="#e7f5ff" stroke="#2a1846" stroke-width="1.6"/><circle cx="30" cy="11" r="3.5" fill="#f7c08f"/><path d="M27 15 h6 v5 h-6 z" fill="#7048e8"/><path d="M4 18 L8 8 L12 18 Z M2 18 h12" fill="#242424" stroke="#242424" stroke-width="1.5"/><path d="M47 21 L51 11 L55 21 Z M45 21 h12" fill="#242424" stroke="#242424" stroke-width="1.5"/><circle cx="51" cy="17" r="8" fill="none" stroke="#2a1846" stroke-width="1"/></svg>',
 };
 const FLOOR = 820, CEIL = 130, PS = 1.7, HW = 18;
 const GRAV = 2700, JUMP_V = 1080, RUN = 380;
@@ -1715,22 +1715,27 @@ const BUILDERS = {
     L.potions.push(pot);
     newRecipe(pot);
   },
-  // P-BALLON: jij bent de P in de ballon; beuk alle andere P's weg voor de tijd op is
+  // BALLON: je poppetje zit in een ballon en beukt alle heksenhoedjes weg voor de tijd op is
   pballon(L, bg, dyn, ox, w, ri) {
     const pr = { room: ri, x0: ox + 60, x1: ox + w - 100, startX: ox + 240, targets: [], active: false, done: false, time: 0 };
-    [[.3, 380, 1, true], [.4, 640, .75, false], [.52, 300, .9, true], [.6, 560, 1.15, false], [.72, 420, .7, true], [.82, 650, 1, true], [.9, 330, .85, false]].forEach(([f, y, k, inBubble]) => {
+    [[.3, 380, 1, true], [.42, 640, .8, false], [.54, 300, .95, true], [.64, 560, 1.15, false], [.76, 420, .8, true], [.87, 640, 1, true]].forEach(([f, y, k, inBubble]) => {
       const g = el('g', {}, dyn);
-      const bubbleEl = inBubble ? el('circle', { r: 44 * k, fill: 'rgba(255,255,255,.35)', stroke: '#2a1846', 'stroke-width': 3.5 }, g) : null;
-      txt(g, 0, 22 * k, 'P', 70 * k, { fill: '#2a1846', 'font-weight': 700 });
-      pr.targets.push({ g, bubbleEl, k, baseX: ox + w * f, baseY: y, x: ox + w * f, y, r: 38 * k, phase: Math.random() * 6, inBubble });
+      const bubbleEl = inBubble ? el('circle', { r: 48 * k, fill: 'rgba(255,255,255,.35)', stroke: '#2a1846', 'stroke-width': 3.5 }, g) : null;
+      // een plagerig heksenhoedje met oogjes
+      const hg = el('g', { transform: `translate(0 ${(24 * k).toFixed(1)}) scale(${(1.7 * k).toFixed(2)})` }, g);
+      witchHat(hg, 0, 0, 1);
+      for (const ex of [-4.5, 3.5]) { el('circle', { cx: ex, cy: -13, r: 2.6, fill: '#fff' }, hg); el('circle', { cx: ex + .6, cy: -12.6, r: 1.2, fill: '#111' }, hg); }
+      P(hg, 'M-4 -7 q3.5 2.5 7 0', { stroke: '#fff', 'stroke-width': 1, fill: 'none', 'stroke-linecap': 'round' });
+      pr.targets.push({ g, bubbleEl, k, baseX: ox + w * f, baseY: y, x: ox + w * f, y, r: 40 * k, phase: Math.random() * 6, inBubble });
     });
-    // jouw ballon (zie je pas als je de kamer in gaat)
+    // jouw ballon met je eigen poppetje erin (zie je pas als je de kamer in gaat)
     const bg_ = el('g', { opacity: 0 }, dyn);
-    const string = P(bg_, 'M0 62 q10 20 0 40 q-10 20 0 40', { stroke: '#2a1846', 'stroke-width': 2.5, fill: 'none' });
-    P(bg_, 'M-8 66 L8 66 L0 58 Z', { fill: '#7048e8' });
-    el('circle', { r: 62, fill: 'rgba(255,255,255,.5)', stroke: '#2a1846', 'stroke-width': 4 }, bg_);
-    el('ellipse', { cx: -24, cy: -30, rx: 12, ry: 18, fill: '#fff', opacity: .8, transform: 'rotate(30 -24 -30)' }, bg_);
-    txt(bg_, 4, 30, 'P', 92, { fill: '#7048e8', 'font-weight': 700 });
+    const string = P(bg_, 'M0 70 q10 20 0 40 q-10 20 0 40', { stroke: '#2a1846', 'stroke-width': 2.5, fill: 'none' });
+    P(bg_, 'M-8 74 L8 74 L0 66 Z', { fill: '#7048e8' });
+    el('circle', { r: 70, fill: 'rgba(231,245,255,.55)', stroke: '#2a1846', 'stroke-width': 4 }, bg_);
+    pr.rider = el('g', {}, bg_);
+    el('circle', { r: 70, fill: 'rgba(165,216,255,.18)' }, bg_);
+    el('ellipse', { cx: -28, cy: -34, rx: 12, ry: 20, fill: '#fff', opacity: .75, transform: 'rotate(30 -28 -34)' }, bg_);
     pr.ball = bg_; pr.string = string;
     pr.barrier = makeBarrier(dyn, ox + w - 60);
     L.barriers.push(pr.barrier);
@@ -1927,9 +1932,15 @@ function startBalloon(pr) {
   pr.active = true; pr.time = 30;
   Object.assign(p, { mode: 'balloon', proom: pr, bx: p.x, by: p.y - 80, bvx: 0, bvy: -150 });
   IN.fig.g.setAttribute('opacity', 0);
+  // je eigen poppetje komt in de ballon te zitten
+  pr.rider.replaceChildren();
+  pr.riderBody = el('g', {}, pr.rider);
+  pr.riderFig = {};
+  LOOKS[state.avatars[worldOf(IN.h)]](pr.riderBody, pr.riderFig);
+  pr.cheer = 0;
   pr.ball.setAttribute('opacity', 1);
   $('pTimer').hidden = false;
-  toast("Je zit in de P-ballon! Beuk alle P's weg. ↑ = omhoog");
+  toast('Je zit in de ballon! Beuk alle heksenhoedjes weg. \u2191 = omhoog');
 }
 function updateBalloon(dt) {
   const p = IN.p, pr = p.proom;
@@ -1938,7 +1949,7 @@ function updateBalloon(dt) {
   if (IN.jumpBuf > 0) { p.bvy = Math.min(p.bvy, 0) - 520; IN.jumpBuf = 0; }
   p.bvy = clamp((p.bvy + 480 * dt) * Math.max(0, 1 - .5 * dt), -700, 500);
   p.bx += p.bvx * dt; p.by += p.bvy * dt;
-  const R = 62;
+  const R = 70;
   if (p.bx < pr.x0 + R) { p.bx = pr.x0 + R; p.bvx = Math.abs(p.bvx) * .5; }
   if (p.bx > pr.x1 - R) { p.bx = pr.x1 - R; p.bvx = -Math.abs(p.bvx) * .5; }
   if (p.by < CEIL + R) { p.by = CEIL + R; p.bvy = Math.abs(p.bvy) * .4; }
@@ -1959,12 +1970,19 @@ function updateBalloon(dt) {
       } else {
         t.state = 'fly'; t.vx = nx * 900 + p.bvx * .4; t.vy = ny * 900 - 250; t.spin = rnd(-720, 720); t.life = 1.2;
         floatText('Bonk!', t.x, t.y - 50);
+        pr.cheer = .6;
         pr.left--;
         if (pr.left === 0) winBalloon(pr);
       }
     }
   }
   p.x = p.bx; p.y = p.by + R;
+  if (input) p.dir = input;
+  pr.cheer -= dt;
+  const f = pr.riderFig, dangle = Math.sin(IN.t * 5) * 10;
+  if (pr.cheer > 0) applyPose(f, 12, -12, 150, -150);
+  else applyPose(f, dangle, -dangle, (f.armBase || 0) + 30, -(f.armBase || 0) - 30);
+  pr.riderBody.setAttribute('transform', `translate(0 54) scale(${(p.dir * .82).toFixed(2)} .82)`);
   pr.ball.setAttribute('transform', `translate(${p.bx.toFixed(1)} ${p.by.toFixed(1)}) rotate(${(p.bvx * .03).toFixed(1)})`);
   if (p.mode === 'balloon') {
     pr.time -= dt;
@@ -1989,7 +2007,7 @@ function updatePRooms(dt) {
       const secs = Math.ceil(pr.time);
       const label = `${secs}`;
       if (label !== pr.shown) { pr.shown = label; $('pTime').textContent = label; $('pTimer').classList.toggle('hurry', secs <= 5); }
-      const left = `nog ${pr.left} P${pr.left === 1 ? '' : "'s"}`;
+      const left = `nog ${pr.left} ${pr.left === 1 ? 'hoedje' : 'hoedjes'}`;
       if (left !== pr.leftShown) { pr.leftShown = left; $('pLeft').textContent = left; }
     }
   }
@@ -2002,9 +2020,9 @@ function winBalloon(pr) {
   pr.ball.setAttribute('opacity', 0);
   puffs(p.bx, p.by, 1.6, 14, '#fff', lvlFx);
   floatText('POP!', p.bx, p.by - 40);
-  Object.assign(p, { mode: 'normal', x: p.bx, y: p.by + 62, vy: 0, onGround: false, carry: 0 });
+  Object.assign(p, { mode: 'normal', x: p.bx, y: p.by + 70, vy: 0, onGround: false, carry: 0 });
   IN.fig.g.removeAttribute('opacity');
-  toast("Alle P's zijn weg! Het hek is open.");
+  toast('Alle hoedjes zijn weg! Het hek is open.');
 }
 function floatText(text, x, y) {
   const outer = el('g', { transform: `translate(${x.toFixed(1)} ${y.toFixed(1)})` }, lvlFx);
@@ -2341,7 +2359,7 @@ function die(kind = 'slijm', extra) {
     p.deadT = 1.4;
     $('pTimer').hidden = true;
     if (p.proom) { p.proom.ball.setAttribute('opacity', 0); puffs(p.bx, p.by, 1.4, 10, '#fff', lvlFx); }
-    toast("De tijd is op! De P's lachen je uit.");
+    toast('De tijd is op! De hoedjes lachen je uit.');
   } else {
     puffs(p.x, SLIME + 10, 1.6, 12, '#8ce99a', lvlFx);
     toast(pick(['Plons! Getrold!', 'Iel, trolslijm!', 'Haha, in het slijm!', 'Getrold door het huis!']));
