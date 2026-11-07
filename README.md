@@ -13,6 +13,8 @@ Na de eerste keer werkt het ook zonder internet.
 
 - **Buiten:** bouw trolhuizen (70 $). Wie langs een huis loopt, wordt getrold en dat levert munten op.
   Soms komt er een zeldzame bezoeker langs, die is 25 $ waard.
+- **Werelden:** wissel bovenin tussen de **Trolwereld** (grasveld) en de **Heksenwereld** (paarse grond, maan,
+  heksenhuizen met een hoed als dak en een heksenhoed met een bloem ernaast). Elke wereld heeft zijn eigen huizen.
 - **Binnen:** koop kamers voor een huis en loop zelf het parcours door.
   Gebruik ← → om te lopen en ↑ of spatie om te springen. Op een telefoon verschijnen knoppen.
 
@@ -32,6 +34,7 @@ Na de eerste keer werkt het ook zonder internet.
 - `huis-schets1.jpg`: het trolhuis
 - `personen-schets1.jpg`: de bezoekers (de onderste is zeldzaam)
 - `kamers-schets1.jpg` en `kamers-schets2.jpg`: de kamers
+- `wereld-huis-schets2-(heksenwereld).jpg`: de heksenwereld met het voorbeeldhuis (ligt op zijn kop)
 
 ## Nieuwe versie uitbrengen
 

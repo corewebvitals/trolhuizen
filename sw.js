@@ -1,13 +1,14 @@
 /* Service worker voor Trolhuizen.
    Nieuwe versie uitbrengen? Verhoog VERSION. Spelers krijgen dan de melding
    "Er is een nieuwe versie" en kunnen met één tik bijwerken. */
-const VERSION = 'trolhuizen-v2';
+const VERSION = 'trolhuizen-v3';
 const FONT_CACHE = 'trolhuizen-fonts';
 const SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './assets/schets1-klein.jpg',
+  './assets/heks-schets-klein.jpg',
   './icons/icon.svg',
   './icons/icon-192.png',
   './icons/icon-512.png',
