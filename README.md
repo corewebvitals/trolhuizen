@@ -31,12 +31,16 @@ Na de eerste keer werkt het ook zonder internet.
 | Touw | 7 $ | over een touw lopen en je evenwicht houden |
 | Spinnen | 8 $ | onder de spinnen door lopen zonder ze of hun draad te raken |
 | Schommel | 8 $ | van de schommel springen voordat de vliegende schaar het touw doorknipt |
+| Vallende hoed | 8 $ | onder drie hoeden door rennen; wacht je te lang, dan val je eronder |
+| Ogen dicht | 10 $ | alleen lopen als het meisje haar ogen dicht heeft, anders word je een kikker |
+| Toverdrank | 15 $ | tegen de plank springen onder de goede ingrediënten, in de volgorde van het recept |
+| P-ballon | 20 $ | als P in de ballon alle andere P's wegbeuken binnen 30 seconden |
 
 ## Tekeningen
 
 - `huis-schets1.jpg`: het trolhuis
 - `personen-schets1.jpg`: de bezoekers (de onderste is zeldzaam)
-- `kamers-schets1.jpg` en `kamers-schets2.jpg`: de kamers
+- `kamers-schets1.jpg`, `kamers-schets2.jpg` en `kamers-schets-3.jpg`: de kamers
 - `personen-schets2-heksenwereld.jpg`: de bezoekers van de heksenwereld (ligt op zijn kant)
 - `wereld-huis-schets2-(heksenwereld).jpg`: de heksenwereld met het voorbeeldhuis (ligt op zijn kop)
 

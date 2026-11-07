@@ -137,6 +137,9 @@ body.inside-mode .top, body.inside-mode .bottom, body.inside-mode #panel{display
 .avatar[disabled]{cursor:not-allowed}
 .avatar[disabled] svg{filter:grayscale(1) brightness(.6);opacity:.5}
 .avatar .lock{position:absolute;inset:0;display:grid;place-items:center;font-size:20px;line-height:1}
+.ptimer{position:fixed;left:50%;top:84px;transform:translateX(-50%);font-size:20px;z-index:2}
+.ptimer b{font-size:30px;min-width:2ch;text-align:center}
+.ptimer.hurry{background:#ffe3e3;animation:bump .5s ease infinite}
 .balance{position:fixed;left:50%;top:96px;transform:translateX(-50%);width:min(360px,70vw);height:22px;border:3px solid var(--ink);border-radius:999px;
   background:linear-gradient(90deg,#ff8787 0 14%,#fff 14% 86%,#ff8787 86%)}
 .balance span{position:absolute;left:50%;top:-30px;transform:translateX(-50%);color:#fff;font-size:20px;text-shadow:0 2px 0 rgba(0,0,0,.4)}
@@ -541,6 +544,7 @@ body.touch-ui .in-hint{display:none}
     <div class="avatars" id="avatars" aria-label="Kies je poppetje"></div>
   </div>
   <div class="turn-tip">tip: draai je telefoon, dan zie je meer</div>
+  <div class="pill ptimer" id="pTimer" hidden><span>tijd</span><b id="pTime">25</b><span id="pLeft"></span></div>
   <div class="balance" id="balance" hidden><span>evenwicht</span><i id="balanceNeedle"></i></div>
   <div class="in-hint">← → lopen · ↑ of spatie springen · Esc naar buiten</div>
   <div class="touch" id="touch">
@@ -1326,8 +1330,12 @@ const ROOMS = {
   touw:       { name: 'Touw',       price: 7,  desc: 'Hou je evenwicht met ← en →', width: 1700 },
   spinnen:    { name: 'Spinnen',    price: 8,  desc: 'Ga onder de spinnen door, niet aanraken!', width: 1600 },
   schommel:   { name: 'Schommel',   price: 8,  desc: 'Spring eraf voor de schaar het touw doorknipt!', width: 1700 },
+  hoed:       { name: 'Vallende hoed', price: 8, desc: 'Ren eronder door voor hij valt!', width: 1700, deco: { picture: false, titleY: 205 } },
+  ogen:       { name: 'Ogen dicht', price: 10, desc: 'Loop alleen als haar ogen dicht zijn', width: 1700, deco: { picture: false } },
+  drank:      { name: 'Toverdrank', price: 15, desc: 'Spring tegen de plank: goede dingen, goede volgorde', width: 1800, deco: { picture: false, window: false } },
+  pballon:    { name: 'P-ballon',   price: 20, desc: "Beuk alle P's weg voor de tijd op is!", width: 1900 },
 };
-const ROOM_ORDER = ['hindernis', 'trampoline', 'weg', 'touw', 'spinnen', 'schommel'];
+const ROOM_ORDER = ['hindernis', 'trampoline', 'weg', 'touw', 'spinnen', 'schommel', 'hoed', 'ogen', 'drank', 'pballon'];
 const ROOM_ICONS = {
   hindernis: '<svg viewBox="0 0 60 30" aria-hidden="true"><g fill="none" stroke="#7048e8" stroke-width="3"><circle cx="9" cy="19" r="7"/><circle cx="24" cy="18" r="8"/><circle cx="39" cy="19" r="7"/><circle cx="53" cy="20" r="6"/></g><path d="M0 28 H60" stroke="#7048e8" stroke-width="2.5"/></svg>',
   trampoline: '<svg viewBox="0 0 60 30" aria-hidden="true"><g stroke="#7048e8" stroke-width="2.5" fill="none" stroke-linecap="round"><path d="M23 0 V17 M37 0 V17"/><path d="M12 9 H4 l4 -4 M4 9 l4 4 M48 9 H56 l-4 -4 M56 9 l-4 4"/></g><rect x="16" y="16" width="28" height="7" rx="3.5" fill="#5f3dc4"/></svg>',
@@ -1335,6 +1343,10 @@ const ROOM_ICONS = {
   touw: '<svg viewBox="0 0 60 30" aria-hidden="true"><g stroke="#7048e8" stroke-width="2.5" fill="none" stroke-linecap="round"><path d="M3 28 V14 M57 28 V14"/><path d="M3 15 Q30 22 57 15"/></g></svg>',
   spinnen: '<svg viewBox="0 0 60 30" aria-hidden="true"><path d="M2 3 H58" stroke="#7048e8" stroke-width="2.5"/><path d="M16 3 V14 M34 3 V9 M50 3 V17" stroke="#555" stroke-width="1"/><g stroke="#222" stroke-width="1.6" fill="none"><path d="M10 15 l12 4 M10 20 l12 -4 M28 10 l12 4 M28 15 l12 -4 M44 18 l12 4 M44 23 l12 -4"/></g><g fill="#222"><circle cx="16" cy="17" r="4"/><circle cx="34" cy="12" r="4"/><circle cx="50" cy="20" r="4"/></g></svg>',
   schommel: '<svg viewBox="0 0 60 30" aria-hidden="true"><path d="M6 29 V4 M54 29 V4" stroke="#868e96" stroke-width="2.5"/><path d="M4 4 H56" stroke="#8a4b1f" stroke-width="4"/><path d="M24 5 L18 21 M36 5 L30 21" stroke="#d9a066" stroke-width="1.6"/><rect x="13" y="20" width="22" height="4" rx="1" fill="#a0612b"/><g stroke="#7048e8" stroke-width="1.6" fill="none"><path d="M40 12 l10 -4 M40 8 l10 4"/><circle cx="38" cy="7" r="2"/><circle cx="38" cy="13" r="2"/></g></svg>',
+  hoed: '<svg viewBox="0 0 60 30" aria-hidden="true"><path d="M30 0 V6" stroke="#7048e8" stroke-width="2"/><path d="M22 18 L29 6 Q30 4 33 4 Q31 7 31 9 L38 18 Z" fill="#2b2b2b"/><ellipse cx="30" cy="18" rx="13" ry="3" fill="#1f1f1f"/><path d="M10 6 v14 m-4 -4 l4 4 l4 -4 M50 6 v14 m-4 -4 l4 4 l4 -4" stroke="#7048e8" stroke-width="2" fill="none" stroke-linecap="round"/></svg>',
+  ogen: '<svg viewBox="0 0 60 30" aria-hidden="true"><circle cx="22" cy="15" r="12" fill="#f7c08f" stroke="#2b2b2b" stroke-width="1.5"/><path d="M15 13 q3 -4 6 0 M23 13 q3 -4 6 0" stroke="#2b2b2b" stroke-width="1.6" fill="none"/><path d="M18 20 q4 3 8 0" stroke="#2b2b2b" stroke-width="1.4" fill="none"/><path d="M14 6 q8 -6 16 0" stroke="#f9d71c" stroke-width="3" fill="none"/><path d="M40 15 h14 m-5 -5 l5 5 l-5 5" stroke="#2a1846" stroke-width="2" fill="none" stroke-linecap="round"/></svg>',
+  drank: '<svg viewBox="0 0 60 30" aria-hidden="true"><path d="M2 8 H40" stroke="#8a5a2b" stroke-width="3"/><rect x="5" y="0" width="5" height="8" fill="#38d9a9"/><circle cx="18" cy="5" r="3" fill="#e03131"/><rect x="25" y="1" width="6" height="7" fill="#ffe066" stroke="#1d1d1d" stroke-width=".8"/><path d="M38 14 Q36 28 46 28 H52 Q62 28 60 14 Z" fill="#2b2b2b"/><ellipse cx="49" cy="14" rx="11" ry="3" fill="#69db7c"/></svg>',
+  pballon: '<svg viewBox="0 0 60 30" aria-hidden="true"><circle cx="30" cy="13" r="11" fill="#fff" stroke="#2a1846" stroke-width="1.6"/><text x="30" y="18" text-anchor="middle" font-size="14" font-family="Gochi Hand, cursive" fill="#7048e8">P</text><text x="8" y="14" font-size="11" font-family="Gochi Hand, cursive" fill="#2a1846">P</text><circle cx="52" cy="20" r="6" fill="none" stroke="#2a1846" stroke-width="1.2"/><text x="52" y="24" text-anchor="middle" font-size="9" font-family="Gochi Hand, cursive" fill="#2a1846">P</text></svg>',
 };
 const FLOOR = 820, CEIL = 130, PS = 1.7, HW = 18;
 const GRAV = 2700, JUMP_V = 1080, RUN = 380;
@@ -1495,10 +1507,11 @@ function drawEndHall(g, x, w, L) {
 function drawRoomDecor(g, ox, w, key, i) {
   const r = seeded(31 + i * 7 + key.length);
   const R = ROOMS[key];
-  txt(g, ox + w / 2, 268, R.name, 78, { ...WALL_TEXT, transform: `rotate(${(r() * 4 - 2).toFixed(1)} ${ox + w / 2} 268)` });
-  txt(g, ox + w / 2, 322, R.desc, 32, { fill: '#fff', opacity: .9 });
-  drawWindow(g, ox + w * 0.17, 370, 110, 95);
-  drawPicture(g, ox + w * 0.83, 410, r);
+  const deco = R.deco || {}, ty = deco.titleY || 268;
+  txt(g, ox + w / 2, ty, R.name, 78, { ...WALL_TEXT, transform: `rotate(${(r() * 4 - 2).toFixed(1)} ${ox + w / 2} ${ty})` });
+  txt(g, ox + w / 2, ty + 54, R.desc, 32, { fill: '#fff', opacity: .9 });
+  if (deco.window !== false) drawWindow(g, ox + w * 0.17, 370, 110, 95);
+  if (deco.picture !== false) drawPicture(g, ox + w * 0.83, 410, r);
   if (key !== 'schommel') drawLamp(g, ox + w * 0.3);
   drawWeb(g, ox + 34, CEIL, .9, false);
   drawWeb(g, ox + w - 34, CEIL, .9, true);
@@ -1604,7 +1617,402 @@ const BUILDERS = {
     s.scissors = sc;
     L.scissors.push(sc);
   },
+  // VALLENDE HOED: drie hoeden aan een touw; kom je eronder, dan vallen ze. Wacht niet te lang!
+  hoed(L, bg, dyn, ox, w, ri) {
+    [[0.3, 165], [0.55, 145], [0.8, 125]].forEach(([f, trig]) => {
+      const hx = ox + w * f;
+      for (const ax of [hx - 175, hx + 175]) {
+        P(bg, `M${ax} ${CEIL + 140} v95 m-22 -26 l22 26 l22 -26`, { stroke: '#7048e8', 'stroke-width': 8, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round', opacity: .85 });
+      }
+      const string = el('line', { x1: hx + 26, y1: CEIL, x2: hx + 26, y2: 300, stroke: '#7048e8', 'stroke-width': 4 }, dyn);
+      const g = el('g', {}, dyn);
+      P(g, 'M-62 -8 L-6 -150 Q2 -176 26 -178 Q10 -160 10 -140 L64 -8 Z', { fill: '#2b2b2b', stroke: '#111', 'stroke-width': 3, 'stroke-linejoin': 'round' });
+      P(g, 'M-62 -8 L-6 -150 Q2 -176 26 -178 Q10 -160 10 -140 L64 -8 Z', { fill: 'url(#hatchRoof)' });
+      P(g, 'M-49.4 -40 L50.9 -40 L41.9 -62 L-40.7 -62 Z', { fill: '#7048e8' });
+      el('rect', { x: -12, y: -60, width: 24, height: 18, rx: 2, fill: 'none', stroke: '#fcc419', 'stroke-width': 4 }, g);
+      // de hoed heeft stiekeme oogjes: dicht als hij wacht, open als hij gaat vallen
+      const closed = P(g, 'M-24 -96 q8 5 16 0 M8 -96 q8 5 16 0', { stroke: '#adb5bd', 'stroke-width': 4, fill: 'none', 'stroke-linecap': 'round' });
+      const open = el('g', { opacity: 0 }, g);
+      for (const ex of [-16, 16]) {
+        el('ellipse', { cx: ex, cy: -96, rx: 10, ry: 12, fill: '#fff' }, open);
+        el('circle', { cx: ex, cy: -92, r: 5, fill: '#111' }, open);
+      }
+      el('ellipse', { cx: 0, cy: 0, rx: 112, ry: 20, fill: '#1f1f1f', stroke: '#111', 'stroke-width': 3 }, g);
+      L.hats.push({ x: hx, trig, g, string, open, closed, upY: FLOOR - 330, by: FLOOR - 330, state: 'up', t: 0, vy: 0, room: ri });
+    });
+  },
+  // OGEN DICHT: alleen lopen als ze haar ogen dicht heeft, anders word je een kikker
+  ogen(L, bg, dyn, ox, w, ri) {
+    const cx = ox + w * 0.74, cy = 360, r = 112;
+    // bordjes op de muur: ogen dicht = lopen, ogen open = stilstaan
+    for (const [sx, isOpen, label] of [[ox + w * 0.22, false, 'lopen'], [ox + w * 0.42, true, 'stil!']]) {
+      el('rect', { x: sx - 70, y: FLOOR - 250, width: 140, height: 90, rx: 8, fill: '#fff6e3', stroke: '#c99a06', 'stroke-width': 5 }, bg);
+      if (isOpen) {
+        for (const ex of [-22, 22]) { el('circle', { cx: sx + ex, cy: FLOOR - 222, r: 12, fill: '#fff', stroke: '#2b2b2b', 'stroke-width': 3 }, bg); el('circle', { cx: sx + ex, cy: FLOOR - 220, r: 5, fill: '#2b2b2b' }, bg); }
+      } else {
+        P(bg, `M${sx - 34} ${FLOOR - 218} q12 -14 24 0 M${sx + 10} ${FLOOR - 218} q12 -14 24 0`, { stroke: '#2b2b2b', 'stroke-width': 4, fill: 'none', 'stroke-linecap': 'round' });
+      }
+      txt(bg, sx, FLOOR - 176, isOpen ? label : `${label} →`, 28, { fill: '#2a1846' });
+    }
+    P(bg, `M${cx} ${CEIL} V${cy - r - 6}`, { stroke: '#333', 'stroke-width': 3 });
+    const g = el('g', { transform: `translate(${cx} ${cy})` }, dyn);
+    el('circle', { cx: r * .55, cy: -r * .98, r: 30, fill: '#f9d71c', stroke: '#e0b90b', 'stroke-width': 3 }, g);
+    P(g, `M${-r * .92} ${-r * .3} Q${-r * .7} ${-r * 1.12} ${r * .2} ${-r * 1.05} Q${r * 1.08} ${-r * .82} ${r * 1.02} ${r * .3}`, { stroke: '#f9d71c', 'stroke-width': 18, fill: 'none', 'stroke-linecap': 'round' });
+    el('circle', { r, fill: SKIN, stroke: '#2b2b2b', 'stroke-width': 4 }, g);
+    P(g, `M${-r * .7} ${-r * .62} Q${-r * .1} ${-r * .95} ${r * .55} ${-r * .72}`, { stroke: '#f9d71c', 'stroke-width': 12, fill: 'none', 'stroke-linecap': 'round' });
+    P(g, `M${-r * .98} ${-r * .62} l-26 -22 l4 34 Z M${-r * .98} ${-r * .62} l-6 -34 l30 10 Z`, { fill: '#111', 'stroke-linejoin': 'round' });
+    for (const sx of [-1, 1]) el('circle', { cx: sx * r * .5, cy: r * .22, r: 15, fill: '#ff8787', opacity: .45 }, g);
+    P(g, `M${-r * .24} ${r * .36} Q0 ${r * .56} ${r * .24} ${r * .36}`, { stroke: '#2b2b2b', 'stroke-width': 5, fill: 'none', 'stroke-linecap': 'round' });
+    const eyesOpen = el('g', { opacity: 0 }, g), eyesClosed = el('g', {}, g), pupils = [];
+    for (const sx of [-1, 1]) {
+      const ex = sx * r * .34, ey = -r * .12;
+      el('ellipse', { cx: ex, cy: ey, rx: 23, ry: 26, fill: '#fff', stroke: '#2b2b2b', 'stroke-width': 4 }, eyesOpen);
+      pupils.push(el('circle', { cx: ex, cy: ey + 4, r: 9, fill: '#2b2b2b' }, eyesOpen));
+      P(eyesOpen, `M${ex - 12} ${ey + 25} l-4 14 M${ex} ${ey + 27} v15 M${ex + 12} ${ey + 25} l4 14`, { stroke: '#2b2b2b', 'stroke-width': 3, 'stroke-linecap': 'round' });
+      P(eyesClosed, `M${ex - 24} ${ey - 4} Q${ex} ${ey - 30} ${ex + 24} ${ey - 4}`, { stroke: '#ffa8a8', 'stroke-width': 9, fill: 'none', 'stroke-linecap': 'round', opacity: .85 });
+      P(eyesClosed, `M${ex - 20} ${ey + 4} Q${ex} ${ey - 16} ${ex + 20} ${ey + 4}`, { stroke: '#2b2b2b', 'stroke-width': 5, fill: 'none', 'stroke-linecap': 'round' });
+    }
+    const bub = el('g', { transform: `translate(${cx} ${cy})` }, dyn);
+    L.girls.push({ eyesOpen, eyesClosed, pupils, bub, cx, cy, r, x0: ox + 150, x1: ox + w - 150, state: 'closed', t: 2.5, grace: 0, warned: false, room: ri });
+  },
+  // TOVERDRANK: spring tegen de plank onder de goede ingrediënten, in de goede volgorde
+  drank(L, bg, dyn, ox, w, ri) {
+    const shelfY = FLOOR - 320, sx0 = ox + 170, sx1 = ox + 1150;
+    el('rect', { x: sx0, y: shelfY, width: sx1 - sx0, height: 18, rx: 4, fill: '#8a5a2b', stroke: '#4a2c12', 'stroke-width': 4 }, bg);
+    for (const bx of [sx0 + 50, sx1 - 50]) P(bg, `M${bx} ${shelfY + 18} v30 l30 -30`, { stroke: '#4a2c12', 'stroke-width': 6, fill: 'none', 'stroke-linejoin': 'round' });
+    const kx = ox + w - 340;
+    // de ketel
+    const pot = { room: ri, shelfY, sx0, sx1, kx, items: [], recipe: [], step: 0, done: false };
+    const kg = el('g', { transform: `translate(${kx} ${FLOOR})` }, dyn);
+    P(kg, 'M-70 0 l-12 -22 M70 0 l12 -22 M0 0 v-14', { stroke: '#1d1d1d', 'stroke-width': 8, 'stroke-linecap': 'round' });
+    P(kg, 'M-104 -128 Q-118 -20 -40 -14 H40 Q118 -20 104 -128 Z', { fill: '#2b2b2b', stroke: '#111', 'stroke-width': 4 });
+    P(kg, 'M-104 -128 Q-118 -20 -40 -14 H40 Q118 -20 104 -128 Z', { fill: 'url(#hatchRoof)' });
+    pot.liquid = el('ellipse', { cx: 0, cy: -130, rx: 100, ry: 18, fill: '#69db7c' }, kg);
+    for (let i = 0; i < 6; i++) {
+      const b = el('circle', { class: 'slimebub', cx: -70 + i * 28, cy: -132, r: 5 + (i % 3) * 3, fill: '#b2f2bb' }, kg);
+      b.style.animationDelay = `${(i * .37).toFixed(2)}s`;
+    }
+    el('ellipse', { cx: 0, cy: -130, rx: 112, ry: 22, fill: 'none', stroke: '#111', 'stroke-width': 10 }, kg);
+    pot.bub = el('g', { transform: 'translate(0 -160)' }, kg);
+    // het recept op de muur
+    const rg = el('g', { transform: `translate(${kx} 330) rotate(-2)` }, dyn);
+    el('rect', { x: -160, y: -78, width: 320, height: 170, rx: 10, fill: '#fff3d6', stroke: '#c99a06', 'stroke-width': 5 }, rg);
+    txt(rg, 0, -44, 'Recept', 34, { fill: '#2a1846' });
+    pot.slots = [-100, 0, 100].map((sx, i) => {
+      const sg = el('g', { transform: `translate(${sx} 0)` }, rg);
+      txt(sg, -30, -6, `${i + 1}`, 26, { fill: '#7048e8' });
+      const icon = el('g', { transform: 'translate(0 66) scale(.85)' }, sg);
+      const check = P(sg, 'M-18 40 l12 14 l26 -34', { stroke: '#2f9e44', 'stroke-width': 9, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round', opacity: 0 });
+      return { icon, check };
+    });
+    ING_KEYS.forEach((k, i) => {
+      const g = el('g', {}, dyn);
+      INGREDIENTS[k].draw(g);
+      pot.items.push({ key: k, x: sx0 + 95 + i * 195, g, state: 'shelf', t: 0 });
+    });
+    pot.barrier = makeBarrier(dyn, ox + w - 60);
+    L.barriers.push(pot.barrier);
+    L.potions.push(pot);
+    newRecipe(pot);
+  },
+  // P-BALLON: jij bent de P in de ballon; beuk alle andere P's weg voor de tijd op is
+  pballon(L, bg, dyn, ox, w, ri) {
+    const pr = { room: ri, x0: ox + 60, x1: ox + w - 100, startX: ox + 240, targets: [], active: false, done: false, time: 0 };
+    [[.3, 380, 1, true], [.4, 640, .75, false], [.52, 300, .9, true], [.6, 560, 1.15, false], [.72, 420, .7, true], [.82, 650, 1, true], [.9, 330, .85, false]].forEach(([f, y, k, inBubble]) => {
+      const g = el('g', {}, dyn);
+      const bubbleEl = inBubble ? el('circle', { r: 44 * k, fill: 'rgba(255,255,255,.35)', stroke: '#2a1846', 'stroke-width': 3.5 }, g) : null;
+      txt(g, 0, 22 * k, 'P', 70 * k, { fill: '#2a1846', 'font-weight': 700 });
+      pr.targets.push({ g, bubbleEl, k, baseX: ox + w * f, baseY: y, x: ox + w * f, y, r: 38 * k, phase: Math.random() * 6, inBubble });
+    });
+    // jouw ballon (zie je pas als je de kamer in gaat)
+    const bg_ = el('g', { opacity: 0 }, dyn);
+    const string = P(bg_, 'M0 62 q10 20 0 40 q-10 20 0 40', { stroke: '#2a1846', 'stroke-width': 2.5, fill: 'none' });
+    P(bg_, 'M-8 66 L8 66 L0 58 Z', { fill: '#7048e8' });
+    el('circle', { r: 62, fill: 'rgba(255,255,255,.5)', stroke: '#2a1846', 'stroke-width': 4 }, bg_);
+    el('ellipse', { cx: -24, cy: -30, rx: 12, ry: 18, fill: '#fff', opacity: .8, transform: 'rotate(30 -24 -30)' }, bg_);
+    txt(bg_, 4, 30, 'P', 92, { fill: '#7048e8', 'font-weight': 700 });
+    pr.ball = bg_; pr.string = string;
+    pr.barrier = makeBarrier(dyn, ox + w - 60);
+    L.barriers.push(pr.barrier);
+    L.prooms.push(pr);
+    resetPRoom(pr);
+  },
 };
+/* ---------- toverhek: dicht tot je de kamer hebt opgelost ---------- */
+function makeBarrier(dyn, x) {
+  const g = el('g', {}, dyn);
+  for (let i = -2; i <= 2; i++) {
+    el('rect', { x: x + i * 9 - 3, y: CEIL, width: 6, height: FLOOR - CEIL, rx: 3, fill: '#9775fa', opacity: .8 }, g);
+  }
+  el('rect', { x: x - 24, y: CEIL, width: 48, height: FLOOR - CEIL, fill: '#e5dbff', opacity: .25 }, g);
+  for (let y = CEIL + 60; y < FLOOR; y += 110) {
+    el('path', { class: 'twinkle', d: `M${x} ${y - 9} l2.5 6.5 l6.5 2.5 l-6.5 2.5 l-2.5 6.5 l-2.5 -6.5 l-6.5 -2.5 l6.5 -2.5 Z`, fill: '#fff3bf' }, g);
+  }
+  return { x: x - 26, g, open: false };
+}
+function setBarrier(b, open) {
+  b.open = open;
+  b.g.style.transition = 'opacity .6s';
+  b.g.style.opacity = open ? 0 : 1;
+}
+
+/* ---------- ingrediënten voor de toverdrank (naar de tekening) ---------- */
+const INGREDIENTS = {
+  flesje: { name: 'het gevlekte flesje', color: '#38d9a9', draw(g) {
+    el('rect', { x: -6, y: -66, width: 12, height: 11, rx: 2, fill: '#a0612b', stroke: '#4a2c12', 'stroke-width': 2 }, g);
+    el('rect', { x: -16, y: -57, width: 32, height: 57, rx: 4, fill: '#38d9a9', stroke: '#1d1d1d', 'stroke-width': 3 }, g);
+    P(g, 'M-9 -50 v40', { stroke: 'rgba(255,255,255,.45)', 'stroke-width': 4, 'stroke-linecap': 'round' });
+    for (const [x, y] of [[-3, -42], [6, -30], [-5, -18], [5, -10]]) el('ellipse', { cx: x, cy: y, rx: 2.5, ry: 4, fill: '#1d1d1d' }, g);
+  } },
+  appel: { name: 'de rode appel', color: '#e03131', draw(g) {
+    P(g, 'M0 -44 Q1 -52 3 -58', { stroke: '#5c3311', 'stroke-width': 3.5, fill: 'none', 'stroke-linecap': 'round' });
+    el('ellipse', { cx: 10, cy: -52, rx: 8, ry: 4, fill: '#40c057', transform: 'rotate(-25 10 -52)' }, g);
+    P(g, 'M0 -42 C-14 -50 -26 -36 -22 -20 C-18 -4 -8 0 0 -4 C8 0 18 -4 22 -20 C26 -36 14 -50 0 -42 Z', { fill: '#e03131', stroke: '#1d1d1d', 'stroke-width': 3 });
+    P(g, 'M-12 -32 q-3 8 0 14', { stroke: 'rgba(255,255,255,.5)', 'stroke-width': 3.5, fill: 'none', 'stroke-linecap': 'round' });
+  } },
+  stokjes: { name: 'de rode stokjes', color: '#c92a2a', draw(g) {
+    el('rect', { x: -15, y: -58, width: 30, height: 58, rx: 3, fill: '#e03131', stroke: '#1d1d1d', 'stroke-width': 3 }, g);
+    P(g, 'M-7 -56 v54 M0 -56 v54 M7 -56 v54', { stroke: '#a61e1e', 'stroke-width': 2 });
+    P(g, 'M-15 -30 H15', { stroke: '#1d1d1d', 'stroke-width': 6 });
+    P(g, 'M-2 -30 q-14 -12 -16 0 q2 10 16 0 M2 -30 q14 -12 16 0 q-2 10 -16 0', { fill: '#1d1d1d' });
+  } },
+  drol: { name: 'de drol', color: '#8a5a2b', draw(g) {
+    P(g, 'M-26 0 Q-28 -12 -14 -13 Q-18 -26 -2 -26 Q-8 -38 6 -40 Q14 -32 9 -26 Q24 -26 18 -13 Q30 -12 26 0 Z', { fill: '#8a5a2b', stroke: '#5c3311', 'stroke-width': 2.5, 'stroke-linejoin': 'round' });
+    P(g, 'M-8 -54 q-6 -6 0 -12 q6 -6 0 -12 M4 -50 q-6 -6 0 -12 q6 -6 0 -12 M16 -54 q-6 -6 0 -12', { stroke: '#63e6be', 'stroke-width': 2.2, fill: 'none', opacity: .85 });
+  } },
+  honing: { name: 'de honingpot', color: '#fcc419', draw(g) {
+    el('rect', { x: -19, y: -48, width: 38, height: 48, rx: 5, fill: '#ffe066', stroke: '#1d1d1d', 'stroke-width': 3 }, g);
+    el('rect', { x: -21, y: -60, width: 42, height: 14, rx: 3, fill: '#1d1d1d' }, g);
+    P(g, 'M-10 -40 v28', { stroke: 'rgba(255,255,255,.6)', 'stroke-width': 4, 'stroke-linecap': 'round' });
+  } },
+};
+const ING_KEYS = Object.keys(INGREDIENTS);
+function newRecipe(pot) {
+  pot.recipe = [...ING_KEYS].sort(() => Math.random() - .5).slice(0, 3);
+  pot.step = 0; pot.done = false;
+  pot.slots.forEach((s, i) => { s.icon.replaceChildren(); INGREDIENTS[pot.recipe[i]].draw(s.icon); s.check.setAttribute('opacity', 0); });
+  for (const it of pot.items) { it.state = 'shelf'; it.t = 0; it.g.removeAttribute('opacity'); it.g.setAttribute('transform', `translate(${it.x} ${pot.shelfY}) scale(1.3)`); }
+  pot.liquid.setAttribute('fill', '#69db7c');
+  pot.bub.replaceChildren();
+  setBarrier(pot.barrier, false);
+}
+function bumpShelf(pot, x) {
+  let best = null;
+  for (const it of pot.items) if (it.state === 'shelf' && Math.abs(it.x - x) < 70 && (!best || Math.abs(it.x - x) < Math.abs(best.x - x))) best = it;
+  if (!best || pot.done) return;
+  best.state = 'fly'; best.t = 0;
+  puffs(best.x, pot.shelfY, .8, 5, '#fff', lvlFx);
+}
+function dropIn(pot, it) {
+  it.state = 'gone'; it.g.setAttribute('opacity', 0);
+  const ING = INGREDIENTS[it.key];
+  if (pot.done) return;
+  if (it.key === pot.recipe[pot.step]) {
+    pot.slots[pot.step].check.setAttribute('opacity', 1);
+    pot.step++;
+    pot.liquid.setAttribute('fill', ING.color);
+    puffs(pot.kx, FLOOR - 140, 1.2, 9, ING.color, lvlFx);
+    bubble(pot.bub, pot.step < 3 ? 'Blub!' : 'Toverdrank klaar!', 0, '#fff', .5);
+    if (pot.step === 3) {
+      pot.done = true;
+      pot.liquid.setAttribute('fill', '#f783ac');
+      for (const c of ['#ffe066', '#f783ac', '#b197fc', '#74c0fc']) puffs(pot.kx + rnd(-60, 60), FLOOR - 170, 1.3, 7, c, lvlFx);
+      setBarrier(pot.barrier, true);
+      toast('De toverdrank is klaar! Het hek is open.');
+    }
+  } else {
+    pot.liquid.setAttribute('fill', '#2b8a3e');
+    puffs(pot.kx, FLOOR - 150, 2, 14, '#8ce99a', lvlFx);
+    bubble(pot.bub, `BOEM! Niet ${ING.name}!`, 0, '#ffe3f1', .5);
+    if (IN.p.mode === 'normal') die('pan', pot);
+  }
+}
+function updatePotions(dt) {
+  for (const pot of IN.L.potions) for (const it of pot.items) {
+    if (it.state !== 'fly') continue;
+    it.t = Math.min(1, it.t + dt / 0.75);
+    const x = it.x + (pot.kx - it.x) * it.t, y = pot.shelfY + (FLOOR - 140 - pot.shelfY) * it.t - Math.sin(it.t * Math.PI) * 160;
+    it.g.setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${(it.t * 540).toFixed(0)}) scale(1.3)`);
+    if (it.t >= 1) dropIn(pot, it);
+  }
+}
+
+/* ---------- vallende hoeden ---------- */
+function updateHats(dt) {
+  const p = IN.p;
+  for (const h of IN.L.hats) {
+    if (h.state === 'up') {
+      h.t -= dt;
+      if (h.t <= 0 && p.mode === 'normal' && p.x > h.x - h.trig && p.x < h.x + 60) { h.state = 'shake'; h.t = 0.3; }
+    } else if (h.state === 'shake') {
+      h.t -= dt;
+      if (h.t <= 0) { h.state = 'fall'; h.vy = 0; }
+    } else if (h.state === 'fall') {
+      h.vy += 1800 * dt; h.by += h.vy * dt;
+      if (h.by >= FLOOR) { h.by = FLOOR; h.state = 'down'; h.t = 1.0; puffs(h.x, FLOOR, 1.6, 10, '#dee2e6', lvlFx); }
+    } else if (h.state === 'down') {
+      h.t -= dt;
+      if (h.t <= 0 && !(p.mode === 'dead' && p.deadKind === 'hoed')) h.state = 'rise';
+    } else if (h.state === 'rise') {
+      h.by -= 220 * dt;
+      if (h.by <= h.upY) { h.by = h.upY; h.state = 'up'; h.t = 0.5; }
+    }
+    const awake = h.state === 'shake' || h.state === 'fall';
+    h.open.setAttribute('opacity', awake ? 1 : 0);
+    h.closed.setAttribute('opacity', awake ? 0 : 1);
+    const jx = h.state === 'shake' ? rnd(-4, 4) : 0;
+    h.g.setAttribute('transform', `translate(${(h.x + jx).toFixed(1)} ${h.by.toFixed(1)})`);
+    h.string.setAttribute('y2', (h.by - 176).toFixed(1));
+  }
+}
+function hatHit(p) {
+  for (const h of IN.L.hats) {
+    if (h.state === 'fall' && Math.abs(p.x - h.x) < 96 && h.by > p.y - 125) return true;
+  }
+  return false;
+}
+
+/* ---------- het meisje met de ogen ---------- */
+function updateGirls(dt) {
+  const p = IN.p;
+  for (const gl of IN.L.girls) {
+    gl.t -= dt; gl.grace -= dt;
+    if (gl.state === 'closed') {
+      if (gl.t <= 0.75 && !gl.warned) { gl.warned = true; bubble(gl.bub, 'Ik kijk zo...', -gl.r - 30, '#fff', .45); }
+      if (gl.t <= 0) { gl.state = 'open'; gl.t = rnd(1.4, 2.4); gl.grace = 0.25; gl.warned = false; bubble(gl.bub, 'Ogen open!', -gl.r - 30, '#ffe3f1', .45); }
+    } else if (gl.t <= 0) {
+      gl.state = 'closed'; gl.t = rnd(1.8, 3.2); gl.bub.replaceChildren();
+    }
+    const flutter = gl.state === 'closed' && gl.t < .75 && Math.sin(IN.t * 28) > .55;
+    const open = gl.state === 'open' || flutter;
+    gl.eyesOpen.setAttribute('opacity', open ? 1 : 0);
+    gl.eyesClosed.setAttribute('opacity', open ? 0 : 1);
+    const look = clamp((p.x - gl.cx) / 500, -1, 1) * 9;
+    gl.pupils.forEach((pu, i) => pu.setAttribute('cx', ((i ? 1 : -1) * gl.r * .34 + look).toFixed(1)));
+    if (gl.state === 'open' && gl.grace <= 0 && p.mode === 'normal' && p.x > gl.x0 && p.x < gl.x1 && (Math.abs(p.vx) > 20 || !p.onGround)) {
+      bubble(gl.bub, 'Hebbes! Hokus pokus!', -gl.r - 30, '#e5dbff', .45);
+      die('kikker');
+    }
+  }
+}
+function makeFrog(x, y) {
+  const g = el('g', { transform: `translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${PS})` }, lvlFx);
+  const lift = el('g', {}, g);
+  for (const sx of [-1, 1]) el('ellipse', { cx: sx * 22, cy: -7, rx: 13, ry: 8, fill: '#51cf66', stroke: '#2b8a3e', 'stroke-width': 2 }, lift);
+  el('ellipse', { cx: 0, cy: -18, rx: 26, ry: 18, fill: '#69db7c', stroke: '#2b8a3e', 'stroke-width': 2.5 }, lift);
+  for (const sx of [-1, 1]) {
+    el('circle', { cx: sx * 12, cy: -34, r: 9, fill: '#69db7c', stroke: '#2b8a3e', 'stroke-width': 2.5 }, lift);
+    el('circle', { cx: sx * 12, cy: -35, r: 5.5, fill: '#fff' }, lift);
+    el('circle', { cx: sx * 12, cy: -34, r: 2.8, fill: '#111' }, lift);
+  }
+  P(lift, 'M-14 -18 Q0 -8 14 -18', { stroke: '#2b8a3e', 'stroke-width': 2.5, fill: 'none', 'stroke-linecap': 'round' });
+  witchHat(lift, 0, -42, .55);
+  return { g, lift };
+}
+
+/* ---------- de P-ballon ---------- */
+function resetPRoom(pr) {
+  pr.active = false; pr.done = false; pr.time = 30;
+  pr.left = pr.targets.length;
+  for (const t of pr.targets) {
+    t.state = 'float'; t.hp = t.inBubble ? 2 : 1; t.cool = 0; t.rot = 0;
+    t.g.removeAttribute('opacity');
+    if (t.bubbleEl) t.bubbleEl.removeAttribute('opacity');
+  }
+  pr.ball.setAttribute('opacity', 0);
+  setBarrier(pr.barrier, false);
+}
+function startBalloon(pr) {
+  const p = IN.p;
+  pr.active = true; pr.time = 30;
+  Object.assign(p, { mode: 'balloon', proom: pr, bx: p.x, by: p.y - 80, bvx: 0, bvy: -150 });
+  IN.fig.g.setAttribute('opacity', 0);
+  pr.ball.setAttribute('opacity', 1);
+  $('pTimer').hidden = false;
+  toast("Je zit in de P-ballon! Beuk alle P's weg. ↑ = omhoog");
+}
+function updateBalloon(dt) {
+  const p = IN.p, pr = p.proom;
+  const input = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
+  p.bvx = clamp((p.bvx + input * 1600 * dt) * Math.max(0, 1 - 1.8 * dt), -540, 540);
+  if (IN.jumpBuf > 0) { p.bvy = Math.min(p.bvy, 0) - 520; IN.jumpBuf = 0; }
+  p.bvy = clamp((p.bvy + 480 * dt) * Math.max(0, 1 - .5 * dt), -700, 500);
+  p.bx += p.bvx * dt; p.by += p.bvy * dt;
+  const R = 62;
+  if (p.bx < pr.x0 + R) { p.bx = pr.x0 + R; p.bvx = Math.abs(p.bvx) * .5; }
+  if (p.bx > pr.x1 - R) { p.bx = pr.x1 - R; p.bvx = -Math.abs(p.bvx) * .5; }
+  if (p.by < CEIL + R) { p.by = CEIL + R; p.bvy = Math.abs(p.bvy) * .4; }
+  if (p.by > FLOOR - R) { p.by = FLOOR - R; p.bvy = -Math.abs(p.bvy) * .4; }
+  for (const t of pr.targets) {
+    if (t.state !== 'float') continue;
+    t.cool -= dt;
+    const dx = t.x - p.bx, dy = t.y - p.by, d = Math.hypot(dx, dy) || 1;
+    if (d < R + t.r && t.cool <= 0) {
+      const nx = dx / d, ny = dy / d;
+      p.bvx -= nx * 280; p.bvy -= ny * 280;
+      t.cool = .35;
+      if (t.hp > 1) {
+        t.hp--;
+        if (t.bubbleEl) t.bubbleEl.setAttribute('opacity', 0);
+        puffs(t.x, t.y, 1, 8, '#fff', lvlFx);
+        floatText('Plop!', t.x, t.y - 50);
+      } else {
+        t.state = 'fly'; t.vx = nx * 900 + p.bvx * .4; t.vy = ny * 900 - 250; t.spin = rnd(-720, 720); t.life = 1.2;
+        floatText('Bonk!', t.x, t.y - 50);
+        pr.left--;
+        if (pr.left === 0) winBalloon(pr);
+      }
+    }
+  }
+  p.x = p.bx; p.y = p.by + R;
+  pr.ball.setAttribute('transform', `translate(${p.bx.toFixed(1)} ${p.by.toFixed(1)}) rotate(${(p.bvx * .03).toFixed(1)})`);
+  if (p.mode === 'balloon') {
+    pr.time -= dt;
+    if (pr.time <= 0) { pr.time = 0; die('tijd'); }
+  }
+}
+function updatePRooms(dt) {
+  for (const pr of IN.L.prooms) {
+    for (const t of pr.targets) {
+      if (t.state === 'float') {
+        t.x = t.baseX + Math.sin(IN.t * .8 + t.phase) * 40;
+        t.y = t.baseY + Math.cos(IN.t * 1.1 + t.phase) * 26;
+      } else if (t.state === 'fly') {
+        t.vy += 900 * dt; t.x += t.vx * dt; t.y += t.vy * dt; t.rot += t.spin * dt; t.life -= dt;
+        t.g.setAttribute('opacity', clamp(t.life, 0, 1).toFixed(2));
+        if (t.life <= 0) t.state = 'gone';
+      }
+      if (t.state !== 'gone') t.g.setAttribute('transform', `translate(${t.x.toFixed(1)} ${t.y.toFixed(1)}) rotate(${t.rot.toFixed(0)})`);
+    }
+    if (!pr.active && !pr.done && IN.p.mode === 'normal' && IN.p.onGround && IN.p.x > pr.startX && IN.p.x < pr.x1) startBalloon(pr);
+    if (pr.active) {
+      const secs = Math.ceil(pr.time);
+      const label = `${secs}`;
+      if (label !== pr.shown) { pr.shown = label; $('pTime').textContent = label; $('pTimer').classList.toggle('hurry', secs <= 5); }
+      const left = `nog ${pr.left} P${pr.left === 1 ? '' : "'s"}`;
+      if (left !== pr.leftShown) { pr.leftShown = left; $('pLeft').textContent = left; }
+    }
+  }
+}
+function winBalloon(pr) {
+  const p = IN.p;
+  pr.done = true; pr.active = false;
+  $('pTimer').hidden = true;
+  setBarrier(pr.barrier, true);
+  pr.ball.setAttribute('opacity', 0);
+  puffs(p.bx, p.by, 1.6, 14, '#fff', lvlFx);
+  floatText('POP!', p.bx, p.by - 40);
+  Object.assign(p, { mode: 'normal', x: p.bx, y: p.by + 62, vy: 0, onGround: false, carry: 0 });
+  IN.fig.g.removeAttribute('opacity');
+  toast("Alle P's zijn weg! Het hek is open.");
+}
+function floatText(text, x, y) {
+  const outer = el('g', { transform: `translate(${x.toFixed(1)} ${y.toFixed(1)})` }, lvlFx);
+  const t = txt(el('g', { class: 'floater' }, outer), 0, 0, text, 44, { fill: '#fff', stroke: '#2a1846', 'stroke-width': 7, 'paint-order': 'stroke', 'stroke-linejoin': 'round' });
+  setTimeout(() => outer.remove(), 1300);
+  return t;
+}
+
 
 /* ---------- de vliegende schaar met vleugels en een eenhoorn ---------- */
 function drawUnicorn(u) {
@@ -1724,7 +2132,7 @@ function spiderHit(p) {
 
 function buildLevel(h) {
   lvlBg.replaceChildren(); lvlDyn.replaceChildren(); lvlFx.replaceChildren(); lvlFront.replaceChildren();
-  const L = { pits: [], balls: [], tramps: [], planks: [], ropes: [], spiders: [], swings: [], scissors: [], checkpoints: [{ x: 300, room: -1 }], rooms: [] };
+  const L = { pits: [], balls: [], tramps: [], planks: [], ropes: [], spiders: [], swings: [], scissors: [], hats: [], girls: [], potions: [], prooms: [], barriers: [], checkpoints: [{ x: 300, room: -1 }], rooms: [] };
   const START_W = 800, END_W = 1000;
   L.width = START_W + h.rooms.reduce((a, k) => a + ROOMS[k].width, 0) + END_W;
   drawShell(lvlBg, L.width, h.wall);
@@ -1736,7 +2144,7 @@ function buildLevel(h) {
     drawDoorway(lvlBg, x);
     L.checkpoints.push({ x: x + 100, room: i });
     L.rooms.push(k);
-    BUILDERS[k](L, lvlBg, lvlDyn, x, wdt);
+    BUILDERS[k](L, lvlBg, lvlDyn, x, wdt, i);
     x += wdt;
   });
   drawDoorway(lvlBg, x);
@@ -1824,7 +2232,7 @@ function closeHouse() {
   const id = IN.h.id;
   IN.active = false;
   keys.left = keys.right = keys.jump = false;
-  $('inside').hidden = true; $('finish').hidden = true; $('balance').hidden = true;
+  $('inside').hidden = true; $('finish').hidden = true; $('balance').hidden = true; $('pTimer').hidden = true;
   document.body.classList.remove('inside-mode');
   lvlBg.replaceChildren(); lvlDyn.replaceChildren(); lvlPlayer.replaceChildren(); lvlFx.replaceChildren(); lvlFront.replaceChildren();
   updateUI();
@@ -1844,7 +2252,14 @@ function spawnPlayer(cp) {
   IN.fig.g.removeAttribute('opacity');
   $('balance').hidden = true;
 }
-function resetPlanks() {
+function resetPlanks(fromRoom = -1) {
+  const L = IN.L;
+  if (IN.frog) { IN.frog.g.remove(); IN.frog = null; }
+  $('pTimer').hidden = true;
+  for (const h of L.hats) if (h.room >= fromRoom) { h.state = 'up'; h.by = h.upY; h.t = 0.6; }
+  for (const gl of L.girls) if (gl.room >= fromRoom) { gl.state = 'closed'; gl.t = 2.2; gl.warned = false; gl.bub.replaceChildren(); }
+  for (const pot of L.potions) if (pot.room >= fromRoom) newRecipe(pot);
+  for (const pr of L.prooms) if (pr.room >= fromRoom) resetPRoom(pr);
   for (const s of IN.L.planks) { s.state = 'ok'; s.dy = 0; s.vy = 0; s.rot = 0; s.g.removeAttribute('transform'); s.g.removeAttribute('opacity'); }
   for (const s of IN.L.swings) { s.cut = false; s.boarded = false; s.timer = 0; s.rot = 0; }
   for (const sc of IN.L.scissors) { sc.state = 'idle'; sc.bub.replaceChildren(); }
@@ -1900,7 +2315,7 @@ function enterRope(pit) {
   Object.assign(p, { mode: 'rope', rope: pit, vy: 0, onGround: true, carry: 0, lean: rnd(-.08, .08), leanV: 0, gustT: .6 });
   $('balance').hidden = false;
 }
-function die(kind = 'slijm') {
+function die(kind = 'slijm', extra) {
   const p = IN.p;
   if (p.mode === 'dead') return;
   p.mode = 'dead'; p.deadKind = kind; p.deadT = 1.1; p.vy = kind === 'spin' ? -700 : 160;
@@ -1910,6 +2325,23 @@ function die(kind = 'slijm') {
   if (kind === 'spin') {
     puffs(p.x, p.y - 70, 1.4, 10, '#b197fc', lvlFx);
     toast(pick(['Au! Een spin! Getrold!', 'Iiieek, een spin!', 'Niet aanraken! Ga eronder door.']));
+  } else if (kind === 'hoed') {
+    p.deadT = 1.3;
+    toast(pick(['Gevangen onder de hoed!', 'Te laat! De hoed viel op je.']));
+  } else if (kind === 'kikker') {
+    p.deadT = 1.8;
+    IN.fig.g.setAttribute('opacity', 0);
+    IN.frog = makeFrog(p.x, p.y);
+    puffs(p.x, p.y - 60, 1.5, 12, '#b197fc', lvlFx);
+    toast('Kwaak! Je bent betoverd in een kikker!');
+  } else if (kind === 'pan') {
+    p.deadT = 1.6; p.panPot = extra; p.panFrom = { x: p.x, y: p.y }; p.splashed = false;
+    toast('Blub! Je zit in de toverpan!');
+  } else if (kind === 'tijd') {
+    p.deadT = 1.4;
+    $('pTimer').hidden = true;
+    if (p.proom) { p.proom.ball.setAttribute('opacity', 0); puffs(p.bx, p.by, 1.4, 10, '#fff', lvlFx); }
+    toast("De tijd is op! De P's lachen je uit.");
   } else {
     puffs(p.x, SLIME + 10, 1.6, 12, '#8ce99a', lvlFx);
     toast(pick(['Plons! Getrold!', 'Iel, trolslijm!', 'Haha, in het slijm!', 'Getrold door het huis!']));
@@ -1940,6 +2372,13 @@ function updateNormal(dt) {
   const prevX = p.x, prevY = p.y;
   p.x = clamp(p.x + p.vx * dt, HW, L.width - HW);
   if (p.y > FLOOR + 4) { const pit = pitAt(prevX); if (pit) p.x = clamp(p.x, pit.x0 + HW, pit.x1 - HW); }
+  for (const b of L.barriers) if (!b.open && prevX <= b.x && p.x > b.x - HW) p.x = b.x - HW;
+  for (const h of L.hats) {
+    // een hoed die op de grond staat (of omhoog gaat) is een muur; overheen springen mag
+    if ((h.state === 'down' || h.state === 'rise') && p.y > h.by - 168 && p.y - 125 < h.by && Math.abs(p.x - h.x) < 110 + HW) {
+      p.x = prevX < h.x ? h.x - 110 - HW : h.x + 110 + HW;
+    }
+  }
   for (const b of L.balls) {
     const dx = p.x - b.cx;
     if (Math.abs(dx) < b.r) {
@@ -1965,6 +2404,16 @@ function updateNormal(dt) {
     if (!keys.jump && p.vy < -480) p.vy = -480;   // kort tikken = klein sprongetje
     p.vy = Math.min(p.vy + GRAV * dt, 1700);
     const ny = p.y + p.vy * dt;
+    if (p.vy < 0) {
+      for (const pot of L.potions) {
+        const sb = pot.shelfY + 18;
+        if (p.x > pot.sx0 - 12 && p.x < pot.sx1 + 12 && p.y - 128 >= sb - 2 && ny - 128 < sb) {
+          p.y = sb + 128; p.vy = 160;
+          bumpShelf(pot, p.x);
+          return;
+        }
+      }
+    }
     if (p.vy >= 0) {
       for (const t of L.tramps) {
         if (Math.abs(p.x - t.x) < t.w / 2 + 8 && prevY <= t.y + 4 && ny >= t.y) {
@@ -2068,10 +2517,28 @@ function updateInside(dt) {
     if (p.deadKind === 'spin') {
       p.vy += GRAV * dt; p.y += p.vy * dt;
       IN.fig.g.setAttribute('opacity', clamp(p.deadT, 0, 1).toFixed(2));
-    } else p.y = Math.min(p.y + p.vy * dt, SLIME + 200);
-    if (p.deadT <= 0) { resetPlanks(); spawnPlayer(p.cp); }
+    } else if (p.deadKind === 'hoed') {
+      if (p.deadT < 1.1) IN.fig.g.setAttribute('opacity', 0);   // weg onder de hoed
+    } else if (p.deadKind === 'kikker') {
+      if (IN.frog) IN.frog.lift.setAttribute('transform', `translate(0 ${(-Math.abs(Math.sin(IN.t * 7)) * 16).toFixed(1)})`);
+    } else if (p.deadKind === 'pan') {
+      const u = clamp((1.6 - p.deadT) / .9, 0, 1), pot = p.panPot;
+      p.x = p.panFrom.x + (pot.kx - p.panFrom.x) * u;
+      p.y = p.panFrom.y + (FLOOR - 120 - p.panFrom.y) * u - Math.sin(u * Math.PI) * 220;
+      if (u >= 1 && !p.splashed) { p.splashed = true; IN.fig.g.setAttribute('opacity', 0); puffs(pot.kx, FLOOR - 140, 1.8, 14, '#69db7c', lvlFx); }
+    } else if (p.deadKind !== 'tijd') p.y = Math.min(p.y + p.vy * dt, SLIME + 200);
+    if (p.deadT <= 0) { resetPlanks(L.checkpoints[p.cp].room); spawnPlayer(p.cp); }
   } else if (p.mode === 'rope') updateRope(dt);
-  else if (p.mode === 'normal') { updateNormal(dt); if (IN.p.mode === 'normal' && spiderHit(IN.p)) die('spin'); }
+  else if (p.mode === 'balloon') updateBalloon(dt);
+  else if (p.mode === 'normal') {
+    updateNormal(dt);
+    if (IN.p.mode === 'normal' && spiderHit(IN.p)) die('spin');
+    else if (IN.p.mode === 'normal' && hatHit(IN.p)) die('hoed');
+  }
+  updateHats(dt);
+  updateGirls(dt);
+  updatePotions(dt);
+  updatePRooms(dt);
   for (const r of L.ropes) {
     const on = IN.p.mode === 'rope' && IN.p.rope === r;
     const px = on ? IN.p.x : (r.x0 + r.x1) / 2, sy = on ? IN.p.y : r.ropeY + 12;
