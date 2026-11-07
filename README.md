@@ -15,6 +15,9 @@ Na de eerste keer werkt het ook zonder internet.
   Soms komt er een zeldzame bezoeker langs, die is 25 $ waard.
 - **Werelden:** wissel bovenin tussen de **Trolwereld** (grasveld) en de **Heksenwereld** (paarse grond, maan,
   heksenhuizen met een hoed als dak en een heksenhoed met een bloem ernaast). Elke wereld heeft zijn eigen huizen.
+- **Bezoekers:** in de Trolwereld lopen het blonde meisje, het regenboogmeisje en de jongen met het tasje;
+  in de Heksenwereld het heksje, de hond en de kat (alle drie met een heksenhoed).
+  De zeldzame bezoeker met de paraplu mag in allebei de werelden komen.
 - **Binnen:** koop kamers voor een huis en loop zelf het parcours door.
   Gebruik ← → om te lopen en ↑ of spatie om te springen. Op een telefoon verschijnen knoppen.
 
@@ -34,6 +37,7 @@ Na de eerste keer werkt het ook zonder internet.
 - `huis-schets1.jpg`: het trolhuis
 - `personen-schets1.jpg`: de bezoekers (de onderste is zeldzaam)
 - `kamers-schets1.jpg` en `kamers-schets2.jpg`: de kamers
+- `personen-schets2-heksenwereld.jpg`: de bezoekers van de heksenwereld (ligt op zijn kant)
 - `wereld-huis-schets2-(heksenwereld).jpg`: de heksenwereld met het voorbeeldhuis (ligt op zijn kop)
 
 ## Nieuwe versie uitbrengen

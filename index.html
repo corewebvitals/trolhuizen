@@ -685,9 +685,9 @@ const DOORS = ['#f6b892', '#f3a77f', '#f8c4a0', '#f1ad8a'];
 const NAMES_A = ['Villa', 'Huize', 'Kasteel', 'Hutje', 'Paleis', 'Krot', 'Stulp', 'Fort'];
 const NAMES_B = ['Gniffel', 'Plaag', 'Kietel', 'Grijns', 'Hihi', 'Gotcha', 'Pesterik', 'Grapjas', 'Boe', 'Proest', 'Snoodaard', 'Schaterlach'];
 const WORLDS = {
-  trol: { name: 'Trolwereld', sym: '#house', house: 'trolhuis', walls: WALLS, roofs: ROOFS, doors: DOORS, namesA: NAMES_A, namesB: NAMES_B,
+  trol: { name: 'Trolwereld', sym: '#house', house: 'trolhuis', people: ['blond', 'regenboog', 'tasje'], walls: WALLS, roofs: ROOFS, doors: DOORS, namesA: NAMES_A, namesB: NAMES_B,
     sketch: 'assets/schets1-klein.jpg', caption: 'ontwerp: schets 1', bubbleY: -206, tagline: 'bouw je trolhuis en trol iedereen die langskomt' },
-  heks: { name: 'Heksenwereld', sym: '#witchHouse', house: 'heksenhuis',
+  heks: { name: 'Heksenwereld', sym: '#witchHouse', house: 'heksenhuis', people: ['heksje', 'hond', 'kat'],
     walls: ['#9775fa', '#a78bfa', '#8f6ee8', '#b197fc', '#9b80f0'], roofs: ['#7048e8', '#6741d9', '#5f3dc4', '#7950f2'], doors: ['#b197fc', '#c0aaff', '#a48bf5'],
     namesA: ['Huize', 'Toren', 'Heksenhuis', 'Hutje', 'Paleis'], namesB: ['Hokuspokus', 'Abracadabra', 'Simsalabim', 'Bezemsteel', 'Toverdrank', 'Kikkerpoot', 'Sterrenstof', 'Maanlicht'],
     sketch: 'assets/heks-schets-klein.jpg', caption: 'ontwerp: heksenwereld', bubbleY: -292, tagline: 'tover je heksenhuis en trol iedereen die langskomt' },
@@ -811,7 +811,7 @@ function bump(id) { const e = $(id); e.classList.remove('bump'); void e.offsetWi
 
 /* ---------- voorbijgangers (naar personen-schets 1) ---------- */
 const SKIN = '#f7c08f', SKIN_LINE = '#dc9a62';
-const NORMAL_TYPES = ['blond', 'regenboog', 'tasje'];
+// wie er rondloopt hangt af van de wereld (zie WORLDS[..].people); de zeldzame mag overal komen
 const RARE_REWARD = 25;
 const walkers = [];
 const FORCE_RARE = location.search.includes('zeldzaam'); // ?zeldzaam = test: zeldzame komt meteen
@@ -879,6 +879,46 @@ function setFace(w, shocked) {
   w.mouth.setAttribute('fill', shocked ? '#6b1f1f' : 'none');
 }
 const FRINGE = 'M-13.5 -62 Q-14 -78.5 0 -78.5 Q14 -78.5 13.5 -62 Q8 -71 0 -70 Q-8 -71 -13.5 -62 Z';
+function starD(cx, cy, R, r) {
+  let d = '';
+  for (let i = 0; i < 10; i++) {
+    const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r : R;
+    d += `${i ? 'L' : 'M'}${(cx + rr * Math.cos(a)).toFixed(1)} ${(cy + rr * Math.sin(a)).toFixed(1)} `;
+  }
+  return d + 'Z';
+}
+// zwarte heksenhoed (met een gele ster op de punt voor het heksje)
+function witchHat(b, cx, cy, k = 1, star = false) {
+  const g = el('g', { transform: `translate(${cx} ${cy}) scale(${k})` }, b);
+  P(g, 'M-12 0 L-2 -30 Q0 -36 7 -37 Q2 -31 2 -27 L12 0 Z', { fill: '#242424', stroke: '#111', 'stroke-width': 1.2, 'stroke-linejoin': 'round' });
+  P(g, 'M-5 -5 L-0.5 -25', { stroke: 'rgba(255,255,255,.2)', 'stroke-width': 2, 'stroke-linecap': 'round' });
+  el('ellipse', { cx: 0, cy: 0, rx: 20, ry: 5, fill: '#1c1c1c', stroke: '#111', 'stroke-width': 1.2 }, g);
+  if (star) P(g, starD(7.5, -38, 6.5, 2.8), { fill: '#fcc419', stroke: '#e8a400', 'stroke-width': 1, 'stroke-linejoin': 'round' });
+}
+// vier poten: eerst de achterste twee (achter het lijf), daarna de voorste twee
+function legsFar(b, w, color, paw) {
+  w.q = {};
+  w.q.fb = limb(b, -24, -26, 24, color, 5.5);
+  w.q.ff = limb(b, 8, -26, 24, color, 5.5);
+  for (const g of [w.q.fb, w.q.ff]) el('ellipse', { cx: 1.5, cy: 24, rx: 4.2, ry: 2.6, fill: paw }, g);
+}
+function legsNear(b, w, color, paw) {
+  w.q.nb = limb(b, -18, -26, 24, color, 5.5);
+  w.q.nf = limb(b, 14, -26, 24, color, 5.5);
+  for (const g of [w.q.nb, w.q.nf]) el('ellipse', { cx: 1.5, cy: 24, rx: 4.2, ry: 2.6, fill: paw }, g);
+  w.quad = true;
+  w.legL = w.q.fb; w.legR = w.q.ff; w.armL = w.q.nb; w.armR = w.q.nf; w.armBase = 0;
+}
+// zet benen en armen; dieren lopen diagonaal om en om, en "armen omhoog" wordt "poten wijd"
+function applyPose(f, legL, legR, armL, armR) {
+  if (f.quad) {
+    const up = Math.abs(armL) > 100, walk = up ? 0 : legL, splay = up ? 30 + (Math.abs(armL) - 150) * .5 : 0;
+    setRot(f.q.fb, walk + splay); setRot(f.q.nb, -walk + splay);
+    setRot(f.q.ff, -walk - splay); setRot(f.q.nf, walk - splay);
+    return;
+  }
+  setRot(f.legL, legL); setRot(f.legR, legR); setRot(f.armL, armL); setRot(f.armR, armR);
+}
 
 const LOOKS = {
   // blond haar, zwarte strik, zwart topje en zwart tutu-rokje
@@ -944,10 +984,59 @@ const LOOKS = {
     P(b, 'M-13.5 -62 Q-14 -79.5 0 -79.5 Q14 -79.5 13.5 -62 Q10 -72 2 -71 Q-6 -73 -13.5 -62 Z', { fill: '#7b35d1' });
     P(b, 'M10 -73 l5 -4 l1 6 Z M10 -73 l-1 -6 l5 1 Z', { fill: '#5f3dc4' });
   },
+  // HEKSENWERELD: heksje met goudgeel haar, paarse jurk en een hoed met een ster
+  heksje(b, w) {
+    P(b, 'M-15 -64 Q-16 -80 0 -80 Q16 -80 15 -64 L16.5 -38 L-16.5 -38 Z', { fill: '#f2b01e', stroke: '#d9930b', 'stroke-width': 1 });
+    legs(b, w, '#4c2a9e');
+    P(b, 'M-9 -32 L-18 -13 L-14 -15 L-11 -10 L-7 -14 L-3 -9 L1 -14 L5 -9 L9 -14 L12 -10 L18 -13 L9 -32 Z', { fill: '#6741d9', stroke: '#4c2a9e', 'stroke-width': 1.2, 'stroke-linejoin': 'round' });
+    P(b, 'M-5 -30 L-11 -13 M0 -30 L0 -11 M5 -30 L11 -13', { stroke: '#4c2a9e', 'stroke-width': 1.2 });
+    arms(b, w, SKIN, { cuff: '#6741d9' });
+    P(b, 'M-10 -50 Q0 -53 10 -50 L9.5 -31 H-9.5 Z', { fill: '#7048e8', stroke: '#4c2a9e', 'stroke-width': 1.2, 'stroke-linejoin': 'round' });
+    head(b); face(b, w);
+    P(b, FRINGE, { fill: '#f2b01e' });
+    witchHat(b, 0, -73, 1, true);
+    w.bubbleY = -124;
+  },
+  // HEKSENWERELD: bruine hond met flaporen, rode wangetjes en een heksenhoed
+  hond(b, w) {
+    const BR = '#a0612b', BRD = '#7a4519';
+    P(b, 'M-30 -34 Q-44 -30 -52 -12', { stroke: BR, 'stroke-width': 6, fill: 'none', 'stroke-linecap': 'round' });
+    legsFar(b, w, BRD, '#5c3311');
+    el('rect', { x: -34, y: -43, width: 50, height: 21, rx: 10, fill: BR, stroke: BRD, 'stroke-width': 1.5 }, b);
+    legsNear(b, w, BR, BRD);
+    el('circle', { cx: 16, cy: -56, r: 14, fill: BR, stroke: BRD, 'stroke-width': 1.5 }, b);
+    P(b, 'M5 -64 Q-3 -60 -1 -40 Q3 -33 8 -40 Q10 -52 11 -60 Z', { fill: BRD });
+    P(b, 'M27 -64 Q35 -60 33 -40 Q29 -33 24 -40 Q22 -52 21 -60 Z', { fill: BRD });
+    el('circle', { cx: 9.5, cy: -51, r: 3.3, fill: '#ff6b6b', opacity: .7 }, b);
+    el('circle', { cx: 22.5, cy: -51, r: 3.3, fill: '#ff6b6b', opacity: .7 }, b);
+    face(el('g', { transform: 'translate(16 6)' }, b), w);
+    el('ellipse', { cx: 16, cy: -53, rx: 2.4, ry: 1.7, fill: '#2b1a10' }, b);
+    witchHat(b, 16, -67, .9);
+    w.bubbleY = -112;
+  },
+  // HEKSENWERELD: bruine kat met zwarte strepen, zwarte poten, puntoren en een heksenhoed
+  kat(b, w) {
+    const BR = '#b5743c', BK = '#1d1d1d';
+    P(b, 'M-30 -36 Q-46 -40 -50 -58', { stroke: BR, 'stroke-width': 7, fill: 'none', 'stroke-linecap': 'round' });
+    P(b, 'M-30 -36 Q-46 -40 -50 -58', { stroke: BK, 'stroke-width': 7, fill: 'none', 'stroke-dasharray': '4 6' });
+    legsFar(b, w, BK, BK);
+    el('rect', { x: -34, y: -44, width: 50, height: 21, rx: 10, fill: BR, stroke: '#7f4a1d', 'stroke-width': 1.5 }, b);
+    P(b, 'M-26 -44 l3 21 M-17 -44 l2 21 M-8 -44 l2 21 M1 -43 l1 17', { stroke: BK, 'stroke-width': 3.5, 'stroke-linecap': 'round' });
+    legsNear(b, w, BK, BK);
+    P(b, 'M5 -63 L-3 -79 L12 -69 Z M27 -63 L35 -79 L20 -69 Z', { fill: BK, 'stroke-linejoin': 'round' });
+    P(b, 'M5.5 -66 L1 -75 L10 -69.5 Z M26.5 -66 L31 -75 L22 -69.5 Z', { fill: '#f783ac' });
+    el('circle', { cx: 16, cy: -56, r: 14, fill: BR, stroke: '#7f4a1d', 'stroke-width': 1.5 }, b);
+    P(b, 'M11 -69 l1 5 M16 -70 v5 M21 -69 l-1 5 M3 -56 h5 M29 -56 h-5 M3.5 -51 h5 M28.5 -51 h-5', { stroke: BK, 'stroke-width': 2.4, 'stroke-linecap': 'round' });
+    face(el('g', { transform: 'translate(16 6)' }, b), w);
+    P(b, 'M14 -53.5 h4 l-2 2.2 Z', { fill: '#f783ac' });
+    P(b, 'M10 -51 l-9 -1.5 M10 -49.5 l-9 2 M22 -51 l9 -1.5 M22 -49.5 l9 2', { stroke: '#555', 'stroke-width': .8 });
+    witchHat(b, 16, -71, .75);
+    w.bubbleY = -114;
+  },
 };
 
 function makeWalker(onField) {
-  let type = pick(NORMAL_TYPES);
+  let type = pick(WORLDS[state.world].people);
   if (!onField && !rareOnField() && rareCooldown <= 0 && (FORCE_RARE || Math.random() < 0.2)) type = 'zeldzaam';
   const rare = type === 'zeldzaam';
   const fromLeft = Math.random() < .5;
@@ -959,10 +1048,11 @@ function makeWalker(onField) {
   };
   w.target = randomTarget();
   const g = el('g', { class: 'walker' }, world);
-  el('ellipse', { cx: 0, cy: 0, rx: 15, ry: 4.5, fill: 'rgba(20,50,10,.25)' }, g);
+  const shadow = el('ellipse', { cx: 0, cy: 0, rx: 15, ry: 4.5, fill: 'rgba(20,50,10,.25)' }, g);
   w.lift = el('g', {}, g);
   w.body = el('g', {}, w.lift);
   LOOKS[type](w.body, w);
+  if (w.quad) shadow.setAttribute('rx', 30);
   w.bub = el('g', {}, g);
   w.g = g;
   walkers.push(w);
@@ -1008,9 +1098,8 @@ function updateWalker(w, dt) {
   }
   if (moving) w.phase += dt * (w.state === 'flee' ? 20 : 9);
   const sw = moving ? Math.sin(w.phase) * 24 : 0;
-  setRot(w.legL, sw); setRot(w.legR, -sw);
-  if (w.state === 'shock') { setRot(w.armL, 150); setRot(w.armR, -150); }
-  else { setRot(w.armL, w.armBase - sw * 0.5); setRot(w.armR, -w.armBase - sw * 0.5); }
+  if (w.state === 'shock') applyPose(w, sw, -sw, 150, -150);
+  else applyPose(w, sw, -sw, w.armBase - sw * 0.5, -w.armBase - sw * 0.5);
   let lift = moving ? -Math.abs(Math.sin(w.phase)) * 2.5 : 0;
   if (w.state === 'shock') lift = -Math.sin((1 - w.timer / 0.6) * Math.PI) * 30;
   w.lift.setAttribute('transform', `translate(0 ${lift.toFixed(1)})`);
@@ -1066,7 +1155,9 @@ function prank(v, w) {
   w.flee = { x: fx / len, y: fy / len };
   setFace(w, true);
   if (p.wet) puffs(w.x, w.y - 50 * w.s, w.s, 8, '#a5d8ff');
-  bubble(w.bub, w.rare ? pick(RARE_LINES) : p.walker, -100, w.rare ? '#fff3bf' : '#fff', w.s);
+  const ANIMAL_LINES = { hond: ['Woef?!', 'Wraf wraf!', 'Kwaak? Ik ben een hond!'], kat: ['Miauw!?', 'Ssssss!', 'Mijn snorharen!'] };
+  const line = w.rare ? pick(RARE_LINES) : ANIMAL_LINES[w.type] ? pick(ANIMAL_LINES[w.type]) : p.walker;
+  bubble(w.bub, line, w.bubbleY || -100, w.rare ? '#fff3bf' : '#fff', w.s);
   bubble(v.bub, p.house, v.bubbleY, heks ? '#e5dbff' : '#ffe3f1', v.s);
   if (heks) puffs(v.h.x + 80 * v.s, v.h.y - 166 * v.s, v.s, 9, '#ffe066');
   replay(v.inner, 'giggle');
@@ -1679,25 +1770,27 @@ function makePlayerFigure() {
   const g = el('g', {}, lvlPlayer);
   const lift = el('g', {}, g), rot = el('g', {}, lift), body = el('g', {}, rot);
   const f = {};
-  LOOKS[state.avatar](body, f);
+  LOOKS[state.avatars[worldOf(IN.h)]](body, f);
   IN.fig = { g, lift, rot, body, f };
 }
 function renderAvatars() {
   const box = $('avatars');
   box.replaceChildren();
-  for (const t of ['blond', 'regenboog', 'tasje', 'zeldzaam']) {
+  const wld = worldOf(IN.h);
+  const VIEW = { heksje: '-36 -114 72 120', hond: '-58 -104 100 108', kat: '-58 -104 100 108' };
+  for (const t of [...WORLDS[wld].people, 'zeldzaam']) {
     const locked = t === 'zeldzaam' && !state.rareTrolled;
     const b = document.createElement('button');
-    b.className = 'avatar' + (state.avatar === t ? ' on' : '');
+    b.className = 'avatar' + (state.avatars[wld] === t ? ' on' : '');
     b.disabled = locked;
     b.title = locked ? 'Trol eerst een zeldzame bezoeker om deze vrij te spelen' : 'Speel met dit poppetje';
-    const s = el('svg', { viewBox: '-36 -88 72 94', width: 38, height: 50 }, b);
+    const s = el('svg', { viewBox: VIEW[t] || '-36 -88 72 94', width: 38, height: 50 }, b);
     const f = {};
     LOOKS[t](el('g', {}, s), f);
-    setRot(f.legL, 0); setRot(f.legR, 0); setRot(f.armL, f.armBase); setRot(f.armR, -f.armBase);
+    applyPose(f, 0, 0, f.armBase, -f.armBase);
     if (locked) { const l = document.createElement('span'); l.className = 'lock'; l.textContent = '\u{1F512}'; b.appendChild(l); }
     b.addEventListener('click', () => {
-      state.avatar = t; save();
+      state.avatars[wld] = t; save();
       makePlayerFigure(); renderAvatars();
       b.blur();
     });
@@ -1919,20 +2012,17 @@ function renderPlayer(dt) {
   const sw = walking ? Math.sin(p.phase) * (p.mode === 'rope' ? 14 : 28) : 0;
   let lift = 0;
   if (p.mode === 'normal' && !p.onGround) {
-    setRot(f.legL, 28); setRot(f.legR, -14);
-    setRot(f.armL, p.vy < 0 ? 150 : 115); setRot(f.armR, p.vy < 0 ? -150 : -115);
+    applyPose(f, 28, -14, p.vy < 0 ? 150 : 115, p.vy < 0 ? -150 : -115);
   } else if (p.mode === 'rope') {
-    setRot(f.legL, sw); setRot(f.legR, -sw);
-    setRot(f.armL, 88 - p.lean * 12); setRot(f.armR, -88 - p.lean * 12);
+    applyPose(f, sw, -sw, 88 - p.lean * 12, -88 - p.lean * 12);
   } else if (p.mode === 'dead') {
     const wv = Math.sin(IN.t * 22) * 22;
-    setRot(f.legL, 10); setRot(f.legR, -10); setRot(f.armL, 150 + wv); setRot(f.armR, -150 + wv);
+    applyPose(f, 10, -10, 150 + wv, -150 + wv);
   } else if (p.mode === 'finish') {
-    setRot(f.legL, 0); setRot(f.legR, 0); setRot(f.armL, 155); setRot(f.armR, -155);
+    applyPose(f, 0, 0, 155, -155);
     lift = -Math.abs(Math.sin(IN.t * 6)) * 24;
   } else {
-    setRot(f.legL, sw); setRot(f.legR, -sw);
-    setRot(f.armL, f.armBase - sw * .5); setRot(f.armR, -f.armBase - sw * .5);
+    applyPose(f, sw, -sw, f.armBase - sw * .5, -f.armBase - sw * .5);
     lift = walking ? -Math.abs(Math.sin(p.phase)) * 3 : 0;
   }
   IN.fig.lift.setAttribute('transform', `translate(0 ${lift.toFixed(1)})`);
@@ -2052,7 +2142,7 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || ['localho
   });
 }
 
-if (location.search.includes('debug')) window.__trol = { enterHouse, IN, keys, get state() { return state; } };
+if (location.search.includes('debug')) window.__trol = { enterHouse, IN, keys, LOOKS, applyPose, el, get state() { return state; } };
 
 /* ---------- werelden wisselen ---------- */
 function showWorld() {
@@ -2081,7 +2171,8 @@ document.querySelectorAll('.world-btn').forEach(b => b.addEventListener('click',
 
 /* ---------- start ---------- */
 load();
-state.avatar = state.avatar || 'blond';
+state.avatars = state.avatars || { trol: state.avatar || 'blond', heks: 'heksje' };
+delete state.avatar;
 state.world = state.world || 'trol';
 state.houses.forEach(h => { h.rooms = h.rooms || []; h.best = h.best || {}; h.world = h.world || 'trol'; });
 if (!state.heksDemo) {
