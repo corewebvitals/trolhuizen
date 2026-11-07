@@ -1920,7 +1920,7 @@ function resetPRoom(pr) {
   pr.active = false; pr.done = false; pr.time = 30;
   pr.left = pr.targets.length;
   for (const t of pr.targets) {
-    t.state = 'float'; t.hp = t.inBubble ? 2 : 1; t.cool = 0; t.rot = 0;
+    t.state = 'float'; t.hp = 1; t.cool = 0; t.rot = 0;
     t.g.removeAttribute('opacity');
     if (t.bubbleEl) t.bubbleEl.removeAttribute('opacity');
   }
@@ -1969,7 +1969,11 @@ function updateBalloon(dt) {
         floatText('Plop!', t.x, t.y - 50);
       } else {
         t.state = 'fly'; t.vx = nx * 900 + p.bvx * .4; t.vy = ny * 900 - 250; t.spin = rnd(-720, 720); t.life = 1.2;
-        floatText('Bonk!', t.x, t.y - 50);
+        if (t.bubbleEl) {   // belletje knapt en het hoedje vliegt meteen weg
+          t.bubbleEl.setAttribute('opacity', 0);
+          puffs(t.x, t.y, 1, 8, '#fff', lvlFx);
+          floatText('Plop!', t.x, t.y - 50);
+        } else floatText('Bonk!', t.x, t.y - 50);
         pr.cheer = .6;
         pr.left--;
         if (pr.left === 0) winBalloon(pr);

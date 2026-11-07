@@ -34,7 +34,7 @@ Na de eerste keer werkt het ook zonder internet.
 | Vallende hoed | 8 $ | onder drie hoeden door rennen; wacht je te lang, dan val je eronder |
 | Ogen dicht | 10 $ | alleen lopen als het meisje haar ogen dicht heeft, anders word je een kikker |
 | Toverdrank | 15 $ | tegen de plank springen onder de goede ingrediënten, in de volgorde van het recept |
-| Ballon | 20 $ | met je poppetje in een ballon alle heksenhoedjes wegbeuken binnen 30 seconden |
+| Ballon | 20 $ | met je poppetje in een ballon alle 6 heksenhoedjes wegbeuken binnen 30 seconden (één tik = weg) |
 
 ## Tekeningen
 
