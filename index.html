@@ -38,7 +38,11 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--sky);
   -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;
   -webkit-touch-callout:none;touch-action:manipulation;overscroll-behavior:none}
 input{-webkit-user-select:text;user-select:text}
+#bg{position:fixed;inset:0;width:100%;height:100%;display:block}
 #scene{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:manipulation}
+#scene.flat #staticScenery{display:none}
+/* binnen: buiten niet meer tekenen (maar de patronen in <defs> wel bruikbaar houden) */
+body.inside-mode #bg, body.inside-mode #scene > :not(defs){visibility:hidden}
 #scene.building{cursor:crosshair}
 
 /* ---------- HUD ---------- */
@@ -109,8 +113,8 @@ input{-webkit-user-select:text;user-select:text}
 
 /* ---------- binnen ---------- */
 body.inside-mode .top, body.inside-mode .bottom, body.inside-mode #panel{display:none}
-#inside{position:fixed;inset:0;z-index:10;background:#22163a}
-#insideSvg{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#inside{position:fixed;inset:0;z-index:10;background:#22163a;overflow:hidden}
+#insideSvg{position:absolute;left:0;top:0;display:block;touch-action:none;will-change:transform;transform-origin:0 0}
 .in-top{position:fixed;top:max(12px,env(safe-area-inset-top));left:max(16px,env(safe-area-inset-left));right:max(16px,env(safe-area-inset-right));display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .btn.exit{background:#23a55a;color:#0d220f;letter-spacing:2px;font-size:22px;padding:6px 18px 8px}
 .in-title{padding:4px 14px 6px;display:flex;flex-direction:column;line-height:1.1}
@@ -189,6 +193,7 @@ body.touch-ui .in-hint{display:none}
 </head>
 <body>
 
+<canvas id="bg" aria-hidden="true"></canvas>
 <svg id="scene" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" aria-label="Grasveld met trolhuizen">
   <defs>
     <!-- marker-strepen zoals in de tekening -->
@@ -336,17 +341,10 @@ body.touch-ui .in-hint{display:none}
     </g>
   </defs>
 
-  <!-- lucht -->
+  <!-- lucht, heuvels en gras staan stil: die worden één keer naar een plaatje getekend (#bg) -->
+  <g id="staticScenery">
   <rect x="-4000" y="-4000" width="9600" height="4400" fill="url(#skyGrad)"/>
   <rect x="-4000" y="-4000" width="9600" height="4400" fill="url(#hatchSky)"/>
-  <g id="sun" transform="translate(1500 70)">
-    <g class="rays">
-      <circle r="150" fill="none" stroke="none"/>
-      <path d="M0 -140 V-100 M0 100 V140 M-140 0 H-100 M100 0 H140 M-99 -99 L-71 -71 M71 71 L99 99 M-99 99 L-71 71 M71 -71 L99 -99" stroke="#ffd43b" stroke-width="10" stroke-linecap="round"/>
-    </g>
-    <circle r="78" fill="url(#sunGrad)" stroke="#f59f00" stroke-width="4"/>
-  </g>
-  <g id="clouds"></g>
 
   <!-- heuvels -->
   <path d="M-4000 372 C-1000 372 -200 330 150 312 S 600 350 820 330 S 1250 278 1560 316 S 2400 350 5600 360 V 600 H -4000 Z" fill="#a6dc86"/>
@@ -355,9 +353,20 @@ body.touch-ui .in-hint{display:none}
 
   <!-- grasveld -->
   <rect id="grass" x="-4000" y="362" width="9600" height="5000" fill="url(#grassGrad)"/>
-  <rect x="-4000" y="362" width="9600" height="5000" fill="url(#hatchGrass)" pointer-events="none"/>
+  <rect x="-4000" y="362" width="9600" height="5000" fill="url(#hatchGrass)"/>
+  <g id="decor"></g>
+  </g>
+
+  <!-- wat beweegt -->
+  <g id="sun" transform="translate(1500 70)">
+    <g class="rays">
+      <circle r="150" fill="none" stroke="none"/>
+      <path d="M0 -140 V-100 M0 100 V140 M-140 0 H-100 M100 0 H140 M-99 -99 L-71 -71 M71 71 L99 99 M-99 99 L-71 71 M71 -71 L99 -99" stroke="#ffd43b" stroke-width="10" stroke-linecap="round"/>
+    </g>
+    <circle r="78" fill="url(#sunGrad)" stroke="#f59f00" stroke-width="4"/>
+  </g>
+  <g id="clouds"></g>
   <rect class="field-hint" x="60" y="400" width="1480" height="570" rx="60" fill="rgba(255,255,255,.08)" stroke="#fff" stroke-width="4" stroke-dasharray="18 14"/>
-  <g id="decor" pointer-events="none"></g>
   <g id="world"></g>
   <g id="ghostLayer" pointer-events="none"></g>
   <g id="fx" pointer-events="none"></g>
@@ -482,7 +491,36 @@ function fit() {
   if (ar > W / H) { const vw = H * ar; svg.setAttribute('viewBox', `${(W - vw) / 2} 0 ${vw} ${H}`); }
   else { const vh = W / ar, extra = vh - H; svg.setAttribute('viewBox', `0 ${-extra * 0.55} ${W} ${vh}`); }
 }
-addEventListener('resize', fit); fit();
+let rasterTimer = 0;
+addEventListener('resize', () => { fit(); clearTimeout(rasterTimer); rasterTimer = setTimeout(rasterizeScenery, 200); });
+fit();
+
+/* Het landschap (lucht, heuvels, gras, bloemen) beweegt niet. In plaats van het
+   bij elk beeldje opnieuw te tekenen, maken we er één keer een plaatje van. */
+let rasterJob = 0;
+function rasterizeScenery() {
+  const job = ++rasterJob;
+  const dpr = Math.min(devicePixelRatio || 1, 2);
+  const w = Math.round(innerWidth * dpr), h = Math.round(innerHeight * dpr);
+  const copy = document.createElementNS(NS, 'svg');
+  copy.setAttribute('xmlns', NS);
+  copy.setAttribute('viewBox', svg.getAttribute('viewBox'));
+  copy.setAttribute('width', w); copy.setAttribute('height', h);
+  copy.appendChild(svg.querySelector('defs').cloneNode(true));
+  copy.appendChild($('staticScenery').cloneNode(true));
+  const url = URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(copy)], { type: 'image/svg+xml' }));
+  const img = new Image();
+  img.onload = () => {
+    URL.revokeObjectURL(url);
+    if (job !== rasterJob) return;
+    const c = $('bg');
+    c.width = w; c.height = h;
+    c.getContext('2d').drawImage(img, 0, 0, w, h);
+    svg.classList.add('flat');
+  };
+  img.onerror = () => URL.revokeObjectURL(url);   // lukt het niet, dan blijft de gewone tekening staan
+  img.src = url;
+}
 
 /* ---------- decor: bomen, gras, bloemen, wolken ---------- */
 const clouds = [];
@@ -505,7 +543,7 @@ const clouds = [];
     el('use', { href: ref, transform: `translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${s.toFixed(3)})` }, d);
   });
   for (let i = 0; i < 6; i++) {
-    const c = { x: r() * 2600 - 600, y: 20 + r() * 200, s: 0.55 + r() * 0.6, v: 6 + r() * 12 };
+    const c = { x: r() * 2600 - 600, y: 20 + r() * 140, s: 0.55 + r() * 0.6, v: 6 + r() * 12 };
     c.el = el('use', { href: '#cloud', width: 220, height: 100 }, cl);
     clouds.push(c);
   }
@@ -1456,11 +1494,21 @@ function buildLevel(h) {
 }
 
 /* ---------- binnengaan en weer naar buiten ---------- */
+/* Het hele huis is één brede tekening. De camera verschuift die tekening als geheel
+   (dat doet de grafische chip), zodat de browser niet elk beeldje alles opnieuw tekent. */
+const VB_PAD = 400;
 function fitInside() {
   const ar = innerWidth / innerHeight;
   IN.vh = 1000; IN.vw = 1000 * ar;
   if (IN.vw < 640) { IN.vw = 640; IN.vh = 640 / ar; }
   IN.y0 = 1000 - IN.vh;
+  IN.scale = innerWidth / IN.vw;
+  IN.camTx = null;
+  if (!IN.L) return;
+  const vbW = IN.L.width + 2 * VB_PAD;
+  inSvg.setAttribute('viewBox', `${-VB_PAD} ${IN.y0.toFixed(1)} ${vbW} ${IN.vh.toFixed(1)}`);
+  inSvg.style.width = `${(vbW * IN.scale).toFixed(1)}px`;
+  inSvg.style.height = `${innerHeight}px`;
 }
 addEventListener('resize', () => { if (IN.active) fitInside(); });
 
@@ -1504,8 +1552,8 @@ function enterHouse(id) {
   $('inside').hidden = false;
   $('inName').textContent = h.name;
   $('inside').oncontextmenu = e => e.preventDefault();
-  fitInside();
   buildLevel(h);
+  fitInside();
   makePlayerFigure();
   renderAvatars();
   restartRun();
@@ -1788,12 +1836,15 @@ function updateInside(dt) {
   const cp = L.checkpoints[P_.cp];
   const label = IN.done ? 'Finish!' : cp.room < 0 ? 'Hal' : `Kamer ${cp.room + 1} van ${L.rooms.length}: ${ROOMS[L.rooms[cp.room]].name}`;
   if (label !== IN.roomLabel) { IN.roomLabel = label; $('inRoom').textContent = label; }
-  $('inTime').textContent = IN.time.toFixed(1);
-  $('inFalls').textContent = IN.falls;
+  const tStr = IN.time.toFixed(1);
+  if (tStr !== IN.tStr) { IN.tStr = tStr; $('inTime').textContent = tStr; }
+  if (IN.falls !== IN.fallsShown) { IN.fallsShown = IN.falls; $('inFalls').textContent = IN.falls; }
   // camera
   const target = clamp(P_.x - IN.vw * 0.4, -60, Math.max(-60, L.width - IN.vw + 60));
   IN.camX = IN.camX == null ? target : IN.camX + (target - IN.camX) * Math.min(1, dt * 5);
-  inSvg.setAttribute('viewBox', `${IN.camX.toFixed(1)} ${IN.y0.toFixed(1)} ${IN.vw.toFixed(1)} ${IN.vh.toFixed(1)}`);
+  const dpr = devicePixelRatio || 1;
+  const tx = Math.round(-(IN.camX + VB_PAD) * IN.scale * dpr) / dpr;
+  if (tx !== IN.camTx) { IN.camTx = tx; inSvg.style.transform = `translate3d(${tx}px,0,0)`; }
 }
 
 /* ---------- installeren en bijwerken (service worker) ---------- */
@@ -1842,6 +1893,7 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || ['localho
 if (location.search.includes('debug')) window.__trol = { enterHouse, IN, keys, get state() { return state; } };
 
 /* ---------- start ---------- */
+rasterizeScenery();
 load();
 state.avatar = state.avatar || 'blond';
 state.houses.forEach(h => { h.rooms = h.rooms || []; h.best = h.best || {}; });
@@ -1852,8 +1904,14 @@ if (firstVisit) setTimeout(() => toast('Wie langs een trolhuis loopt, wordt getr
 
 let spawnTimer = 1, last = performance.now();
 function frame(now) {
-  const dt = Math.min(0.05, (now - last) / 1000); last = now;
-  if (IN.active) { updateInside(dt); requestAnimationFrame(frame); return; }
+  const real = Math.min(0.1, Math.max(0, (now - last) / 1000)); last = now;
+  if (IN.active) {
+    // trage tablet? dan rekenen we in kleine stapjes bij, zodat het spel niet in slow motion gaat
+    let left = real;
+    while (left > 1e-4) { const step = Math.min(left, 1 / 60); updateInside(step); left -= step; }
+    requestAnimationFrame(frame); return;
+  }
+  const dt = real;
   for (const c of clouds) {
     c.x += c.v * dt; if (c.x > 2700) c.x = -1000;
     c.el.setAttribute('transform', `translate(${c.x.toFixed(1)} ${c.y.toFixed(1)}) scale(${c.s.toFixed(2)})`);
