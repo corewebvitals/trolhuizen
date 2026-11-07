@@ -1,0 +1,1800 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Trolhuizen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gochi+Hand&family=Patrick+Hand&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#2a1846;
+  --paper:#fffaf0;
+  --paper-edge:#e6d6b8;
+  --purple:#7a4cc2;
+  --purple-dark:#4e2a8a;
+  --gold:#f5c542;
+  --gold-dark:#a87508;
+  --ok:#2f9e44;
+  --bad:#e03131;
+  --sky:#8fd0f2;
+  --grass:#4fae3e;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--sky);
+  font-family:'Patrick Hand','Comic Sans MS',cursive;color:var(--ink);
+  -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+#scene{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:manipulation}
+#scene.building{cursor:crosshair}
+
+/* ---------- HUD ---------- */
+.card{background:var(--paper);border:3px solid var(--ink);border-radius:14px 18px 12px 16px;
+  box-shadow:4px 5px 0 rgba(42,24,70,.35)}
+.top{position:fixed;top:12px;left:16px;right:16px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;pointer-events:none}
+.title{padding:6px 18px 8px;transform:rotate(-1.5deg);pointer-events:auto}
+.title h1{margin:0;font-family:'Gochi Hand','Comic Sans MS',cursive;font-size:clamp(28px,4vw,44px);line-height:1;color:var(--purple-dark);letter-spacing:.5px}
+.title h1 span{color:#e2361f}
+.title p{margin:2px 0 0;font-size:17px;opacity:.75}
+.stats{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;pointer-events:auto}
+.pill{display:flex;align-items:center;gap:8px;padding:6px 14px;font-size:22px;background:var(--paper);border:3px solid var(--ink);border-radius:999px;box-shadow:3px 4px 0 rgba(42,24,70,.3)}
+.pill b{font-size:26px;min-width:1.5ch;text-align:right}
+.pill.rare{background:#fff3bf;border-color:#5f3dc4;color:#5f3dc4;animation:glow 1.1s ease-in-out infinite alternate}
+@keyframes glow{to{box-shadow:0 0 16px 4px #ffe066,3px 4px 0 rgba(42,24,70,.3)}}
+.pill.bump{animation:bump .4s ease}
+@keyframes bump{40%{transform:scale(1.15) rotate(-3deg)}}
+
+.bottom{position:fixed;left:16px;right:16px;bottom:max(16px,env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
+.btn{font:inherit;font-size:24px;cursor:pointer;pointer-events:auto;color:#fff;background:var(--purple);
+  border:3px solid var(--ink);border-radius:16px 12px 18px 14px;padding:10px 22px 12px;
+  box-shadow:4px 5px 0 var(--ink);transition:transform .1s, box-shadow .1s;display:inline-flex;align-items:center;gap:10px}
+.btn:hover{transform:translate(-1px,-2px);box-shadow:5px 7px 0 var(--ink)}
+.btn:active{transform:translate(3px,4px);box-shadow:1px 1px 0 var(--ink)}
+.btn.secondary{background:var(--paper);color:var(--ink)}
+.btn.danger{background:#ffe3e3;color:#a61e1e}
+.btn[disabled]{opacity:.55;cursor:not-allowed;transform:none;box-shadow:4px 5px 0 var(--ink)}
+.btn .price{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.2);padding:0 10px;border-radius:999px}
+.btn.cancel{background:#ffd8a8;color:var(--ink)}
+.hint{pointer-events:none;font-size:20px;color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.35),0 0 8px rgba(0,0,0,.25);text-align:center;min-height:1.2em}
+
+/* house panel */
+#panel{position:fixed;right:16px;top:50%;transform:translateY(-50%) rotate(.6deg);width:min(300px,calc(100vw - 32px));padding:16px 16px 18px;display:flex;flex-direction:column;gap:10px}
+#panel[hidden]{display:none}
+#panel .close{position:absolute;top:6px;right:10px;font:inherit;font-size:28px;line-height:1;border:none;background:none;cursor:pointer;color:var(--ink)}
+#panel figure{margin:0;border:2px solid var(--paper-edge);border-radius:8px;overflow:hidden;background:#fff;transform:rotate(-1.2deg)}
+#panel figure img{display:block;width:100%;height:auto}
+#panel figcaption{font-size:15px;padding:2px 8px 4px;opacity:.7}
+#panel label{font-size:15px;opacity:.7;margin-bottom:-8px}
+#houseName{font:inherit;font-size:26px;color:var(--purple-dark);border:none;border-bottom:3px dashed var(--purple);background:transparent;padding:2px 0;width:100%;outline:none}
+#houseName:focus{border-bottom-style:solid}
+#panel .row{display:flex;gap:8px;flex-wrap:wrap}
+#panel .row .btn{font-size:19px;padding:6px 14px 8px;flex:1 1 auto;justify-content:center}
+#panel .stat{font-size:20px;margin:0}
+@media (max-width:640px){
+  #panel{top:auto;bottom:90px;transform:none;right:16px;left:16px;width:auto}
+  #panel figure{display:none}
+  .pill{font-size:18px;padding:4px 10px}
+  .pill b{font-size:21px}
+  .title p{display:none}
+}
+
+#toast{position:fixed;left:50%;top:90px;transform:translate(-50%,-20px);opacity:0;transition:all .25s;pointer-events:none;
+  padding:8px 18px;font-size:21px;z-index:20}
+#panel{max-height:calc(100vh - 40px);overflow:auto}
+#panel figure img{max-height:110px;object-fit:cover}
+.stat.small{font-size:17px;margin-top:-8px}
+.rooms-head{font-size:20px;margin-bottom:-4px}
+.rooms-head small{font-size:14px;opacity:.65}
+.rooms{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.room{font:inherit;font-size:17px;color:var(--ink);display:flex;flex-direction:column;align-items:center;padding:4px 4px 6px;border:2px solid var(--ink);border-radius:10px 12px 9px 11px;background:#fff;cursor:pointer;line-height:1.1;transition:transform .1s, box-shadow .1s}
+.room svg{width:58px;height:28px}
+.room .p{display:flex;align-items:center;gap:3px;font-size:15px;opacity:.8}
+.room.owned{background:#e5dbff;border-color:#5f3dc4}
+.room:not(.owned):hover{transform:translateY(-1px);box-shadow:2px 3px 0 var(--ink)}
+.room.cant{opacity:.55}
+
+/* ---------- binnen ---------- */
+body.inside-mode .top, body.inside-mode .bottom, body.inside-mode #panel{display:none}
+#inside{position:fixed;inset:0;z-index:10;background:#22163a}
+#insideSvg{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.in-top{position:fixed;top:12px;left:16px;right:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.btn.exit{background:#23a55a;color:#0d220f;letter-spacing:2px;font-size:22px;padding:6px 18px 8px}
+.in-title{padding:4px 14px 6px;display:flex;flex-direction:column;line-height:1.1}
+.in-title b{font-family:'Gochi Hand','Comic Sans MS',cursive;font-size:24px;color:var(--purple-dark)}
+.in-title span{font-size:16px;opacity:.75}
+.in-top .pill{font-size:17px}
+.in-top .pill b{font-size:22px;min-width:2.5ch}
+.avatars{margin-left:auto;display:flex;gap:6px}
+.avatar{position:relative;background:var(--paper);border:3px solid var(--ink);border-radius:12px;padding:2px 3px;cursor:pointer;box-shadow:2px 3px 0 rgba(42,24,70,.35);line-height:0}
+.avatar.on{background:#e5dbff;border-color:#5f3dc4;transform:translateY(-3px);box-shadow:2px 6px 0 rgba(42,24,70,.35)}
+.avatar[disabled]{cursor:not-allowed}
+.avatar[disabled] svg{filter:grayscale(1) brightness(.6);opacity:.5}
+.avatar .lock{position:absolute;inset:0;display:grid;place-items:center;font-size:20px;line-height:1}
+.balance{position:fixed;left:50%;top:96px;transform:translateX(-50%);width:min(360px,70vw);height:22px;border:3px solid var(--ink);border-radius:999px;
+  background:linear-gradient(90deg,#ff8787 0 14%,#fff 14% 86%,#ff8787 86%)}
+.balance span{position:absolute;left:50%;top:-30px;transform:translateX(-50%);color:#fff;font-size:20px;text-shadow:0 2px 0 rgba(0,0,0,.4)}
+.balance i{position:absolute;top:-8px;width:8px;height:32px;background:var(--ink);border-radius:4px;left:50%;transform:translateX(-50%)}
+.in-hint{position:fixed;left:0;right:0;bottom:14px;text-align:center;color:#fff;font-size:19px;opacity:.85;pointer-events:none;text-shadow:0 2px 0 rgba(0,0,0,.4)}
+.touch{position:fixed;left:16px;right:16px;bottom:max(16px,env(safe-area-inset-bottom));display:none;justify-content:space-between;align-items:flex-end;pointer-events:none}
+.touch div{display:flex;gap:14px}
+.touch button{pointer-events:auto;width:76px;height:76px;border-radius:50%;font:inherit;font-size:32px;color:var(--ink);background:rgba(255,250,240,.88);
+  border:3px solid var(--ink);box-shadow:3px 4px 0 rgba(0,0,0,.35);touch-action:none;-webkit-user-select:none;user-select:none}
+.touch button.down{transform:translate(2px,3px);box-shadow:1px 1px 0 rgba(0,0,0,.35);background:#e5dbff}
+.touch .jump{width:92px;height:92px;background:#ffe066}
+@media (pointer:coarse){.touch{display:flex}.in-hint{display:none}}
+.turn-tip{display:none;position:fixed;left:0;right:0;top:130px;text-align:center;color:#fff;opacity:.7;font-size:18px;pointer-events:none}
+@media (pointer:coarse) and (orientation:portrait){.turn-tip{display:block}}
+.finish{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-1deg);padding:18px 26px 22px;text-align:center;width:min(400px,calc(100vw - 32px));z-index:12}
+.finish h2{margin:0;font-family:'Gochi Hand','Comic Sans MS',cursive;font-size:56px;line-height:1;color:var(--purple-dark)}
+.finish p{margin:8px 0;font-size:20px}
+.finish .big{font-size:26px}
+.finish .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.finish .btn{font-size:20px;padding:8px 16px 10px}
+.slimebub{animation:slimebub 2.4s ease-in infinite;opacity:0}
+@keyframes slimebub{0%{transform:translateY(0);opacity:0}25%{opacity:1}100%{transform:translateY(-38px);opacity:0}}
+@media (max-width:640px){.in-top .pill span{display:none}.in-title span{font-size:14px}.avatar svg{width:30px;height:40px}}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* ---------- scene animation ---------- */
+.house{cursor:pointer}
+#scene.building .house{cursor:crosshair}
+.house-inner{transform-box:fill-box;transform-origin:50% 100%}
+.house:hover .house-inner{filter:drop-shadow(0 0 5px #fff)}
+#scene.building .house:hover .house-inner{filter:none}
+.house.moving{opacity:.25}
+.sel{opacity:0;transition:opacity .2s}
+.house.selected .sel{opacity:1}
+.pop{animation:pop .7s cubic-bezier(.3,1.7,.5,1)}
+@keyframes pop{0%{transform:scale(.3,0)}55%{transform:scale(1.12,.92)}100%{transform:scale(1,1)}}
+.giggle{animation:giggle .35s ease-in-out 3}
+@keyframes giggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-2.5deg) scale(1.03,.97)}75%{transform:rotate(2.5deg) scale(.98,1.03)}}
+.bubble{transform-box:fill-box;transform-origin:50% 100%;animation:bubble .3s cubic-bezier(.3,1.8,.5,1)}
+@keyframes bubble{from{transform:scale(0)}}
+.floater{animation:floatUp 1.3s ease-out forwards}
+@keyframes floatUp{to{transform:translateY(-70px);opacity:0}}
+.puff{transform-box:fill-box;transform-origin:center;animation:puff .7s ease-out forwards}
+@keyframes puff{from{opacity:.9}to{transform:translate(var(--dx),var(--dy)) scale(2.2);opacity:0}}
+.rays{transform-box:fill-box;transform-origin:center;animation:spin 60s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.aura{animation:aura .9s ease-in-out infinite alternate}
+@keyframes aura{from{opacity:.35}to{opacity:1}}
+.lampglow{animation:flicker 3s ease-in-out infinite}
+@keyframes flicker{0%,100%{opacity:.85}45%{opacity:.55}50%{opacity:.95}}
+.field-hint{opacity:0;transition:opacity .3s;pointer-events:none}
+#scene.building .field-hint{opacity:1}
+@media (prefers-reduced-motion:reduce){.rays,.aura{animation:aura .9s ease-in-out infinite alternate}
+@keyframes aura{from{opacity:.35}to{opacity:1}}
+.lampglow{animation:none}}
+</style>
+</head>
+<body>
+
+<svg id="scene" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" aria-label="Grasveld met trolhuizen">
+  <defs>
+    <!-- marker-strepen zoals in de tekening -->
+    <pattern id="hatchWall" width="9" height="40" patternUnits="userSpaceOnUse" patternTransform="rotate(8)">
+      <path d="M2 0 Q4 20 2 40" stroke="rgba(30,0,60,.22)" stroke-width="2.2" fill="none"/>
+      <path d="M6.5 3 Q5 20 7 38" stroke="rgba(255,255,255,.10)" stroke-width="1.6" fill="none"/>
+    </pattern>
+    <pattern id="hatchRoof" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(-35)">
+      <path d="M0 5 H10" stroke="rgba(0,0,0,.16)" stroke-width="2"/>
+    </pattern>
+    <pattern id="hatchSky" width="60" height="60" patternUnits="userSpaceOnUse" patternTransform="rotate(-25)">
+      <path d="M0 10 Q30 6 60 12 M0 32 Q30 28 60 34 M0 52 Q30 50 60 54" stroke="rgba(255,255,255,.18)" stroke-width="5" fill="none" stroke-linecap="round"/>
+    </pattern>
+    <pattern id="hatchBig" width="22" height="120" patternUnits="userSpaceOnUse" patternTransform="rotate(6)">
+      <path d="M5 0 Q10 60 5 120" stroke="rgba(30,0,60,.13)" stroke-width="5" fill="none"/>
+      <path d="M16 6 Q13 60 17 114" stroke="rgba(255,255,255,.08)" stroke-width="4" fill="none"/>
+    </pattern>
+    <pattern id="hatchGrass" width="16" height="16" patternUnits="userSpaceOnUse" patternTransform="rotate(70)">
+      <path d="M0 8 H16" stroke="rgba(20,90,20,.07)" stroke-width="3"/>
+    </pattern>
+
+    <linearGradient id="skyGrad" gradientUnits="userSpaceOnUse" x1="0" y1="-600" x2="0" y2="380">
+      <stop offset="0" stop-color="#3f8fd8"/>
+      <stop offset=".55" stop-color="#78c3f0"/>
+      <stop offset="1" stop-color="#c9ecff"/>
+    </linearGradient>
+    <linearGradient id="grassGrad" gradientUnits="userSpaceOnUse" x1="0" y1="350" x2="0" y2="1100">
+      <stop offset="0" stop-color="#8fd56c"/>
+      <stop offset=".5" stop-color="#62bb48"/>
+      <stop offset="1" stop-color="#3f9a35"/>
+    </linearGradient>
+    <radialGradient id="lampGlowGrad">
+      <stop offset="0" stop-color="#fff3a6" stop-opacity=".95"/>
+      <stop offset="1" stop-color="#ffd34d" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="sunGrad" cx=".4" cy=".4">
+      <stop offset="0" stop-color="#fff6b0"/>
+      <stop offset="1" stop-color="#ffd43b"/>
+    </radialGradient>
+
+    <!-- ======== HET TROLHUIS (naar schets 1) ======== -->
+    <symbol id="house" viewBox="0 0 200 200" overflow="visible">
+      <!-- muur -->
+      <path d="M28 101 L172 98 L174 196 L26 196 Z" style="fill:var(--wall)" stroke="#3a1d66" stroke-width="2.5" stroke-linejoin="round"/>
+      <path d="M28 101 L172 98 L174 196 L26 196 Z" fill="url(#hatchWall)"/>
+      <!-- dak -->
+      <path d="M13 105 Q55 66 100 21 Q142 60 187 103 Z" style="fill:var(--roof)" stroke="#4d4d58" stroke-width="2.5" stroke-linejoin="round"/>
+      <path d="M13 105 Q55 66 100 21 Q142 60 187 103 Z" fill="url(#hatchRoof)"/>
+      <path d="M100 22 Q103 40 107 57" stroke="#2b2b33" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+      <path d="M13 105 L28 101 L30 125 L19 129 Z" fill="#26222e"/>
+      <!-- zolderraam -->
+      <rect x="87" y="50" width="26" height="22" fill="#fdfdfd" stroke="#444" stroke-width="1.6"/>
+      <path d="M100 50 V72 M87 61 H113" stroke="#444" stroke-width="1.4"/>
+      <!-- torentje met lamp -->
+      <path d="M137 102 C137 86 147 77 157 77 C168 77 177 86 177 101 Z" style="fill:var(--wall)" stroke="#3a1d66" stroke-width="2.5" stroke-linejoin="round"/>
+      <path d="M137 102 C137 86 147 77 157 77 C168 77 177 86 177 101 Z" fill="rgba(20,0,40,.25)"/>
+      <path d="M142 92 Q157 86 172 92 M139 99 Q157 93 175 99 M152 80 L150 101 M162 80 L164 100" stroke="rgba(20,0,40,.45)" stroke-width="1.2" fill="none"/>
+      <path d="M150 101 V107 H144 V110" stroke="#222" stroke-width="2" fill="none"/>
+      <circle class="lampglow" cx="144" cy="116" r="13" fill="url(#lampGlowGrad)"/>
+      <path d="M139 110 H149 L147 119 H141 Z" fill="#222"/>
+      <circle cx="144" cy="117" r="2.2" fill="#ffd34d"/>
+      <!-- bord "Trol" met rode palen -->
+      <rect x="55" y="96" width="5" height="32" rx="1.5" fill="#e2361f"/>
+      <rect x="116" y="96" width="5" height="46" rx="1.5" fill="#e2361f"/>
+      <rect x="58" y="102" width="61" height="17" rx="2" fill="#f4a77c" stroke="#9a4a22" stroke-width="1.5"/>
+      <text x="88" y="115" text-anchor="middle" font-family="Gochi Hand, Patrick Hand, Comic Sans MS, cursive" font-size="15" fill="#1d1d1d">Trol</text>
+      <path d="M100 117 L113 117 L110 115 M113 117 L110 119" stroke="#1d1d1d" stroke-width=".9" fill="none"/>
+      <!-- raam links -->
+      <rect x="36" y="134" width="26" height="18" fill="#fdfdfd" stroke="#3a1d66" stroke-width="1.6"/>
+      <path d="M49 134 V152 M36 143 H62" stroke="#3a1d66" stroke-width="1.3"/>
+      <!-- raam met de getrolde gezichtjes -->
+      <rect x="82" y="124" width="27" height="21" fill="#fff6e3" stroke="#3a1d66" stroke-width="1.6"/>
+      <circle cx="91" cy="138" r="5" fill="#f2a33a" stroke="#8a4b0e" stroke-width=".9"/>
+      <path d="M88 136 l2 2 m0 -2 l-2 2 M92 136 l2 2 m0 -2 l-2 2 M89 141.5 h4" stroke="#3a1d0e" stroke-width=".8"/>
+      <circle cx="101" cy="140" r="5" fill="#f2a33a" stroke="#8a4b0e" stroke-width=".9"/>
+      <path d="M99 139 v.1 M103 139 v.1" stroke="#3a1d0e" stroke-width="1.6" stroke-linecap="round"/>
+      <path d="M98.6 141.6 Q101 144 103.4 141.6" stroke="#3a1d0e" stroke-width=".9" fill="none"/>
+      <text x="97" y="133" font-family="Patrick Hand, Comic Sans MS, cursive" font-size="9" fill="#3a1d66">?</text>
+      <!-- balkonnetje -->
+      <ellipse cx="141" cy="137" rx="16" ry="5.5" style="fill:var(--wall)" stroke="#3a1d66" stroke-width="2"/>
+      <ellipse cx="141" cy="137" rx="16" ry="5.5" fill="rgba(20,0,40,.3)"/>
+      <!-- raam rechtsboven met web -->
+      <rect x="152" y="112" width="19" height="15" fill="#fdfdfd" stroke="#3a1d66" stroke-width="1.6"/>
+      <path d="M161.5 112 V127 M152 119.5 H171" stroke="#3a1d66" stroke-width="1.3"/>
+      <path d="M171 112 l-6 0 M171 112 l0 6 M171 112 l-4.5 4.5 M166.5 112 Q167.5 115 171 116.5 M168.5 112 Q169 114 171 114.5" stroke="#777" stroke-width=".6" fill="none"/>
+      <!-- raam rechtsonder -->
+      <rect x="143" y="156" width="23" height="15" fill="#fdfdfd" stroke="#3a1d66" stroke-width="1.6"/>
+      <path d="M154.5 156 V171 M143 163.5 H166" stroke="#3a1d66" stroke-width="1.3"/>
+      <!-- EXIT bord (boven de ingang, haha) -->
+      <rect x="77" y="148" width="44" height="13" rx="1.5" fill="#23a55a" stroke="#0f5a2f" stroke-width="1.5"/>
+      <text x="99" y="158.6" text-anchor="middle" font-family="Patrick Hand, Comic Sans MS, cursive" font-size="11.5" fill="#0d220f" letter-spacing="1">EXIT</text>
+      <rect x="117" y="149.5" width="2.5" height="10" fill="#7a2a12"/>
+      <!-- deur -->
+      <rect x="71" y="164" width="56" height="32" style="fill:var(--door)" stroke="#8d4a2a" stroke-width="2"/>
+      <path d="M99 164 L97.5 171 L100 178 L98 186 L99.5 196" stroke="#8d4a2a" stroke-width="1.5" fill="none"/>
+      <path d="M85 181 C82 177 77 180 85 186 C93 180 88 177 85 181 Z" fill="#3a1d66"/>
+      <path d="M113 181 C110 177 105 180 113 186 C121 180 116 177 113 181 Z" fill="#3a1d66"/>
+      <path d="M110 181 l6 4 M116 181 l-6 4" stroke="#f6b892" stroke-width=".8"/>
+      <!-- spinnenweb + spin -->
+      <path d="M127 164 l-14 0 M127 164 l0 14 M127 164 l-10 10 M127 164 l-13 6 M122 164 Q122.5 167.5 127 169 M118 164 Q119 170 127 173" stroke="#555" stroke-width=".7" fill="none"/>
+      <path d="M121 170 V178" stroke="#333" stroke-width=".6"/>
+      <g transform="translate(121 180)">
+        <path d="M-3.5 -2 l-2 -1.5 M-3.5 0 l-2.5 0 M-3.5 2 l-2 1.5 M3.5 -2 l2 -1.5 M3.5 0 l2.5 0 M3.5 2 l2 1.5" stroke="#1b1b1b" stroke-width=".8"/>
+        <ellipse rx="3.4" ry="2.6" fill="#1b1b1b"/>
+      </g>
+      <!-- grassprietjes -->
+      <path d="M30 196 q-2 -6 -5 -9 M33 196 q0 -7 2 -10 M168 196 q1 -6 -1 -10 M172 196 q2 -5 6 -8 M64 196 q-1 -5 -4 -7 M136 196 q1 -6 4 -8" stroke="#2f7d2a" stroke-width="2" fill="none" stroke-linecap="round"/>
+    </symbol>
+
+    <symbol id="coin" viewBox="-12 -12 24 24">
+      <circle r="10.5" fill="#f5c542" stroke="#a87508" stroke-width="2"/>
+      <circle r="7" fill="none" stroke="#e0a91c" stroke-width="1.2"/>
+      <text y="4.6" text-anchor="middle" font-family="Gochi Hand, Patrick Hand, cursive" font-size="13" fill="#7a5305">$</text>
+    </symbol>
+
+    <symbol id="cloud" viewBox="0 0 220 100" overflow="visible">
+      <path d="M30 80 Q0 80 8 58 Q14 40 40 46 Q48 14 86 20 Q110 0 140 22 Q178 14 184 48 Q214 50 208 72 Q204 86 180 82 Z" fill="#fff" stroke="#bfe3f7" stroke-width="3"/>
+    </symbol>
+
+    <g id="tree">
+      <rect x="-4" y="-26" width="8" height="26" fill="#7a5230"/>
+      <circle cx="0" cy="-44" r="22" fill="#3f9a35"/>
+      <circle cx="-12" cy="-34" r="14" fill="#4aa83f"/>
+      <circle cx="12" cy="-36" r="15" fill="#378f2f"/>
+    </g>
+
+    <g id="tuft">
+      <path d="M0 0 Q-3 -7 -7 -11 M0 0 Q0 -9 1 -15 M0 0 Q3 -6 7 -10" stroke="#2f8a2c" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    </g>
+
+    <!-- blauwe bloem zoals linksonder in de tekening -->
+    <g id="flowerBlue">
+      <path d="M0 0 Q-1 -12 0 -22" stroke="#2f8a2c" stroke-width="2.2" fill="none"/>
+      <path d="M0 -8 Q-7 -12 -9 -8 Q-5 -5 0 -8" fill="#3fa03a"/>
+      <g transform="translate(0 -24)">
+        <circle cx="0" cy="-6" r="4.5" fill="#2952d6"/><circle cx="6" cy="0" r="4.5" fill="#2952d6"/>
+        <circle cx="0" cy="6" r="4.5" fill="#2952d6"/><circle cx="-6" cy="0" r="4.5" fill="#2952d6"/>
+        <circle r="3.4" fill="#ffd43b"/>
+      </g>
+    </g>
+    <!-- gele tulp zoals rechtsonder in de tekening -->
+    <g id="tulip">
+      <path d="M0 0 V-20" stroke="#2f8a2c" stroke-width="2.2"/>
+      <path d="M-6 -20 Q-7 -32 -3 -30 L0 -34 L3 -30 Q7 -32 6 -20 Q0 -16 -6 -20 Z" fill="#ffe066" stroke="#c99a06" stroke-width="1.2"/>
+    </g>
+  </defs>
+
+  <!-- lucht -->
+  <rect x="-4000" y="-4000" width="9600" height="4400" fill="url(#skyGrad)"/>
+  <rect x="-4000" y="-4000" width="9600" height="4400" fill="url(#hatchSky)"/>
+  <g id="sun" transform="translate(1500 70)">
+    <g class="rays">
+      <circle r="150" fill="none" stroke="none"/>
+      <path d="M0 -140 V-100 M0 100 V140 M-140 0 H-100 M100 0 H140 M-99 -99 L-71 -71 M71 71 L99 99 M-99 99 L-71 71 M71 -71 L99 -99" stroke="#ffd43b" stroke-width="10" stroke-linecap="round"/>
+    </g>
+    <circle r="78" fill="url(#sunGrad)" stroke="#f59f00" stroke-width="4"/>
+  </g>
+  <g id="clouds"></g>
+
+  <!-- heuvels -->
+  <path d="M-4000 372 C-1000 372 -200 330 150 312 S 600 350 820 330 S 1250 278 1560 316 S 2400 350 5600 360 V 600 H -4000 Z" fill="#a6dc86"/>
+  <g id="farTrees"></g>
+  <path d="M-4000 380 C-500 380 0 352 300 350 S 900 376 1200 356 S 1800 352 5600 372 V 600 H -4000 Z" fill="#93d473"/>
+
+  <!-- grasveld -->
+  <rect id="grass" x="-4000" y="362" width="9600" height="5000" fill="url(#grassGrad)"/>
+  <rect x="-4000" y="362" width="9600" height="5000" fill="url(#hatchGrass)" pointer-events="none"/>
+  <rect class="field-hint" x="60" y="400" width="1480" height="570" rx="60" fill="rgba(255,255,255,.08)" stroke="#fff" stroke-width="4" stroke-dasharray="18 14"/>
+  <g id="decor" pointer-events="none"></g>
+  <g id="world"></g>
+  <g id="ghostLayer" pointer-events="none"></g>
+  <g id="fx" pointer-events="none"></g>
+</svg>
+
+<header class="top">
+  <div class="title card">
+    <h1>Trol<span>huizen</span></h1>
+    <p>bouw je trolhuis en trol iedereen die langskomt</p>
+  </div>
+  <div class="stats">
+    <div class="pill" id="coinPill" title="Munten">
+      <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><use href="#coin" width="24" height="24"/></svg>
+      <b id="coins">0</b>
+    </div>
+    <div class="pill rare" id="rarePill" title="Er loopt iemand zeldzaams rond" hidden><span>✦</span> zeldzaam!</div>
+    <div class="pill" id="trolPill" title="Mensen getrold">
+      <span>getrold</span><b id="trolled">0</b>
+    </div>
+  </div>
+</header>
+
+<div class="bottom">
+  <div class="hint" id="hint"></div>
+  <button class="btn" id="buildBtn">
+    <span id="buildLabel">+ Trolhuis bouwen</span>
+    <span class="price" id="buildPrice"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><use href="#coin" width="24" height="24"/></svg>70</span>
+  </button>
+</div>
+
+<aside id="panel" class="card" hidden>
+  <button class="close" id="panelClose" aria-label="Sluiten">×</button>
+  <figure>
+    <img src="assets/schets1-klein.jpg" alt="De eerste schets van het trolhuis">
+    <figcaption>ontwerp: schets 1</figcaption>
+  </figure>
+  <label for="houseName">naam van dit huis</label>
+  <input id="houseName" maxlength="22" autocomplete="off">
+  <p class="stat">Getrold: <b id="houseTrolled">0</b> mensen</p>
+  <p class="stat small">Per trol: <b id="perTroll">5</b> munten</p>
+  <div class="rooms-head">Kamers <small>elke kamer = +1 munt per trol</small></div>
+  <div class="rooms" id="roomsGrid"></div>
+  <div class="row">
+    <button class="btn" id="enterBtn" disabled>Naar binnen</button>
+  </div>
+  <div class="row">
+    <button class="btn secondary" id="moveBtn">Verplaatsen</button>
+    <button class="btn danger" id="demolishBtn">Slopen</button>
+  </div>
+</aside>
+
+<div id="inside" hidden>
+  <svg id="insideSvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" aria-label="Binnen in het trolhuis">
+    <g id="lvlBg"></g><g id="lvlDyn"></g><g id="lvlPlayer"></g><g id="lvlFront"></g><g id="lvlFx"></g>
+  </svg>
+  <div class="in-top">
+    <button class="btn exit" id="exitBtn" title="Terug naar het grasveld (Esc)">EXIT</button>
+    <div class="card in-title"><b id="inName"></b><span id="inRoom"></span></div>
+    <div class="pill"><span>tijd</span><b id="inTime">0.0</b></div>
+    <div class="pill"><span>gevallen</span><b id="inFalls">0</b></div>
+    <div class="avatars" id="avatars" aria-label="Kies je poppetje"></div>
+  </div>
+  <div class="turn-tip">tip: draai je telefoon, dan zie je meer</div>
+  <div class="balance" id="balance" hidden><span>evenwicht</span><i id="balanceNeedle"></i></div>
+  <div class="in-hint">← → lopen · ↑ of spatie springen · Esc naar buiten</div>
+  <div class="touch" id="touch">
+    <div><button data-k="left" aria-label="Naar links">◀</button><button data-k="right" aria-label="Naar rechts">▶</button></div>
+    <button data-k="jump" class="jump" aria-label="Springen">↑</button>
+  </div>
+  <div class="card finish" id="finish" hidden>
+    <h2>Gehaald!</h2>
+    <p>Je bent door het hele trolhuis gekomen.</p>
+    <p class="big">tijd <b id="fTime">0</b> sec · gevallen <b id="fFalls">0</b>×</p>
+    <p id="fBest"></p>
+    <div class="row"><button class="btn" id="againBtn">Nog een keer</button><button class="btn secondary" id="outBtn">Naar buiten</button></div>
+  </div>
+</div>
+
+<div id="toast" class="card"></div>
+
+
+<script>
+(() => {
+'use strict';
+const NS = 'http://www.w3.org/2000/svg';
+const W = 1600, H = 1000, HORIZON = 360;
+const FIELD = { x0: 90, x1: 1510, y0: 420, y1: 955 };
+const PRICE = 70, REWARD = 5, START_COINS = 100;
+const SAVE_KEY = 'trolhuizen-v1';
+const HOUSE_K = 1.3;
+
+const svg = document.getElementById('scene');
+const world = document.getElementById('world');
+const fxLayer = document.getElementById('fx');
+const ghostLayer = document.getElementById('ghostLayer');
+const $ = id => document.getElementById(id);
+
+const rnd = (a, b) => a + Math.random() * (b - a);
+const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const scaleAt = y => 0.42 + (y - HORIZON) / (H - HORIZON) * 0.8;
+function el(tag, attrs = {}, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function seeded(seed) { // mulberry32
+  return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+}
+
+/* ---------- scherm vullen zonder randen ---------- */
+function fit() {
+  const ar = innerWidth / innerHeight;
+  if (ar > W / H) { const vw = H * ar; svg.setAttribute('viewBox', `${(W - vw) / 2} 0 ${vw} ${H}`); }
+  else { const vh = W / ar, extra = vh - H; svg.setAttribute('viewBox', `0 ${-extra * 0.55} ${W} ${vh}`); }
+}
+addEventListener('resize', fit); fit();
+
+/* ---------- decor: bomen, gras, bloemen, wolken ---------- */
+const clouds = [];
+(function decor() {
+  const r = seeded(7);
+  const d = $('decor'), trees = $('farTrees'), cl = $('clouds');
+  for (let i = 0; i < 22; i++) {
+    const x = -900 + r() * 3400, y = 318 + r() * 40, s = 0.5 + r() * 0.35;
+    el('use', { href: '#tree', transform: `translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${s.toFixed(2)})` }, trees);
+  }
+  const items = [];
+  for (let i = 0; i < 260; i++) items.push(['#tuft', -1500 + r() * 4600, 370 + Math.pow(r(), .8) * 1300]);
+  for (let i = 0; i < 46; i++) items.push(['#flowerBlue', -1200 + r() * 4000, 390 + r() * 1000]);
+  for (let i = 0; i < 34; i++) items.push(['#tulip', -1200 + r() * 4000, 390 + r() * 1000]);
+  // net als in de tekening: blauwe bloemen linksvoor, gele tulpen rechtsvoor
+  [[70, 965], [110, 985], [40, 992]].forEach(([x, y]) => items.push(['#flowerBlue', x, y]));
+  [[1520, 975], [1545, 968], [1570, 980], [1595, 972]].forEach(([x, y]) => items.push(['#tulip', x, y]));
+  items.sort((a, b) => a[2] - b[2]).forEach(([ref, x, y]) => {
+    const s = scaleAt(y) * (ref === '#tuft' ? 1.1 : 1.25);
+    el('use', { href: ref, transform: `translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${s.toFixed(3)})` }, d);
+  });
+  for (let i = 0; i < 6; i++) {
+    const c = { x: r() * 2600 - 600, y: 20 + r() * 200, s: 0.55 + r() * 0.6, v: 6 + r() * 12 };
+    c.el = el('use', { href: '#cloud', width: 220, height: 100 }, cl);
+    clouds.push(c);
+  }
+})();
+
+/* ---------- huizen-data en opslaan ---------- */
+const WALLS = ['#7a4cc2', '#8656cf', '#6c3fb2', '#9161cc', '#7447bb', '#8a4fc0'];
+const ROOFS = ['#b8b8c1', '#a9a9b4', '#c4c4cc', '#b0aeb8'];
+const DOORS = ['#f6b892', '#f3a77f', '#f8c4a0', '#f1ad8a'];
+const NAMES_A = ['Villa', 'Huize', 'Kasteel', 'Hutje', 'Paleis', 'Krot', 'Stulp', 'Fort'];
+const NAMES_B = ['Gniffel', 'Plaag', 'Kietel', 'Grijns', 'Hihi', 'Gotcha', 'Pesterik', 'Grapjas', 'Boe', 'Proest', 'Snoodaard', 'Schaterlach'];
+let nextId = 1;
+function newHouse(x, y) {
+  return { id: nextId++, x, y, name: `${pick(NAMES_A)} ${pick(NAMES_B)}`, wall: pick(WALLS), roof: pick(ROOFS), door: pick(DOORS), trolled: 0, rooms: [], best: {} };
+}
+
+let state;
+let firstVisit = false;
+function load() {
+  try {
+    if (location.search.includes('reset')) localStorage.removeItem(SAVE_KEY);
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (raw) {
+      const s = JSON.parse(raw);
+      if (s && Array.isArray(s.houses)) { state = s; nextId = Math.max(0, ...s.houses.map(h => h.id)) + 1; return; }
+    }
+  } catch (e) { /* geen opslag beschikbaar: gewoon opnieuw beginnen */ }
+  firstVisit = true;
+  state = { coins: START_COINS, trolled: 0, houses: [] };
+  const a = newHouse(470, 560), b = newHouse(1040, 505), c = newHouse(1170, 770);
+  a.name = 'Villa Gniffel'; a.wall = '#7a4cc2'; a.roof = '#b8b8c1'; a.door = '#f6b892'; a.rooms = ['hindernis'];
+  state.houses.push(a, b, c);
+}
+function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); } catch (e) {} }
+
+/* ---------- huizen tekenen ---------- */
+const views = new Map();
+function applyColors(node, c) {
+  node.style.setProperty('--wall', c.wall);
+  node.style.setProperty('--roof', c.roof);
+  node.style.setProperty('--door', c.door);
+}
+function makeHouseView(h, animate) {
+  const g = el('g', { class: 'house' }, world);
+  el('ellipse', { cx: 0, cy: -2, rx: 92, ry: 13, fill: 'rgba(30,60,20,.25)' }, g);
+  el('ellipse', { class: 'sel', cx: 0, cy: -2, rx: 106, ry: 19, fill: 'rgba(255,255,255,.15)', stroke: '#fff', 'stroke-width': 4, 'stroke-dasharray': '12 9' }, g);
+  const inner = el('g', { class: 'house-inner' }, g);
+  const use = el('use', { href: '#house', x: -100, y: -196, width: 200, height: 200 }, inner);
+  applyColors(use, h);
+  const bub = el('g', {}, g);
+  const v = { h, g, inner, bub, cool: rnd(1, 3), s: 1 };
+  g.addEventListener('click', e => { if (mode) return; e.stopPropagation(); select(h.id); });
+  views.set(h.id, v);
+  placeView(v);
+  if (animate) replay(inner, 'pop');
+  return v;
+}
+function placeView(v) {
+  v.s = scaleAt(v.h.y) * HOUSE_K;
+  v.g.setAttribute('transform', `translate(${v.h.x.toFixed(1)} ${v.h.y.toFixed(1)}) scale(${v.s.toFixed(3)})`);
+}
+function replay(node, cls) {
+  node.classList.remove('pop', 'giggle');
+  void node.getBoundingClientRect();
+  node.classList.add(cls);
+  node.addEventListener('animationend', () => node.classList.remove(cls), { once: true });
+}
+function canPlace(x, y, ignoreId) {
+  if (x < FIELD.x0 || x > FIELD.x1 || y < FIELD.y0 || y > FIELD.y1) return 'veld';
+  const s = scaleAt(y) * HOUSE_K;
+  for (const h of state.houses) {
+    if (h.id === ignoreId) continue;
+    const hs = scaleAt(h.y) * HOUSE_K;
+    if (Math.abs(x - h.x) < 78 * (s + hs) && Math.abs(y - h.y) < 30 * (s + hs)) return 'huis';
+  }
+  return 'ok';
+}
+
+/* ---------- effectjes ---------- */
+function bubble(parent, text, y, fill, s) {
+  parent.replaceChildren();
+  const k = Math.max(1, 0.8 / s);
+  const outer = el('g', { transform: `translate(0 ${y}) scale(${k.toFixed(2)})` }, parent);
+  const g = el('g', { class: 'bubble' }, outer);
+  const bg = el('path', { fill, stroke: '#2a1846', 'stroke-width': 2.5, 'stroke-linejoin': 'round' }, g);
+  const t = el('text', { 'text-anchor': 'middle', 'font-family': 'Gochi Hand, Patrick Hand, Comic Sans MS, cursive', 'font-size': 22, fill: '#2a1846' }, g);
+  t.textContent = text;
+  const w = Math.max(44, t.getComputedTextLength() + 26), h = 34, r = 13;
+  const x0 = -w / 2, x1 = w / 2, y0 = -h - 10, y1 = -10;
+  bg.setAttribute('d', `M${x0 + r} ${y0} H${x1 - r} Q${x1} ${y0} ${x1} ${y0 + r} V${y1 - r} Q${x1} ${y1} ${x1 - r} ${y1} H9 L1 0 L-6 ${y1} H${x0 + r} Q${x0} ${y1} ${x0} ${y1 - r} V${y0 + r} Q${x0} ${y0} ${x0 + r} ${y0} Z`);
+  t.setAttribute('y', y0 + h / 2 + 7);
+  setTimeout(() => outer.remove(), 2300);
+}
+function floater(text, x, y, big = false) {
+  const outer = el('g', { transform: `translate(${x.toFixed(1)} ${y.toFixed(1)})` }, fxLayer);
+  const g = el('g', { class: 'floater', transform: big ? 'scale(1.6)' : '' }, outer);
+  el('use', { href: '#coin', x: -36, y: -24, width: 30, height: 30 }, g);
+  const t = el('text', { x: -2, y: 0, 'font-family': 'Gochi Hand, Patrick Hand, cursive', 'font-size': 32, fill: big ? '#ffe066' : '#fff', stroke: '#2a1846', 'stroke-width': 5, 'paint-order': 'stroke' }, g);
+  t.textContent = text;
+  setTimeout(() => outer.remove(), 1400);
+}
+function puffs(x, y, s, n = 10, color = '#fff', layer = fxLayer) {
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2 + rnd(-.3, .3);
+    const outer = el('g', { transform: `translate(${(x + Math.cos(a) * 40 * s).toFixed(1)} ${(y - 6 * s + Math.sin(a) * 10 * s).toFixed(1)})` }, layer);
+    const c = el('circle', { class: 'puff', r: (rnd(9, 15) * s).toFixed(1), fill: color, opacity: .9 }, outer);
+    c.style.setProperty('--dx', `${(Math.cos(a) * 70 * s).toFixed(1)}px`);
+    c.style.setProperty('--dy', `${(Math.sin(a) * 18 * s - 14 * s).toFixed(1)}px`);
+    setTimeout(() => outer.remove(), 800);
+  }
+}
+let toastTimer;
+function toast(msg) {
+  const t = $('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+function bump(id) { const e = $(id); e.classList.remove('bump'); void e.offsetWidth; e.classList.add('bump'); }
+
+/* ---------- voorbijgangers (naar personen-schets 1) ---------- */
+const SKIN = '#f7c08f', SKIN_LINE = '#dc9a62';
+const NORMAL_TYPES = ['blond', 'regenboog', 'tasje'];
+const RARE_REWARD = 25;
+const walkers = [];
+const FORCE_RARE = location.search.includes('zeldzaam'); // ?zeldzaam = test: zeldzame komt meteen
+let rareCooldown = FORCE_RARE ? 0 : 10;   // seconden tot er weer een zeldzame mag komen
+const randomTarget = () => ({ x: rnd(FIELD.x0, FIELD.x1), y: rnd(FIELD.y0 + 10, FIELD.y1) });
+const rareOnField = () => walkers.some(w => w.rare && !w.dead);
+const P = (parent, d, attrs = {}) => el('path', { d, ...attrs }, parent);
+const HAPPY_MOUTH = 'M-4 -56.5 q4 3.6 8 0';
+const SHOCK_MOUTH = 'M-2.3 -55.5 a2.3 2.7 0 1 0 4.6 0 a2.3 2.7 0 1 0 -4.6 0';
+
+function limb(parent, x, y, len, color, width) {
+  const g = el('g', {}, parent);
+  g.px = x; g.py = y;
+  el('line', { x1: 0, y1: 0, x2: 0, y2: len, stroke: color, 'stroke-width': width, 'stroke-linecap': 'round' }, g);
+  return g;
+}
+function setRot(g, deg) { g.setAttribute('transform', `translate(${g.px} ${g.py}) rotate(${deg.toFixed(1)})`); }
+function legs(b, w, shoe, kind) {
+  w.legL = limb(b, -4.5, -24, 21, SKIN, 3.4);
+  w.legR = limb(b, 4.5, -24, 21, SKIN, 3.4);
+  for (const [g, sx] of [[w.legL, -1], [w.legR, 1]]) {
+    if (kind === 'laars') {
+      el('rect', { x: -4, y: 6, width: 8, height: 17, rx: 1.5, fill: '#1d1d1d' }, g);
+      el('rect', { x: -1.6, y: 9, width: 3.2, height: 10, rx: 1, fill: '#f0592b' }, g);
+      el('ellipse', { cx: sx * 1.5, cy: 23, rx: 5, ry: 2.6, fill: '#1d1d1d' }, g);
+    } else if (kind === 'rond') {
+      el('circle', { cx: sx * 0.8, cy: 22.5, r: 3.4, fill: shoe }, g);
+    } else {
+      el('ellipse', { cx: sx * 1.6, cy: 22.6, rx: 4.4, ry: 2.8, fill: shoe }, g);
+    }
+  }
+}
+function arms(b, w, color, o = {}) {
+  const x = o.x ?? 10, y = o.y ?? -47, width = o.width ?? 3.2, len = o.len ?? 16;
+  w.armL = limb(b, -x, y, len, color, width);
+  w.armR = limb(b, x, y, len, color, width);
+  w.armBase = o.base ?? 40;
+  if (o.cuff) for (const g of [w.armL, w.armR]) {
+    el('line', { x1: 0, y1: len - 3, x2: 0, y2: len, stroke: o.cuff, 'stroke-width': width + .8 }, g);
+    el('circle', { cx: 0, cy: len + 2.2, r: 2.4, fill: SKIN }, g);
+  }
+  if (o.paraplu) {
+    const u = el('g', { transform: `translate(0 ${len + 2}) rotate(-24)` }, w.armR);
+    P(u, 'M2 0 L-5 0 Q-9 0 -9 3.5 Q-9 6.5 -6 6.5', { stroke: '#111', 'stroke-width': 2, fill: 'none', 'stroke-linecap': 'round' });
+    P(u, 'M4 0 L13 -5.5 L33 0 L13 5.5 Z', { fill: '#7048e8', stroke: '#4c2a9e', 'stroke-width': 1.2, 'stroke-linejoin': 'round' });
+    P(u, 'M13 0 L33 0 L13 5.5 Z', { fill: '#74c0fc', opacity: .75 });
+    P(u, 'M33 0 L37 0', { stroke: '#111', 'stroke-width': 1.6, 'stroke-linecap': 'round' });
+  }
+}
+function head(b) { el('circle', { cx: 0, cy: -62, r: 13, fill: SKIN, stroke: SKIN_LINE, 'stroke-width': 1 }, b); }
+function face(b, w) {
+  // de dichte, blije oogjes uit de tekening
+  w.eyesHappy = P(b, 'M-7 -62 q2.6 -3.2 5.2 0 M1.8 -62 q2.6 -3.2 5.2 0', { stroke: '#1d1d1d', 'stroke-width': 1.6, fill: 'none', 'stroke-linecap': 'round' });
+  w.eyesShock = el('g', { opacity: 0 }, b);
+  for (const cx of [-4.4, 4.4]) {
+    el('circle', { cx, cy: -62.5, r: 2.8, fill: '#fff', stroke: '#1d1d1d', 'stroke-width': 1.1 }, w.eyesShock);
+    el('circle', { cx, cy: -62.5, r: 1.1, fill: '#1d1d1d' }, w.eyesShock);
+  }
+  w.mouth = P(b, HAPPY_MOUTH, { stroke: '#1d1d1d', 'stroke-width': 1.6, fill: 'none', 'stroke-linecap': 'round' });
+}
+function setFace(w, shocked) {
+  w.eyesHappy.setAttribute('opacity', shocked ? 0 : 1);
+  w.eyesShock.setAttribute('opacity', shocked ? 1 : 0);
+  w.mouth.setAttribute('d', shocked ? SHOCK_MOUTH : HAPPY_MOUTH);
+  w.mouth.setAttribute('fill', shocked ? '#6b1f1f' : 'none');
+}
+const FRINGE = 'M-13.5 -62 Q-14 -78.5 0 -78.5 Q14 -78.5 13.5 -62 Q8 -71 0 -70 Q-8 -71 -13.5 -62 Z';
+
+const LOOKS = {
+  // blond haar, zwarte strik, zwart topje en zwart tutu-rokje
+  blond(b, w) {
+    P(b, 'M-15 -64 Q-16 -80 0 -80 Q16 -80 15 -64 L16.5 -40 L-16.5 -40 Z', { fill: '#f9d71c', stroke: '#e0b90b', 'stroke-width': 1 });
+    legs(b, w, '#1d1d1d');
+    P(b, 'M-9 -31 L-18 -13 L-14 -16 L-11 -11 L-7 -15 L-3 -10 L1 -15 L5 -10 L9 -15 L12 -11 L18 -13 L9 -31 Z', { fill: '#222' });
+    P(b, 'M-6 -29 L-11 -14 M-1 -29 L-3 -12 M4 -29 L5 -12 M8 -29 L13 -14', { stroke: '#6b6b6b', 'stroke-width': 1 });
+    arms(b, w, SKIN);
+    el('rect', { x: -10, y: -50, width: 20, height: 21, rx: 3, fill: '#222' }, b);
+    P(b, 'M-10 -45 H10 M-10 -40 H10 M-10 -35 H10', { stroke: '#808080', 'stroke-width': 1.2 });
+    head(b); face(b, w);
+    P(b, FRINGE, { fill: '#f9d71c' });
+    P(b, 'M-11 -74 l-5.5 -3.5 l0 7 Z M-11 -74 l5.5 -3.5 l0 7 Z', { fill: '#111' });
+    el('circle', { cx: -11, cy: -74, r: 2, fill: '#111' }, b);
+  },
+  // regenbooghaar dat opzij waait en een regenboogjurk
+  regenboog(b, w) {
+    [['#e03131', 'M-4 -76 Q-17 -70 -18 -44'], ['#fd7e14', 'M-2 -77 Q-13 -66 -14 -44'], ['#fcc419', 'M0 -77 Q-9 -64 -10 -46'],
+     ['#40c057', 'M3 -77 Q15 -76 19 -56'], ['#228be6', 'M5 -77 Q22 -80 25 -58'], ['#7048e8', 'M7 -76 Q29 -84 31 -60']]
+      .forEach(([c, d]) => P(b, d, { stroke: c, 'stroke-width': 5, fill: 'none', 'stroke-linecap': 'round' }));
+    legs(b, w, '#e03131', 'rond');
+    const half = y => 9 + (y + 50) * 0.22;
+    [['#7048e8', -50, -46], ['#228be6', -46, -41], ['#40c057', -41, -35], ['#fcc419', -35, -30], ['#fd7e14', -30, -24.5]]
+      .forEach(([c, y0, y1]) => P(b, `M${-half(y0)} ${y0} H${half(y0)} L${half(y1) + .3} ${y1 + .3} H${-half(y1) - .3} Z`, { fill: c }));
+    P(b, 'M-14.5 -25 H14.5 L17 -15 L13 -17 L10 -14 L6 -17 L2 -14 L-2 -17 L-6 -14 L-10 -17 L-13 -14 L-17 -16 Z', { fill: '#e03131' });
+    arms(b, w, SKIN);
+    head(b); face(b, w);
+    P(b, FRINGE, { fill: '#fcc419' });
+    P(b, 'M-12 -66 Q-8 -75 -2 -77.5 M3 -77.5 Q10 -75 13 -66', { stroke: '#e03131', 'stroke-width': 2.4, fill: 'none', 'stroke-linecap': 'round' });
+    P(b, 'M6 -76 Q11 -72 12.5 -67', { stroke: '#7048e8', 'stroke-width': 2.4, fill: 'none', 'stroke-linecap': 'round' });
+  },
+  // bruin haar, lichtblauw shirt, blauwe broek en een zwart tasje
+  tasje(b, w) {
+    legs(b, w, '#1d1d1d');
+    P(b, 'M-10.5 -31 H10.5 L11.5 -17 H2.5 L0 -24 L-2.5 -17 H-11.5 Z', { fill: '#1c7ed6' });
+    arms(b, w, SKIN, { x: 13, y: -43, base: 30 });
+    P(b, 'M-10 -51 H10 L16.5 -46 L13.5 -40.5 L10 -43 L10.5 -30 H-10.5 L-10 -43 L-13.5 -40.5 L-16.5 -46 Z', { fill: '#74c0fc', stroke: '#4dabf7', 'stroke-width': 1, 'stroke-linejoin': 'round' });
+    P(b, 'M-6 -51 L5 -37', { stroke: '#111', 'stroke-width': 1.8 });
+    P(b, 'M1 -38 Q5 -40 9 -38 Q9 -32 5 -32 Q1 -32 1 -38 Z', { fill: '#111' });
+    head(b); face(b, w);
+    P(b, 'M-13.5 -60 Q-15 -79 0 -78.5 Q15 -78.5 14 -59 L12 -67 Q7 -72 0 -71 Q-8 -72 -12 -66 Z', { fill: '#8a4b1f' });
+    P(b, 'M-4 -78 l-2 -3.5 M1 -78.5 l1 -3.5 M6 -77.5 l3 -3', { stroke: '#8a4b1f', 'stroke-width': 2, 'stroke-linecap': 'round' });
+  },
+  // ZELDZAAM: lange paarse vlecht, geel jasje, paraplu, glinsterlijntjes
+  zeldzaam(b, w) {
+    const aura = el('g', { class: 'aura' }, b);
+    P(aura, 'M-22 -74 Q-28 -64 -25 -54 M-28 -46 Q-34 -36 -30 -26 M-25 -18 Q-31 -10 -28 -1 M22 -74 Q28 -64 25 -54 M30 -46 Q36 -36 32 -26 M27 -18 Q33 -10 30 -1',
+      { stroke: '#74c0fc', 'stroke-width': 2.6, fill: 'none', 'stroke-linecap': 'round' });
+    P(b, 'M-13 -64 Q-16 -80 0 -80 Q15 -80 14 -64 Z', { fill: '#6f2dbd' });
+    for (let y = -60; y <= -3; y += 6.2) {
+      el('ellipse', { cx: (-13 - Math.sin((y + 60) / 12) * 1.6).toFixed(1), cy: y.toFixed(1), rx: 4.9, ry: 4, fill: '#7b35d1', stroke: '#4a1a8a', 'stroke-width': 1 }, b);
+    }
+    el('circle', { cx: -13, cy: 1, r: 2.4, fill: '#4a1a8a' }, b);
+    legs(b, w, null, 'laars');
+    P(b, 'M-10.5 -31 H10.5 L11.5 -18 H2.5 L0 -24 L-2.5 -18 H-11.5 Z', { fill: '#4dabf7' });
+    el('rect', { x: -10.5, y: -32, width: 21, height: 2.6, fill: '#40c057' }, b);
+    arms(b, w, '#ffe14d', { x: 10, y: -47, width: 5, cuff: '#7048e8', paraplu: true, base: 38 });
+    P(b, 'M-10 -51 H10 L11 -30 H-11 Z', { fill: '#ffe14d', stroke: '#e8b800', 'stroke-width': 1, 'stroke-linejoin': 'round' });
+    P(b, 'M-8 -45 h4.5 v2.2 h-4.5z M4.5 -40 h4.5 v2.6 h-4.5z M-9 -36 h3.5 v2.2 h-3.5z M6 -49 h3 v2 h-3z', { fill: '#111' });
+    P(b, 'M-3.5 -47 L0 -45.5 L3.5 -47 L3.5 -43.5 L0 -45.5 L-3.5 -43.5 Z', { fill: '#7048e8', stroke: '#5c2a2a', 'stroke-width': .8 });
+    head(b); face(b, w);
+    P(b, 'M-13.5 -62 Q-14 -79.5 0 -79.5 Q14 -79.5 13.5 -62 Q10 -72 2 -71 Q-6 -73 -13.5 -62 Z', { fill: '#7b35d1' });
+    P(b, 'M10 -73 l5 -4 l1 6 Z M10 -73 l-1 -6 l5 1 Z', { fill: '#5f3dc4' });
+  },
+};
+
+function makeWalker(onField) {
+  let type = pick(NORMAL_TYPES);
+  if (!onField && !rareOnField() && rareCooldown <= 0 && (FORCE_RARE || Math.random() < 0.2)) type = 'zeldzaam';
+  const rare = type === 'zeldzaam';
+  const fromLeft = Math.random() < .5;
+  const w = {
+    type, rare,
+    x: onField ? rnd(FIELD.x0, FIELD.x1) : (fromLeft ? FIELD.x0 - 200 : FIELD.x1 + 200),
+    y: rnd(FIELD.y0 + 10, FIELD.y1), speed: rare ? rnd(48, 60) : rnd(55, 85), phase: rnd(0, 6), state: 'walk',
+    timer: 0, immune: 2, stops: Math.floor(rnd(2, 5)) + (rare ? 2 : 0), dir: 1, leaving: false, dead: false,
+  };
+  w.target = randomTarget();
+  const g = el('g', { class: 'walker' }, world);
+  el('ellipse', { cx: 0, cy: 0, rx: 15, ry: 4.5, fill: 'rgba(20,50,10,.25)' }, g);
+  w.lift = el('g', {}, g);
+  w.body = el('g', {}, w.lift);
+  LOOKS[type](w.body, w);
+  w.bub = el('g', {}, g);
+  w.g = g;
+  walkers.push(w);
+  updateWalker(w, 0);
+  if (rare) {
+    $('rarePill').hidden = false;
+    toast('Zeldzame bezoeker! Trollen levert 25 munten op.');
+  }
+}
+
+function updateWalker(w, dt) {
+  w.immune -= dt;
+  let moving = false;
+  const s = scaleAt(w.y);
+  if (w.state === 'walk') {
+    const dx = w.target.x - w.x, dy = w.target.y - w.y, d = Math.hypot(dx, dy);
+    if (d < 6) {
+      if (w.leaving) { w.dead = true; return; }
+      if (--w.stops <= 0) leave(w);
+      else { w.state = 'idle'; w.timer = rnd(.4, 2); }
+    } else {
+      const step = Math.min(d, w.speed * s * dt);
+      w.x += dx / d * step; w.y += dy / d * step;
+      moving = dt > 0; if (Math.abs(dx) > 2) w.dir = dx > 0 ? 1 : -1;
+    }
+  } else if (w.state === 'idle') {
+    w.timer -= dt;
+    if (w.timer <= 0) { w.state = 'walk'; w.target = randomTarget(); }
+  } else if (w.state === 'shock') {
+    w.timer -= dt;
+    if (w.timer <= 0) { w.state = 'flee'; w.timer = 1.6; }
+  } else if (w.state === 'flee') {
+    w.timer -= dt;
+    w.x += w.flee.x * w.speed * 3.2 * s * dt;
+    w.y = clamp(w.y + w.flee.y * w.speed * 3.2 * s * dt, FIELD.y0, FIELD.y1 + 30);
+    moving = true; w.dir = w.flee.x >= 0 ? 1 : -1;
+    if (w.x < FIELD.x0 - 280 || w.x > FIELD.x1 + 280) { w.dead = true; return; }
+    if (w.timer <= 0) {
+      setFace(w, false);
+      w.state = 'walk'; w.target = randomTarget(); w.stops = Math.max(w.stops, 1);
+      if (w.rare) leave(w);   // een zeldzame laat zich maar één keer trollen
+    }
+  }
+  if (moving) w.phase += dt * (w.state === 'flee' ? 20 : 9);
+  const sw = moving ? Math.sin(w.phase) * 24 : 0;
+  setRot(w.legL, sw); setRot(w.legR, -sw);
+  if (w.state === 'shock') { setRot(w.armL, 150); setRot(w.armR, -150); }
+  else { setRot(w.armL, w.armBase - sw * 0.5); setRot(w.armR, -w.armBase - sw * 0.5); }
+  let lift = moving ? -Math.abs(Math.sin(w.phase)) * 2.5 : 0;
+  if (w.state === 'shock') lift = -Math.sin((1 - w.timer / 0.6) * Math.PI) * 30;
+  w.lift.setAttribute('transform', `translate(0 ${lift.toFixed(1)})`);
+  w.body.setAttribute('transform', `scale(${w.dir} 1)`);
+  w.s = s * 1.05;
+  w.g.setAttribute('transform', `translate(${w.x.toFixed(1)} ${w.y.toFixed(1)}) scale(${w.s.toFixed(3)})`);
+}
+function leave(w) {
+  w.leaving = true; w.state = 'walk';
+  w.target = { x: w.x < W / 2 ? FIELD.x0 - 260 : FIELD.x1 + 260, y: clamp(w.y + rnd(-60, 60), FIELD.y0, FIELD.y1) };
+}
+
+/* ---------- trollen! ---------- */
+const PRANKS = [
+  { house: 'BOE!', walker: 'Iiieeek!' },
+  { house: 'Hihihi!', walker: 'Een spin op m’n neus!' },
+  { house: 'Pfrrrrt!', walker: 'Wie was dat?!' },
+  { house: 'Getrold!', walker: 'EXIT is de ingang?!' },
+  { house: 'Niemand thuis!', walker: 'Huh?' },
+  { house: 'Splash!', walker: 'Kleddernat!', wet: true },
+  { house: 'Hahaha!', walker: 'Mijn veters!' },
+  { house: 'Gotcha!', walker: 'Neeee!' },
+  { house: 'Trol trol trol', walker: 'Mama!' },
+];
+const RARE_LINES = ['Mijn paraplu!?', 'Mijn vlecht!', 'Hoe dúrf je!', 'Dit is zeldzaam brutaal!'];
+function checkPranks(dt) {
+  for (const v of views.values()) {
+    v.cool -= dt;
+    if (v.cool > 0 || (mode && mode.type === 'move' && mode.id === v.h.id)) continue;
+    for (const w of walkers) {
+      if ((w.state !== 'walk' && w.state !== 'idle') || w.immune > 0) continue;
+      const dx = (w.x - v.h.x) / (105 * v.s), dy = (w.y - (v.h.y + 16 * v.s)) / (30 * v.s);
+      if (dx * dx + dy * dy < 1) { prank(v, w); break; }
+    }
+  }
+}
+function prank(v, w) {
+  const p = pick(PRANKS);
+  const reward = (w.rare ? RARE_REWARD : REWARD) + v.h.rooms.length;
+  v.cool = rnd(5, 8); w.immune = 9;
+  w.state = 'shock'; w.timer = 0.6;
+  const fx = Math.sign(w.x - v.h.x) || 1, fy = rnd(.25, .7), len = Math.hypot(fx, fy);
+  w.flee = { x: fx / len, y: fy / len };
+  setFace(w, true);
+  if (p.wet) puffs(w.x, w.y - 50 * w.s, w.s, 8, '#a5d8ff');
+  bubble(w.bub, w.rare ? pick(RARE_LINES) : p.walker, -100, w.rare ? '#fff3bf' : '#fff', w.s);
+  bubble(v.bub, p.house, -206, '#ffe3f1', v.s);
+  replay(v.inner, 'giggle');
+  state.coins += reward; state.trolled++; v.h.trolled++;
+  if (w.rare) {
+    state.rareTrolled = (state.rareTrolled || 0) + 1;
+    puffs(w.x, w.y - 40 * w.s, w.s, 16, '#ffe066');
+    toast(`Zeldzaam getrold! +${RARE_REWARD} munten`);
+  }
+  floater(`+${reward}`, v.h.x + 30 * v.s, v.h.y - 150 * v.s, w.rare);
+  if (selectedId === v.h.id) $('houseTrolled').textContent = v.h.trolled;
+  bump('coinPill'); bump('trolPill');
+  updateUI(); save();
+}
+
+/* ---------- bouwen en verplaatsen ---------- */
+let mode = null;   // null | {type:'build'} | {type:'move', id}
+let ghost = null;
+function svgPoint(evt) {
+  const p = svg.createSVGPoint(); p.x = evt.clientX; p.y = evt.clientY;
+  return p.matrixTransform(svg.getScreenCTM().inverse());
+}
+function enterMode(m) {
+  mode = m;
+  const src = m.type === 'move' ? state.houses.find(h => h.id === m.id) : { wall: pick(WALLS), roof: pick(ROOFS), door: pick(DOORS) };
+  m.colors = { wall: src.wall, roof: src.roof, door: src.door };
+  svg.classList.add('building');
+  ghost = el('g', { opacity: 0 }, ghostLayer);
+  ghost.ring = el('ellipse', { cx: 0, cy: -2, rx: 104, ry: 18, 'stroke-width': 4, 'stroke-dasharray': '12 9' }, ghost);
+  applyColors(el('use', { href: '#house', x: -100, y: -196, width: 200, height: 200 }, ghost), m.colors);
+  if (m.type === 'move') views.get(m.id).g.classList.add('moving');
+  $('panel').hidden = true;
+  updateUI();
+}
+function exitMode() {
+  if (!mode) return;
+  const moved = mode.type === 'move' ? mode.id : null;
+  if (moved != null) views.get(moved)?.g.classList.remove('moving');
+  ghost?.remove(); ghost = null; mode = null;
+  svg.classList.remove('building');
+  updateUI();
+  if (moved != null) select(moved);
+}
+function moveGhost(p) {
+  if (!ghost) return;
+  const res = canPlace(p.x, p.y, mode.type === 'move' ? mode.id : null);
+  const s = scaleAt(clamp(p.y, HORIZON + 30, 1300)) * HOUSE_K;
+  ghost.setAttribute('transform', `translate(${p.x.toFixed(1)} ${p.y.toFixed(1)}) scale(${s.toFixed(3)})`);
+  ghost.setAttribute('opacity', res === 'ok' ? .85 : .5);
+  ghost.ring.setAttribute('fill', res === 'ok' ? 'rgba(64,192,87,.35)' : 'rgba(224,49,49,.35)');
+  ghost.ring.setAttribute('stroke', res === 'ok' ? '#2f9e44' : '#e03131');
+  ghost.res = res;
+}
+svg.addEventListener('pointermove', e => { if (mode) moveGhost(svgPoint(e)); });
+svg.addEventListener('pointerdown', e => { if (mode) moveGhost(svgPoint(e)); });
+svg.addEventListener('click', e => {
+  if (!mode) { select(null); return; }
+  const p = svgPoint(e);
+  moveGhost(p);
+  if (ghost.res === 'veld') { toast('Zet je huis op het grasveld'); return; }
+  if (ghost.res === 'huis') { toast('Daar staat al een huis'); return; }
+  if (mode.type === 'build') {
+    if (state.coins < PRICE) { toast(`Je hebt ${PRICE} munten nodig`); exitMode(); return; }
+    state.coins -= PRICE;
+    const h = newHouse(p.x, p.y);
+    Object.assign(h, mode.colors);
+    state.houses.push(h);
+    makeHouseView(h, true);
+    puffs(p.x, p.y, scaleAt(p.y) * HOUSE_K, 12);
+    bump('coinPill');
+    exitMode();
+    toast(`${h.name} is gebouwd!`);
+  } else {
+    const h = state.houses.find(x => x.id === mode.id);
+    h.x = p.x; h.y = p.y;
+    const v = views.get(h.id);
+    placeView(v); replay(v.inner, 'pop');
+    puffs(p.x, p.y, v.s, 10);
+    exitMode();
+  }
+  save(); updateUI();
+});
+
+$('buildBtn').addEventListener('click', () => {
+  if (mode) { exitMode(); return; }
+  if (state.coins < PRICE) { toast(`Nog ${PRICE - state.coins} munten nodig. Wacht tot er iemand langs je huis loopt!`); return; }
+  select(null);
+  enterMode({ type: 'build' });
+});
+addEventListener('keydown', e => {
+  if (IN.active) return;
+  if (e.key === 'Escape') { if (mode) exitMode(); else select(null); }
+});
+
+/* ---------- huis-paneel ---------- */
+let selectedId = null, demolishArmed = false;
+function resetDemolish() { demolishArmed = false; $('demolishBtn').textContent = 'Slopen'; }
+function select(id) {
+  if (selectedId != null) views.get(selectedId)?.g.classList.remove('selected');
+  selectedId = id; resetDemolish();
+  if (id == null) { $('panel').hidden = true; return; }
+  const v = views.get(id);
+  v.g.classList.add('selected');
+  $('houseName').value = v.h.name;
+  $('houseTrolled').textContent = v.h.trolled;
+  renderRooms(v.h);
+  $('panel').hidden = false;
+}
+$('houseName').addEventListener('input', e => {
+  const h = state.houses.find(x => x.id === selectedId);
+  if (h) { h.name = e.target.value; save(); }
+});
+$('houseName').addEventListener('keydown', e => { if (e.key === 'Enter') e.target.blur(); e.stopPropagation(); });
+$('panelClose').addEventListener('click', () => select(null));
+$('moveBtn').addEventListener('click', () => { if (selectedId != null) enterMode({ type: 'move', id: selectedId }); });
+$('demolishBtn').addEventListener('click', () => {
+  if (!demolishArmed) { demolishArmed = true; $('demolishBtn').textContent = `Zeker? (+${PRICE / 2})`; return; }
+  const id = selectedId, v = views.get(id);
+  puffs(v.h.x, v.h.y - 60 * v.s, v.s, 16, '#d0bfff');
+  v.g.remove(); views.delete(id);
+  state.houses = state.houses.filter(h => h.id !== id);
+  state.coins += PRICE / 2;
+  select(null); bump('coinPill'); save(); updateUI();
+});
+
+function updateUI() {
+  $('coins').textContent = state.coins;
+  $('trolled').textContent = state.trolled;
+  const btn = $('buildBtn');
+  if (mode) {
+    btn.classList.add('cancel');
+    $('buildLabel').textContent = 'Stoppen';
+    $('buildPrice').hidden = true;
+    $('hint').textContent = mode.type === 'build' ? 'Tik op het gras om je trolhuis neer te zetten' : 'Tik op een nieuwe plek voor dit huis';
+  } else {
+    btn.classList.remove('cancel');
+    $('buildLabel').textContent = '+ Trolhuis bouwen';
+    $('buildPrice').hidden = false;
+    $('hint').textContent = state.coins < PRICE ? `Nog ${PRICE - state.coins} munten tot je volgende trolhuis` : '';
+  }
+}
+
+/* ---------- diepte: wat verder weg staat, komt erachter ---------- */
+function sortWorld() {
+  const items = [];
+  for (const v of views.values()) items.push([v.g, v.h.y]);
+  for (const w of walkers) items.push([w.g, w.y]);
+  items.sort((a, b) => a[1] - b[1]);
+  let node = world.firstChild, same = true;
+  for (const [e] of items) { if (node !== e) { same = false; break; } node = node.nextSibling; }
+  if (!same) for (const [e] of items) world.appendChild(e);
+}
+
+/* =====================================================
+   BINNEN IN HET TROLHUIS: het parcours (naar kamers-schets 1)
+   ===================================================== */
+const ROOMS = {
+  hindernis:  { name: 'Hindernis',  price: 10, desc: 'Spring over de 4 trolballen', width: 1500 },
+  trampoline: { name: 'Trampoline', price: 20, desc: 'Blijf op de schommeltrampoline!', width: 1700 },
+  weg:        { name: 'Weg',        price: 2,  desc: 'Ren! De plank brokkelt af', width: 1500 },
+  touw:       { name: 'Touw',       price: 7,  desc: 'Hou je evenwicht met ← en →', width: 1700 },
+  spinnen:    { name: 'Spinnen',    price: 8,  desc: 'Spring over de spinnen, niet aanraken!', width: 1600 },
+  schommel:   { name: 'Schommel',   price: 8,  desc: 'Spring eraf voor de schaar het touw doorknipt!', width: 1700 },
+};
+const ROOM_ORDER = ['hindernis', 'trampoline', 'weg', 'touw', 'spinnen', 'schommel'];
+const ROOM_ICONS = {
+  hindernis: '<svg viewBox="0 0 60 30" aria-hidden="true"><g fill="none" stroke="#7048e8" stroke-width="3"><circle cx="9" cy="19" r="7"/><circle cx="24" cy="18" r="8"/><circle cx="39" cy="19" r="7"/><circle cx="53" cy="20" r="6"/></g><path d="M0 28 H60" stroke="#7048e8" stroke-width="2.5"/></svg>',
+  trampoline: '<svg viewBox="0 0 60 30" aria-hidden="true"><g stroke="#7048e8" stroke-width="2.5" fill="none" stroke-linecap="round"><path d="M23 0 V17 M37 0 V17"/><path d="M12 9 H4 l4 -4 M4 9 l4 4 M48 9 H56 l-4 -4 M56 9 l-4 4"/></g><rect x="16" y="16" width="28" height="7" rx="3.5" fill="#5f3dc4"/></svg>',
+  weg: '<svg viewBox="0 0 60 30" aria-hidden="true"><path d="M3 16 H57 V23 H5 Z" fill="none" stroke="#7048e8" stroke-width="2.5" stroke-linejoin="round"/><path d="M30 16 l3 4 l-2 3" stroke="#7048e8" stroke-width="1.5" fill="none"/></svg>',
+  touw: '<svg viewBox="0 0 60 30" aria-hidden="true"><g stroke="#7048e8" stroke-width="2.5" fill="none" stroke-linecap="round"><path d="M3 28 V14 M57 28 V14"/><path d="M3 15 Q30 22 57 15"/></g></svg>',
+  spinnen: '<svg viewBox="0 0 60 30" aria-hidden="true"><path d="M2 3 H58" stroke="#7048e8" stroke-width="2.5"/><path d="M16 3 V14 M34 3 V9 M50 3 V17" stroke="#555" stroke-width="1"/><g stroke="#222" stroke-width="1.6" fill="none"><path d="M10 15 l12 4 M10 20 l12 -4 M28 10 l12 4 M28 15 l12 -4 M44 18 l12 4 M44 23 l12 -4"/></g><g fill="#222"><circle cx="16" cy="17" r="4"/><circle cx="34" cy="12" r="4"/><circle cx="50" cy="20" r="4"/></g></svg>',
+  schommel: '<svg viewBox="0 0 60 30" aria-hidden="true"><path d="M6 29 V4 M54 29 V4" stroke="#868e96" stroke-width="2.5"/><path d="M4 4 H56" stroke="#8a4b1f" stroke-width="4"/><path d="M24 5 L18 21 M36 5 L30 21" stroke="#d9a066" stroke-width="1.6"/><rect x="13" y="20" width="22" height="4" rx="1" fill="#a0612b"/><g stroke="#7048e8" stroke-width="1.6" fill="none"><path d="M40 12 l10 -4 M40 8 l10 4"/><circle cx="38" cy="7" r="2"/><circle cx="38" cy="13" r="2"/></g></svg>',
+};
+const FLOOR = 820, CEIL = 130, PS = 1.7, HW = 18;
+const GRAV = 2700, JUMP_V = 1080, RUN = 380;
+const SLIME = FLOOR + 55;
+const lvlFront = $('lvlFront');
+const inSvg = $('insideSvg'), lvlBg = $('lvlBg'), lvlDyn = $('lvlDyn'), lvlPlayer = $('lvlPlayer'), lvlFx = $('lvlFx');
+const IN = { active: false, t: 0, jumpBuf: 0 };
+const keys = { left: false, right: false, jump: false };
+
+/* ---------- kamers kopen in het huis-paneel ---------- */
+function renderRooms(h) {
+  const grid = $('roomsGrid');
+  grid.replaceChildren();
+  for (const k of ROOM_ORDER) {
+    const R = ROOMS[k], owned = h.rooms.includes(k);
+    const b = document.createElement('button');
+    b.className = 'room' + (owned ? ' owned' : '') + (!owned && state.coins < R.price ? ' cant' : '');
+    b.innerHTML = `${ROOM_ICONS[k]}<span>${R.name}</span><span class="p">${owned ? '✓ gekocht' : `<svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><use href="#coin" width="24" height="24"/></svg>${R.price}`}</span>`;
+    b.title = R.desc;
+    b.addEventListener('click', () => {
+      if (owned) { toast(`${R.name}: ${R.desc}`); return; }
+      if (state.coins < R.price) { toast(`Je hebt ${R.price} munten nodig voor ${R.name}`); return; }
+      state.coins -= R.price;
+      h.rooms.push(k);
+      save(); updateUI(); bump('coinPill');
+      renderRooms(h);
+      toast(`${R.name} is gebouwd in ${h.name}!`);
+    });
+    grid.appendChild(b);
+  }
+  $('perTroll').textContent = REWARD + h.rooms.length;
+  const enter = $('enterBtn');
+  enter.disabled = !h.rooms.length;
+  enter.innerHTML = h.rooms.length ? `Naar binnen <small>(${h.rooms.length} ${h.rooms.length === 1 ? 'kamer' : 'kamers'})</small>` : 'Naar binnen <small>(koop eerst een kamer)</small>';
+}
+$('enterBtn').addEventListener('click', () => { if (selectedId != null) enterHouse(selectedId); });
+
+/* ---------- tekenhulpjes voor binnen ---------- */
+function txt(parent, x, y, str, size, attrs = {}) {
+  const t = el('text', { x, y, 'text-anchor': 'middle', 'font-family': 'Gochi Hand, Patrick Hand, Comic Sans MS, cursive', 'font-size': size, ...attrs }, parent);
+  t.textContent = str;
+  return t;
+}
+const WALL_TEXT = { fill: '#fff', stroke: '#2a1846', 'stroke-width': 10, 'paint-order': 'stroke', 'stroke-linejoin': 'round' };
+function drawWindow(g, x, y, w, h) {
+  el('rect', { x: x - w / 2, y, width: w, height: h, fill: '#bfe6ff', stroke: '#3a1d66', 'stroke-width': 5 }, g);
+  P(g, `M${x - w / 2 + 10} ${y + h - 16} q12 -14 26 -6 q10 -12 24 -2`, { stroke: '#fff', 'stroke-width': 8, fill: 'none', 'stroke-linecap': 'round' });
+  P(g, `M${x} ${y} V${y + h} M${x - w / 2} ${y + h / 2} H${x + w / 2}`, { stroke: '#3a1d66', 'stroke-width': 4 });
+}
+function drawWeb(g, x, y, s, flip) {
+  const f = flip ? -1 : 1;
+  P(g, `M${x} ${y} l${f * 70 * s} 0 M${x} ${y} l0 ${70 * s} M${x} ${y} l${f * 55 * s} ${45 * s} M${x} ${y} l${f * 26 * s} ${64 * s}` +
+    ` M${x + f * 24 * s} ${y} Q${x + f * 18 * s} ${y + 15 * s} ${x} ${y + 24 * s} M${x + f * 48 * s} ${y} Q${x + f * 38 * s} ${y + 34 * s} ${x} ${y + 50 * s}`,
+    { stroke: 'rgba(255,255,255,.6)', 'stroke-width': 2.2, fill: 'none' });
+  P(g, `M${x + f * 30 * s} ${y + 30 * s} V${y + 95 * s}`, { stroke: 'rgba(255,255,255,.6)', 'stroke-width': 1.5 });
+  el('ellipse', { cx: x + f * 30 * s, cy: y + 100 * s, rx: 7 * s, ry: 6 * s, fill: '#1b1b1b' }, g);
+  P(g, `M${x + f * 30 * s - 7 * s} ${y + 97 * s} l-7 -5 M${x + f * 30 * s - 7 * s} ${y + 102 * s} l-8 2 M${x + f * 30 * s + 7 * s} ${y + 97 * s} l7 -5 M${x + f * 30 * s + 7 * s} ${y + 102 * s} l8 2`, { stroke: '#1b1b1b', 'stroke-width': 2 });
+}
+function drawLamp(g, x) {
+  P(g, `M${x} ${CEIL} V${CEIL + 70}`, { stroke: '#222', 'stroke-width': 3 });
+  el('circle', { class: 'lampglow', cx: x, cy: CEIL + 98, r: 95, fill: 'url(#lampGlowGrad)' }, g);
+  P(g, `M${x - 26} ${CEIL + 96} L${x - 12} ${CEIL + 70} H${x + 12} L${x + 26} ${CEIL + 96} Z`, { fill: '#222' });
+  el('circle', { cx: x, cy: CEIL + 98, r: 7, fill: '#ffd34d' }, g);
+}
+function drawHeart(g, cx, cy, s, fill) {
+  P(g, `M${cx} ${cy} C${cx - 3 * s} ${cy - 4 * s} ${cx - 8 * s} ${cy - 1 * s} ${cx} ${cy + 5 * s} C${cx + 8 * s} ${cy - 1 * s} ${cx + 3 * s} ${cy - 4 * s} ${cx} ${cy} Z`, { fill });
+}
+function drawPicture(g, x, y, rand) {
+  el('rect', { x: x - 50, y: y - 40, width: 100, height: 80, fill: '#fff6e3', stroke: '#c99a06', 'stroke-width': 8, transform: `rotate(${(rand() * 8 - 4).toFixed(1)} ${x} ${y})` }, g);
+  el('circle', { cx: x, cy: y + 2, r: 24, fill: '#f2a33a', stroke: '#8a4b0e', 'stroke-width': 3 }, g);
+  P(g, `M${x - 12} ${y - 2} q5 -6 10 0 M${x + 2} ${y - 2} q5 -6 10 0 M${x - 11} ${y + 9} q11 10 22 0`, { stroke: '#3a1d0e', 'stroke-width': 3, fill: 'none', 'stroke-linecap': 'round' });
+}
+function drawDoorway(g, x) {
+  el('rect', { x: x - 30, y: CEIL, width: 60, height: FLOOR - 300 - CEIL, fill: 'rgba(30,10,60,.35)' }, g);
+  for (const dx of [-34, 22]) el('rect', { x: x + dx, y: FLOOR - 292, width: 12, height: 292, fill: '#8a5a2b', stroke: '#4a2c12', 'stroke-width': 3 }, g);
+  el('rect', { x: x - 44, y: FLOOR - 314, width: 88, height: 24, rx: 4, fill: '#8a5a2b', stroke: '#4a2c12', 'stroke-width': 3 }, g);
+}
+function drawShell(g, total, wall) {
+  el('rect', { x: -4000, y: -4000, width: total + 8000, height: 8000, fill: '#22163a' }, g);
+  const wallRect = el('rect', { x: 0, y: CEIL, width: total, height: FLOOR - CEIL }, g);
+  wallRect.style.fill = wall;
+  el('rect', { x: 0, y: CEIL, width: total, height: FLOOR - CEIL, fill: 'rgba(255,255,255,.2)' }, g);
+  el('rect', { x: 0, y: CEIL, width: total, height: FLOOR - CEIL, fill: 'url(#hatchBig)' }, g);
+  el('rect', { x: 0, y: FLOOR - 110, width: total, height: 110, fill: 'rgba(40,10,70,.22)' }, g);
+  P(g, `M0 ${FLOOR - 110} H${total}`, { stroke: 'rgba(40,10,70,.45)', 'stroke-width': 5 });
+  el('rect', { x: -4000, y: -4000, width: total + 8000, height: 4000 + CEIL, fill: '#3b2a55' }, g);
+  el('rect', { x: -4000, y: CEIL - 34, width: total + 8000, height: 34, fill: '#7a4f2a' }, g);
+  let d = '';
+  for (let x = 0; x < total; x += 260) d += `M${x} ${CEIL - 34} v34 `;
+  P(g, d, { stroke: '#4a2c12', 'stroke-width': 6 });
+  el('rect', { x: -4000, y: CEIL - 34, width: 4000, height: FLOOR + 34 - CEIL, fill: '#3b2a55' }, g);
+  el('rect', { x: total, y: CEIL - 34, width: 4000, height: FLOOR + 34 - CEIL, fill: '#3b2a55' }, g);
+}
+function drawFloor(g, L, total) {
+  const pits = [...L.pits].sort((a, b) => a.x0 - b.x0);
+  const solids = [];
+  let cur = -4000;
+  for (const p of pits) { solids.push([cur, p.x0]); cur = p.x1; }
+  solids.push([cur, total + 4000]);
+  for (const p of pits) {
+    el('rect', { x: p.x0, y: FLOOR, width: p.x1 - p.x0, height: 600, fill: '#1c1230' }, g);
+    let d = `M${p.x0} ${SLIME}`;
+    for (let x = p.x0; x < p.x1; x += 60) d += ' q15 -12 30 0 q15 12 30 0';
+    d += ` V${FLOOR + 600} H${p.x0} Z`;
+    P(g, d, { fill: '#5ad46a', stroke: '#2b8a3e', 'stroke-width': 4 });
+    // voorkant van het slijm: daar zak je in weg
+    el('rect', { x: p.x0, y: SLIME + 30, width: p.x1 - p.x0, height: 600, fill: '#5ad46a', opacity: .93 }, lvlFront);
+    P(lvlFront, `M${p.x0} ${SLIME + 30} H${p.x1}`, { stroke: '#8ce99a', 'stroke-width': 3, opacity: .7 });
+    for (let x = p.x0 + 40; x < p.x1 - 20; x += rnd(70, 150)) {
+      const b = el('circle', { class: 'slimebub', cx: x.toFixed(0), cy: SLIME + 40, r: rnd(5, 12).toFixed(1), fill: '#8ce99a' }, lvlFront);
+      b.style.animationDelay = `${rnd(0, 2.4).toFixed(2)}s`;
+    }
+  }
+  for (const [a, b] of solids) {
+    el('rect', { x: a, y: FLOOR, width: b - a, height: 600, fill: '#b07444', stroke: '#5a3416', 'stroke-width': 4 }, g);
+    el('rect', { x: a, y: FLOOR, width: b - a, height: 12, fill: '#cf9461' }, g);
+    let d = `M${a} ${FLOOR + 70} H${b} M${a} ${FLOOR + 140} H${b}`;
+    for (let x = Math.ceil(a / 140) * 140; x < b; x += 140) d += ` M${x} ${FLOOR + 12} V${FLOOR + 70} M${x + 70} ${FLOOR + 70} V${FLOOR + 140}`;
+    P(g, d, { stroke: 'rgba(60,30,10,.35)', 'stroke-width': 3 });
+  }
+}
+function drawStartHall(g, h) {
+  const dx = 60;
+  const door = el('rect', { x: dx, y: FLOOR - 250, width: 170, height: 250, stroke: '#8d4a2a', 'stroke-width': 6 }, g);
+  door.style.fill = h.door;
+  P(g, `M${dx + 85} ${FLOOR - 250} l-4 60 l6 60 l-5 70 l3 60`, { stroke: '#8d4a2a', 'stroke-width': 4, fill: 'none' });
+  drawHeart(g, dx + 45, FLOOR - 115, 4, '#3a1d66');
+  drawHeart(g, dx + 125, FLOOR - 115, 4, '#3a1d66');
+  el('rect', { x: dx + 15, y: FLOOR - 312, width: 140, height: 46, rx: 4, fill: '#23a55a', stroke: '#0f5a2f', 'stroke-width': 5 }, g);
+  txt(g, dx + 85, FLOOR - 276, 'EXIT', 38, { fill: '#0d220f', 'letter-spacing': 3 });
+  txt(g, 500, 290, h.name, 66, { ...WALL_TEXT, transform: 'rotate(-2 500 290)' });
+  const touch = matchMedia('(pointer:coarse)').matches;
+  txt(g, 500, 400, touch ? 'gebruik de knoppen onderin' : '← →  lopen', 38, { fill: '#fff', opacity: .92 });
+  txt(g, 500, 450, touch ? 'om te lopen en te springen' : '↑ of spatie  springen', 38, { fill: '#fff', opacity: .92 });
+  el('rect', { x: 618, y: FLOOR - 120, width: 12, height: 120, fill: '#8a5a2b' }, g);
+  el('rect', { x: 560, y: FLOOR - 190, width: 130, height: 60, rx: 6, fill: '#f4a77c', stroke: '#9a4a22', 'stroke-width': 4, transform: 'rotate(-3 624 -160)' }, g);
+  txt(g, 625, FLOOR - 148, 'Start →', 36, { fill: '#2a1846' });
+  drawLamp(g, 330);
+  drawWeb(g, 0, CEIL, 1.1, false);
+}
+function drawEndHall(g, x, w, L) {
+  const fx = L.finishX;
+  el('rect', { x: fx - 5, y: FLOOR - 340, width: 10, height: 340, fill: '#495057' }, g);
+  for (let i = 0; i < 5; i++) for (let j = 0; j < 3; j++) {
+    el('rect', { x: fx + 5 + i * 22, y: FLOOR - 340 + j * 22, width: 22, height: 22, fill: (i + j) % 2 ? '#111' : '#fff' }, g);
+  }
+  txt(g, x + 620, 290, 'Finish!', 80, { ...WALL_TEXT, transform: `rotate(-3 ${x + 620} 290)` });
+  const cx = x + 660;
+  el('rect', { x: cx - 90, y: FLOOR - 95, width: 180, height: 95, rx: 8, fill: '#a0612b', stroke: '#4a2c12', 'stroke-width': 5 }, g);
+  P(g, `M${cx - 95} ${FLOOR - 95} Q${cx} ${FLOOR - 170} ${cx + 95} ${FLOOR - 95} Z`, { fill: '#b8733a', stroke: '#4a2c12', 'stroke-width': 5 });
+  P(g, `M${cx - 90} ${FLOOR - 55} H${cx + 90}`, { stroke: '#ffd43b', 'stroke-width': 8 });
+  el('rect', { x: cx - 14, y: FLOOR - 70, width: 28, height: 30, rx: 4, fill: '#ffd43b', stroke: '#a87508', 'stroke-width': 3 }, g);
+  [[-50, -150], [-10, -168], [30, -152], [62, -138], [-70, -132]].forEach(([dx, dy]) => el('use', { href: '#coin', x: cx + dx - 16, y: FLOOR + dy - 16, width: 32, height: 32 }, g));
+  drawLamp(g, x + 400);
+  drawWindow(g, x + 860, 360, 120, 100);
+  drawWeb(g, x + w, CEIL, 1.1, true);
+}
+function drawRoomDecor(g, ox, w, key, i) {
+  const r = seeded(31 + i * 7 + key.length);
+  const R = ROOMS[key];
+  txt(g, ox + w / 2, 268, R.name, 78, { ...WALL_TEXT, transform: `rotate(${(r() * 4 - 2).toFixed(1)} ${ox + w / 2} 268)` });
+  txt(g, ox + w / 2, 322, R.desc, 32, { fill: '#fff', opacity: .9 });
+  drawWindow(g, ox + w * 0.17, 370, 110, 95);
+  drawPicture(g, ox + w * 0.83, 410, r);
+  if (key !== 'schommel') drawLamp(g, ox + w * 0.3);
+  drawWeb(g, ox + 34, CEIL, .9, false);
+  drawWeb(g, ox + w - 34, CEIL, .9, true);
+}
+
+/* ---------- de vier kamers ---------- */
+const BUILDERS = {
+  // vier trolballen die in het slijm dobberen
+  hindernis(L, bg, dyn, ox) {
+    L.pits.push({ x0: ox + 240, x1: ox + 1230, type: 'hindernis' });
+    [[350, 92, '#ffd8a8'], [610, 96, '#c0eb75'], [865, 88, '#a5d8ff'], [1120, 98, '#fcc2d7']].forEach(([cx, r, fill], j) => {
+      const g = el('g', {}, dyn);
+      const inner = el('g', {}, g);
+      el('circle', { r, fill, stroke: '#7048e8', 'stroke-width': 7 }, inner);
+      el('circle', { r: r - 5, fill: 'url(#hatchBig)' }, inner);
+      P(inner, `M${-r * .36} ${-r * .18} q${r * .12} ${-r * .15} ${r * .24} 0 M${r * .12} ${-r * .18} q${r * .12} ${-r * .15} ${r * .24} 0`, { stroke: '#2a1846', 'stroke-width': 5, fill: 'none', 'stroke-linecap': 'round' });
+      P(inner, `M${-r * .22} ${r * .12} q${r * .22} ${r * .2} ${r * .44} 0`, { stroke: '#2a1846', 'stroke-width': 5, fill: 'none', 'stroke-linecap': 'round' });
+      L.balls.push({ cx: ox + cx, baseY: FLOOR - 130 + r, cy: FLOOR - 130 + r, r, g, inner, phase: j * 1.7, squash: 0 });
+    });
+  },
+  // trampoline aan touwen die heen en weer schuift
+  trampoline(L, bg, dyn, ox, w) {
+    const x0 = ox + 220, x1 = ox + w - 220;
+    L.pits.push({ x0, x1, type: 'trampoline' });
+    el('rect', { x: x0 + 40, y: CEIL - 6, width: x1 - x0 - 80, height: 16, rx: 6, fill: '#5a3d1e', stroke: '#2e1c0b', 'stroke-width': 3 }, bg);
+    P(bg, `M${x0 + 170} ${CEIL + 70} h-70 m0 0 l18 -14 m-18 14 l18 14 M${x1 - 170} ${CEIL + 70} h70 m0 0 l-18 -14 m18 14 l-18 14`,
+      { stroke: '#fff', 'stroke-width': 7, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round', opacity: .85 });
+    const ty = FLOOR - 70, tw = 240;
+    const g = el('g', {}, dyn);
+    for (const sx of [-80, 80]) {
+      el('line', { x1: sx, y1: CEIL + 6, x2: sx, y2: ty + 6, stroke: '#e9ecef', 'stroke-width': 4 }, g);
+      el('circle', { cx: sx, cy: CEIL + 4, r: 11, fill: '#343a40', stroke: '#111', 'stroke-width': 3 }, g);
+    }
+    const bed = el('g', {}, g);
+    el('rect', { x: -tw / 2, y: ty, width: tw, height: 26, rx: 13, fill: '#5f3dc4', stroke: '#2b1a66', 'stroke-width': 4 }, bed);
+    P(bed, `M${-tw / 2 + 30} ${ty + 9} H${tw / 2 - 40}`, { stroke: '#b197fc', 'stroke-width': 5, 'stroke-linecap': 'round' });
+    const amp = (x1 - x0) / 2 - 140, cx0 = (x0 + x1) / 2;
+    L.tramps.push({ g, bed, cx0, amp, w: tw, y: ty, period: 7.5, x: cx0 - amp, vx: 0, squash: 0 });
+  },
+  // een plank die afbrokkelt zodra je erop staat
+  weg(L, bg, dyn, ox, w) {
+    const x0 = ox + 150, x1 = ox + w - 150;
+    L.pits.push({ x0, x1, type: 'weg' });
+    const n = Math.round((x1 - x0) / 60), sw = (x1 - x0) / n;
+    for (let i = 0; i < n; i++) {
+      const a = x0 + i * sw, b = a + sw;
+      const g = el('g', {}, dyn);
+      el('rect', { x: a + 1, y: FLOOR - 2, width: sw - 2, height: 26, rx: 3, fill: '#c58b4a', stroke: '#6b3f1a', 'stroke-width': 3 }, g);
+      P(g, `M${a + 6} ${FLOOR + 8} q${sw / 3} -4 ${sw - 14} 2`, { stroke: 'rgba(80,40,10,.4)', 'stroke-width': 2, fill: 'none' });
+      if (i % 3 === 1) P(g, `M${a + sw * .4} ${FLOOR - 2} l6 9 l-5 7 l7 8`, { stroke: '#5a3416', 'stroke-width': 2, fill: 'none' });
+      L.planks.push({ x0: a, x1: b, cx: (a + b) / 2, g, state: 'ok', t: 0, dy: 0, vy: 0, rot: 0, rotV: 0 });
+    }
+  },
+  // een touw over het slijm
+  touw(L, bg, dyn, ox, w) {
+    const x0 = ox + 150, x1 = ox + w - 150;
+    const pit = { x0, x1, type: 'touw', ropeY: FLOOR - 8 };
+    L.pits.push(pit);
+    for (const x of [x0, x1]) el('rect', { x: x - 9, y: FLOOR - 46, width: 18, height: 60, rx: 4, fill: '#8a5a2b', stroke: '#4a2c12', 'stroke-width': 3 }, bg);
+    pit.path = el('path', { fill: 'none', stroke: '#d9a066', 'stroke-width': 8, 'stroke-linecap': 'round' }, dyn);
+    pit.path2 = el('path', { fill: 'none', stroke: '#8a5a2b', 'stroke-width': 8, 'stroke-dasharray': '5 9' }, dyn);
+    L.ropes.push(pit);
+  },
+  // vier spinnen aan een draad, met het paarse nest uit de tekening
+  spinnen(L, bg, dyn, ox, w) {
+    const lineY = CEIL + 60, nx = ox + 170;
+    P(bg, `M${nx} ${lineY} H${ox + w - 70}`, { stroke: 'rgba(255,255,255,.8)', 'stroke-width': 3 });
+    el('ellipse', { cx: nx, cy: lineY + 4, rx: 72, ry: 28, fill: '#5f3dc4' }, bg);
+    P(bg, `M${nx - 66} ${lineY + 8} l16 -26 l10 34 l14 -38 l12 40 l14 -38 l10 36 l14 -32 l10 28 l12 -22`, { stroke: '#7048e8', 'stroke-width': 9, fill: 'none', 'stroke-linejoin': 'round', 'stroke-linecap': 'round' });
+    P(bg, `M${nx - 50} ${lineY + 22} q40 10 96 -6`, { stroke: '#b197fc', 'stroke-width': 5, fill: 'none', 'stroke-linecap': 'round' });
+    [[430, 3.2, 0], [720, 2.7, 1.9], [1010, 3.6, 3.7], [1300, 2.9, 5.1]].forEach(([x, period, phase]) => {
+      const thread = el('line', { x1: ox + x, y1: lineY, x2: ox + x, y2: FLOOR - 40, stroke: 'rgba(255,255,255,.85)', 'stroke-width': 2 }, dyn);
+      const g = el('g', {}, dyn);
+      for (const side of [-1, 1]) for (let i = 0; i < 4; i++) {
+        P(g, `M${side * 10} ${-4 + i * 4} L${side * 30} ${-15 + i * 8} L${side * 37} ${5 + i * 6}`, { stroke: '#1b1b1b', 'stroke-width': 3.5, fill: 'none', 'stroke-linejoin': 'round', 'stroke-linecap': 'round' });
+      }
+      el('ellipse', { rx: 22, ry: 19, fill: '#2b2b2b', stroke: '#111', 'stroke-width': 2 }, g);
+      el('circle', { cx: -8, cy: -5, r: 7, fill: '#fff' }, g);
+      el('circle', { cx: 8, cy: -5, r: 7, fill: '#fff' }, g);
+      el('circle', { cx: -7, cy: -3, r: 3.2, fill: '#111' }, g);
+      el('circle', { cx: 9, cy: -3, r: 3.2, fill: '#111' }, g);
+      P(g, 'M-8 8 q8 6 16 0 M-5 10 l1.5 4 l1.5 -3 M3 10 l1.5 4 l1.5 -4', { stroke: '#fff', 'stroke-width': 2, fill: 'none', 'stroke-linejoin': 'round' });
+      L.spiders.push({ x: ox + x, top: FLOOR - 300, bottom: FLOOR - 26, period, phase, y: FLOOR - 26, g, thread });
+    });
+  },
+  // schommel boven het slijm, met een vliegende schaar (met vleugels en een eenhoorn)
+  schommel(L, bg, dyn, ox, w) {
+    const x0 = ox + 350, x1 = ox + w - 350, cx = (x0 + x1) / 2, beamY = 150;
+    L.pits.push({ x0, x1, type: 'schommel' });
+    for (const x of [x0 - 34, x1 + 20]) el('rect', { x, y: beamY, width: 14, height: FLOOR - beamY, fill: '#868e96', stroke: '#495057', 'stroke-width': 3 }, bg);
+    el('rect', { x: x0 - 44, y: beamY - 16, width: x1 - x0 + 88, height: 24, rx: 6, fill: '#8a4b1f', stroke: '#4a2c12', 'stroke-width': 4 }, bg);
+    const g = el('g', {}, dyn);
+    const rope = () => el('line', { stroke: '#d9a066', 'stroke-width': 5, 'stroke-linecap': 'round' }, g);
+    const ropeL = rope(), ropeR = rope(), stubL = rope(), stubR = rope();
+    const seat = el('g', {}, g);
+    el('rect', { x: -100, y: 0, width: 200, height: 18, rx: 5, fill: '#a0612b', stroke: '#4a2c12', 'stroke-width': 4 }, seat);
+    P(seat, 'M-70 7 q40 -3 70 1 t60 0', { stroke: 'rgba(60,30,10,.4)', 'stroke-width': 2, fill: 'none' });
+    const s = { px: cx, py: beamY + 8, L: 610, A: 35 * Math.PI / 180, T: 4.0, w: 200, x: cx, y: beamY + 618, vx: 0, dx: 0,
+      cut: false, boarded: false, timer: 0, rot: 0, ropeL, ropeR, stubL, stubR, seat };
+    L.swings.push(s);
+    const sc = makeScissors(dyn);
+    Object.assign(sc, { home: { cx, y: 330, amp: (x1 - x0) / 2 }, swing: s, x: cx, y: 330 });
+    s.scissors = sc;
+    L.scissors.push(sc);
+  },
+};
+
+/* ---------- de vliegende schaar met vleugels en een eenhoorn ---------- */
+function drawUnicorn(u) {
+  const RAINBOW = ['#ff6b6b', '#ffd43b', '#69db7c', '#74c0fc', '#b197fc'];
+  RAINBOW.forEach((c, i) => P(u, `M-15 ${-19 + i * 1.6} q-12 ${-6 + i * 3} -20 ${4 + i * 3}`, { stroke: c, 'stroke-width': 3, fill: 'none', 'stroke-linecap': 'round' }));
+  P(u, 'M-10 -8 V0 M-4 -8 V0 M6 -8 V0 M11 -8 V0', { stroke: '#adb5bd', 'stroke-width': 6, 'stroke-linecap': 'round' });
+  P(u, 'M-10 -8 V0 M-4 -8 V0 M6 -8 V0 M11 -8 V0', { stroke: '#fff', 'stroke-width': 3.5, 'stroke-linecap': 'round' });
+  el('ellipse', { cx: 0, cy: -15, rx: 17, ry: 10, fill: '#fff', stroke: '#adb5bd', 'stroke-width': 2 }, u);
+  P(u, 'M8 -20 Q13 -30 15 -36 L24 -32 Q20 -24 16 -14 Z', { fill: '#fff', stroke: '#adb5bd', 'stroke-width': 2, 'stroke-linejoin': 'round' });
+  el('ellipse', { cx: 22, cy: -36, rx: 10, ry: 7, fill: '#fff', stroke: '#adb5bd', 'stroke-width': 2, transform: 'rotate(20 22 -36)' }, u);
+  P(u, 'M18 -41 L22 -60 L25 -40 Z', { fill: '#ffd43b', stroke: '#f59f00', 'stroke-width': 1.5, 'stroke-linejoin': 'round' });
+  RAINBOW.forEach((c, i) => P(u, `M${15 - i * 1.8} ${-42 + i * 3.2} q-6 4 -6 10`, { stroke: c, 'stroke-width': 3, fill: 'none', 'stroke-linecap': 'round' }));
+  P(u, 'M21 -38 q2.2 -2.2 4.4 0', { stroke: '#2a1846', 'stroke-width': 1.6, fill: 'none', 'stroke-linecap': 'round' });
+  el('circle', { cx: 28, cy: -33, r: 2, fill: '#ffc9c9' }, u);
+}
+function makeScissors(parent) {
+  const g = el('g', {}, parent);
+  const flip = el('g', {}, g);
+  const wings = [];
+  for (const [dx, fill] of [[6, '#e9ecef'], [-4, '#fff']]) {
+    const wg = el('g', {}, flip);
+    P(wg, 'M0 0 C-8 -30 -40 -44 -60 -32 C-48 -26 -46 -18 -52 -12 C-40 -12 -30 -6 -40 2 C-24 4 -10 2 0 0 Z', { fill, stroke: '#adb5bd', 'stroke-width': 2, 'stroke-linejoin': 'round' });
+    wings.push({ g: wg, dx });
+  }
+  const b2 = el('g', {}, flip), b1 = el('g', {}, flip);
+  for (const [b, sy] of [[b1, -1], [b2, 1]]) {
+    P(b, `M0 ${2 * sy} L82 ${sy} Q60 ${-4 * sy} 0 ${-5 * sy} Z`, { fill: '#dee2e6', stroke: '#495057', 'stroke-width': 2, 'stroke-linejoin': 'round' });
+    P(b, `M0 0 L-22 ${10 * sy}`, { stroke: '#7048e8', 'stroke-width': 6, 'stroke-linecap': 'round' });
+    el('circle', { cx: -33, cy: 15 * sy, r: 12, fill: 'none', stroke: '#7048e8', 'stroke-width': 6 }, b);
+  }
+  el('circle', { r: 4.5, fill: '#495057' }, flip);
+  drawUnicorn(el('g', { transform: 'translate(24 -4)' }, flip));
+  const bub = el('g', {}, g);
+  return { g, flip, wings, b1, b2, bub, x: 0, y: 0, t: rnd(0, 10), face: 1, state: 'idle' };
+}
+function ropePoint(s, side, f) {
+  return { x: s.px + side * 70 + (s.x - s.px) * f, y: s.py + (s.y - s.py) * f };
+}
+function cutRope(s) {
+  const sc = s.scissors;
+  s.cut = true; s.fvx = s.vx * 0.4; s.fvy = 0;
+  s.cutL = ropePoint(s, -1, .45); s.cutR = ropePoint(s, 1, .45);
+  s.stub = { dx: (s.px - s.x) * .3, dy: -(s.y - s.py) * .3 };
+  sc.state = 'away';
+  bubble(sc.bub, 'KNIP!', -40, '#ffe3f1', 1);
+  puffs(s.cutL.x, s.cutL.y, 1, 8, '#ffe066', lvlFx);
+}
+function updateSwings(dt) {
+  for (const s of IN.L.swings) {
+    if (!s.cut) {
+      const om = 2 * Math.PI / s.T, th = s.A * Math.sin(IN.t * om), thd = s.A * om * Math.cos(IN.t * om);
+      const nx = s.px + s.L * Math.sin(th);
+      s.dx = nx - s.x; s.x = nx; s.y = s.py + s.L * Math.cos(th);
+      s.vx = s.L * Math.cos(th) * thd;
+      if (s.boarded && s.scissors.state === 'idle') {
+        s.timer -= dt;
+        if (s.timer <= 0) { s.scissors.state = 'attack'; bubble(s.scissors.bub, 'Knip knip!', -40, '#fff', 1); toast('Pas op, de schaar komt eraan!'); }
+      }
+      s.ropeL.setAttribute('x1', s.px - 70); s.ropeL.setAttribute('y1', s.py); s.ropeL.setAttribute('x2', (s.x - 70).toFixed(1)); s.ropeL.setAttribute('y2', s.y.toFixed(1));
+      s.ropeR.setAttribute('x1', s.px + 70); s.ropeR.setAttribute('y1', s.py); s.ropeR.setAttribute('x2', (s.x + 70).toFixed(1)); s.ropeR.setAttribute('y2', s.y.toFixed(1));
+      s.stubL.setAttribute('opacity', 0); s.stubR.setAttribute('opacity', 0);
+      s.seat.setAttribute('transform', `translate(${s.x.toFixed(1)} ${s.y.toFixed(1)})`);
+    } else if (s.y < FLOOR + 500) {
+      s.fvy += GRAV * dt; s.x += s.fvx * dt; s.y += s.fvy * dt; s.dx = s.fvx * dt; s.rot += dt * 70;
+      s.ropeL.setAttribute('x2', s.cutL.x.toFixed(1)); s.ropeL.setAttribute('y2', s.cutL.y.toFixed(1));
+      s.ropeR.setAttribute('x2', s.cutR.x.toFixed(1)); s.ropeR.setAttribute('y2', s.cutR.y.toFixed(1));
+      for (const [st, side] of [[s.stubL, -1], [s.stubR, 1]]) {
+        st.setAttribute('opacity', 1);
+        st.setAttribute('x1', (s.x + side * 70).toFixed(1)); st.setAttribute('y1', s.y.toFixed(1));
+        st.setAttribute('x2', (s.x + side * 70 + s.stub.dx).toFixed(1)); st.setAttribute('y2', (s.y + s.stub.dy).toFixed(1));
+      }
+      s.seat.setAttribute('transform', `translate(${s.x.toFixed(1)} ${s.y.toFixed(1)}) rotate(${s.rot.toFixed(1)})`);
+    }
+  }
+  for (const sc of IN.L.scissors) {
+    sc.t += dt;
+    const ox = sc.x;
+    if (sc.state === 'attack') {
+      const tp = ropePoint(sc.swing, -1, .45);
+      const d = Math.hypot(tp.x - sc.x, tp.y - sc.y), step = Math.min(d, 650 * dt);
+      if (d > 0.01) { sc.x += (tp.x - sc.x) / d * step; sc.y += (tp.y - sc.y) / d * step; }
+      if (d < 22) cutRope(sc.swing);
+    } else {
+      const tx = sc.home.cx + sc.home.amp * 0.95 * Math.sin(sc.t * 0.5), ty = sc.home.y + 70 * Math.sin(sc.t * 1.1 + 1);
+      const k = Math.min(1, dt * 2.5);
+      sc.x += (tx - sc.x) * k; sc.y += (ty - sc.y) * k;
+    }
+    const vx = (sc.x - ox) / Math.max(dt, 1e-4);
+    if (Math.abs(vx) > 15) sc.face = vx > 0 ? 1 : -1;
+    const open = sc.state === 'attack' ? 4 + 16 * Math.abs(Math.sin(sc.t * 14)) : 7 + 4 * Math.sin(sc.t * 3);
+    sc.b1.setAttribute('transform', `rotate(${-open})`);
+    sc.b2.setAttribute('transform', `rotate(${open})`);
+    const flap = 0.35 + 0.65 * Math.abs(Math.sin(sc.t * 9));
+    for (const wg of sc.wings) wg.g.setAttribute('transform', `translate(${wg.dx} -4) scale(1 ${flap.toFixed(2)})`);
+    sc.flip.setAttribute('transform', `scale(${1.8 * sc.face} 1.8)`);
+    sc.g.setAttribute('transform', `translate(${sc.x.toFixed(1)} ${sc.y.toFixed(1)})`);
+  }
+}
+function updateSpiders() {
+  for (const sp of IN.L.spiders) {
+    const f = clamp(0.5 + 0.85 * Math.sin(2 * Math.PI * IN.t / sp.period + sp.phase), 0, 1);
+    sp.y = sp.top + (sp.bottom - sp.top) * f;
+    sp.g.setAttribute('transform', `translate(${sp.x} ${sp.y.toFixed(1)}) rotate(${(Math.sin(IN.t * 7 + sp.phase) * 6).toFixed(1)})`);
+    sp.thread.setAttribute('y2', (sp.y - 17).toFixed(1));
+  }
+}
+function spiderHit(p) {
+  for (const sp of IN.L.spiders) {
+    const cx = clamp(sp.x, p.x - 16, p.x + 16), cy = clamp(sp.y, p.y - 125, p.y - 4);
+    if (Math.hypot(sp.x - cx, sp.y - cy) < 22) return true;
+  }
+  return false;
+}
+
+
+function buildLevel(h) {
+  lvlBg.replaceChildren(); lvlDyn.replaceChildren(); lvlFx.replaceChildren(); lvlFront.replaceChildren();
+  const L = { pits: [], balls: [], tramps: [], planks: [], ropes: [], spiders: [], swings: [], scissors: [], checkpoints: [{ x: 300, room: -1 }], rooms: [] };
+  const START_W = 800, END_W = 1000;
+  L.width = START_W + h.rooms.reduce((a, k) => a + ROOMS[k].width, 0) + END_W;
+  drawShell(lvlBg, L.width, h.wall);
+  drawStartHall(lvlBg, h);
+  let x = START_W;
+  h.rooms.forEach((k, i) => {
+    const wdt = ROOMS[k].width;
+    drawRoomDecor(lvlBg, x, wdt, k, i);
+    drawDoorway(lvlBg, x);
+    L.checkpoints.push({ x: x + 100, room: i });
+    L.rooms.push(k);
+    BUILDERS[k](L, lvlBg, lvlDyn, x, wdt);
+    x += wdt;
+  });
+  drawDoorway(lvlBg, x);
+  L.finishX = x + 380;
+  drawEndHall(lvlBg, x, END_W, L);
+  drawFloor(lvlBg, L, L.width);
+  IN.L = L;
+}
+
+/* ---------- binnengaan en weer naar buiten ---------- */
+function fitInside() {
+  const ar = innerWidth / innerHeight;
+  IN.vh = 1000; IN.vw = 1000 * ar;
+  if (IN.vw < 640) { IN.vw = 640; IN.vh = 640 / ar; }
+  IN.y0 = 1000 - IN.vh;
+}
+addEventListener('resize', () => { if (IN.active) fitInside(); });
+
+function makePlayerFigure() {
+  lvlPlayer.replaceChildren();
+  const g = el('g', {}, lvlPlayer);
+  const lift = el('g', {}, g), rot = el('g', {}, lift), body = el('g', {}, rot);
+  const f = {};
+  LOOKS[state.avatar](body, f);
+  IN.fig = { g, lift, rot, body, f };
+}
+function renderAvatars() {
+  const box = $('avatars');
+  box.replaceChildren();
+  for (const t of ['blond', 'regenboog', 'tasje', 'zeldzaam']) {
+    const locked = t === 'zeldzaam' && !state.rareTrolled;
+    const b = document.createElement('button');
+    b.className = 'avatar' + (state.avatar === t ? ' on' : '');
+    b.disabled = locked;
+    b.title = locked ? 'Trol eerst een zeldzame bezoeker om deze vrij te spelen' : 'Speel met dit poppetje';
+    const s = el('svg', { viewBox: '-36 -88 72 94', width: 38, height: 50 }, b);
+    const f = {};
+    LOOKS[t](el('g', {}, s), f);
+    setRot(f.legL, 0); setRot(f.legR, 0); setRot(f.armL, f.armBase); setRot(f.armR, -f.armBase);
+    if (locked) { const l = document.createElement('span'); l.className = 'lock'; l.textContent = '\u{1F512}'; b.appendChild(l); }
+    b.addEventListener('click', () => {
+      state.avatar = t; save();
+      makePlayerFigure(); renderAvatars();
+      b.blur();
+    });
+    box.appendChild(b);
+  }
+}
+function enterHouse(id) {
+  const h = state.houses.find(x => x.id === id);
+  if (!h || !h.rooms.length) return;
+  select(null);
+  IN.active = true; IN.h = h;
+  document.body.classList.add('inside-mode');
+  $('inside').hidden = false;
+  $('inName').textContent = h.name;
+  fitInside();
+  buildLevel(h);
+  makePlayerFigure();
+  renderAvatars();
+  restartRun();
+}
+function leaveHouse() {
+  if (!IN.active) return;
+  const id = IN.h.id;
+  IN.active = false;
+  keys.left = keys.right = keys.jump = false;
+  $('inside').hidden = true; $('finish').hidden = true; $('balance').hidden = true;
+  document.body.classList.remove('inside-mode');
+  lvlBg.replaceChildren(); lvlDyn.replaceChildren(); lvlPlayer.replaceChildren(); lvlFx.replaceChildren(); lvlFront.replaceChildren();
+  updateUI();
+  select(id);
+}
+function restartRun() {
+  IN.t = 0; IN.time = 0; IN.falls = 0; IN.done = false; IN.camX = null; IN.roomLabel = null;
+  $('finish').hidden = true;
+  resetPlanks();
+  spawnPlayer(0);
+}
+function spawnPlayer(cp) {
+  const c = IN.L.checkpoints[cp];
+  IN.p = { x: c.x, y: FLOOR, vx: 0, vy: 0, onGround: true, ground: { type: 'floor' }, coyote: 0, carry: 0, mode: 'normal',
+    lean: 0, leanV: 0, gust: 0, gustT: 0, dir: 1, phase: 0, deadT: 0, cp, noRope: 0 };
+  setFace(IN.fig.f, false);
+  IN.fig.g.removeAttribute('opacity');
+  $('balance').hidden = true;
+}
+function resetPlanks() {
+  for (const s of IN.L.planks) { s.state = 'ok'; s.dy = 0; s.vy = 0; s.rot = 0; s.g.removeAttribute('transform'); s.g.removeAttribute('opacity'); }
+  for (const s of IN.L.swings) { s.cut = false; s.boarded = false; s.timer = 0; s.rot = 0; }
+  for (const sc of IN.L.scissors) { sc.state = 'idle'; sc.bub.replaceChildren(); }
+}
+
+/* ---------- besturing ---------- */
+const KEYMAP = { ArrowLeft: 'left', a: 'left', A: 'left', ArrowRight: 'right', d: 'right', D: 'right', ArrowUp: 'jump', w: 'jump', W: 'jump', ' ': 'jump' };
+addEventListener('keydown', e => {
+  if (!IN.active) return;
+  if (e.key === 'Escape') { leaveHouse(); return; }
+  const k = KEYMAP[e.key];
+  if (!k) return;
+  e.preventDefault();
+  if (k === 'jump' && !e.repeat) IN.jumpBuf = 0.14;
+  keys[k] = true;
+});
+addEventListener('keyup', e => { const k = KEYMAP[e.key]; if (k) keys[k] = false; });
+addEventListener('blur', () => { keys.left = keys.right = keys.jump = false; });
+document.querySelectorAll('#touch button').forEach(b => {
+  const k = b.dataset.k;
+  const on = e => { e.preventDefault(); b.setPointerCapture?.(e.pointerId); keys[k] = true; if (k === 'jump') IN.jumpBuf = 0.14; b.classList.add('down'); };
+  const off = () => { keys[k] = false; b.classList.remove('down'); };
+  b.addEventListener('pointerdown', on);
+  b.addEventListener('pointerup', off); b.addEventListener('pointercancel', off); b.addEventListener('lostpointercapture', off);
+});
+$('exitBtn').addEventListener('click', leaveHouse);
+$('outBtn').addEventListener('click', leaveHouse);
+$('againBtn').addEventListener('click', restartRun);
+
+/* ---------- natuurkunde ---------- */
+const pitAt = x => IN.L.pits.find(p => x > p.x0 && x < p.x1);
+function supports(x) {
+  const out = [];
+  const pit = pitAt(x);
+  if (!pit) out.push({ y: FLOOR, type: 'floor' });
+  else if (pit.type === 'weg') {
+    for (const s of IN.L.planks) if ((s.state === 'ok' || s.state === 'shake') && x >= s.x0 - 3 && x <= s.x1 + 3) { out.push({ y: FLOOR, type: 'plank', ref: s }); break; }
+  }
+  for (const s of IN.L.swings) if (!s.cut && Math.abs(x - s.x) < s.w / 2 + 4) out.push({ y: s.y, type: 'swing', ref: s });
+  for (const b of IN.L.balls) {
+    const dx = x - b.cx;
+    if (Math.abs(dx) < b.r * 0.97) out.push({ y: b.cy - Math.sqrt(b.r * b.r - dx * dx), type: 'ball', ref: b });
+  }
+  return out;
+}
+function touchSupport(s, landed) {
+  if (s.type === 'plank' && s.ref.state === 'ok') { s.ref.state = 'shake'; s.ref.t = 0.3; }
+  if (landed && s.type === 'ball') s.ref.squash = 1;
+  if (s.type === 'swing' && !s.ref.boarded && !s.ref.cut) { s.ref.boarded = true; s.ref.timer = rnd(2.0, 3.2); }
+}
+function enterRope(pit) {
+  const p = IN.p;
+  Object.assign(p, { mode: 'rope', rope: pit, vy: 0, onGround: true, carry: 0, lean: rnd(-.08, .08), leanV: 0, gustT: .6 });
+  $('balance').hidden = false;
+}
+function die(kind = 'slijm') {
+  const p = IN.p;
+  if (p.mode === 'dead') return;
+  p.mode = 'dead'; p.deadKind = kind; p.deadT = 1.1; p.vy = kind === 'spin' ? -700 : 160;
+  IN.falls++;
+  setFace(IN.fig.f, true);
+  $('balance').hidden = true;
+  if (kind === 'spin') {
+    puffs(p.x, p.y - 70, 1.4, 10, '#b197fc', lvlFx);
+    toast(pick(['Au! Een spin! Getrold!', 'Iiieek, een spin!', 'Niet aan de spinnen komen!']));
+  } else {
+    puffs(p.x, SLIME + 10, 1.6, 12, '#8ce99a', lvlFx);
+    toast(pick(['Plons! Getrold!', 'Iel, trolslijm!', 'Haha, in het slijm!', 'Getrold door het huis!']));
+  }
+}
+function finishRun() {
+  const p = IN.p, h = IN.h;
+  IN.done = true; p.mode = 'finish';
+  const key = h.rooms.join(',');
+  const t = Math.round(IN.time * 10) / 10;
+  const prev = h.best[key];
+  const record = prev == null || t < prev;
+  if (record) h.best[key] = t;
+  save();
+  $('fTime').textContent = t.toFixed(1);
+  $('fFalls').textContent = IN.falls;
+  $('fBest').textContent = prev == null ? 'Je eerste keer, dus meteen een record!' : record ? 'Nieuw record!' : `Je record is ${prev.toFixed(1)} sec`;
+  $('finish').hidden = false;
+  for (const c of ['#ffe066', '#ff8787', '#74c0fc', '#8ce99a', '#b197fc']) puffs(p.x + rnd(-60, 60), p.y - rnd(80, 180), 1.4, 7, c, lvlFx);
+}
+
+function updateNormal(dt) {
+  const p = IN.p, L = IN.L;
+  const input = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
+  if (input) p.dir = input;
+  p.noRope -= dt;
+  p.vx = input * RUN + p.carry;
+  const prevX = p.x, prevY = p.y;
+  p.x = clamp(p.x + p.vx * dt, HW, L.width - HW);
+  if (p.y > FLOOR + 4) { const pit = pitAt(prevX); if (pit) p.x = clamp(p.x, pit.x0 + HW, pit.x1 - HW); }
+  for (const b of L.balls) {
+    const dx = p.x - b.cx;
+    if (Math.abs(dx) < b.r) {
+      const sy = b.cy - Math.sqrt(b.r * b.r - dx * dx);
+      if (p.y > sy + 24 && p.y - 120 < b.cy + b.r) { p.x = b.cx + (Math.sign(prevX - b.cx) || 1) * b.r; p.carry = 0; }
+    }
+  }
+  if (p.onGround) {
+    if (p.ground.type === 'swing') p.x += p.ground.ref.dx;
+    const pit = pitAt(p.x);
+    if (pit && pit.type === 'touw' && p.y <= FLOOR + 1) { enterRope(pit); return; }
+    let best = null;
+    for (const s of supports(p.x)) if (Math.abs(s.y - p.y) <= 30 && (!best || Math.abs(s.y - p.y) < Math.abs(best.y - p.y))) best = s;
+    if (best) { p.y = best.y; p.ground = best; touchSupport(best, false); }
+    else { p.onGround = false; p.coyote = 0.1; p.vy = 0; }
+  }
+  if (IN.jumpBuf > 0 && (p.onGround || p.coyote > 0)) {
+    if (p.onGround && p.ground.type === 'swing') p.carry = p.ground.ref.vx * 0.8;
+    p.vy = -JUMP_V; p.onGround = false; p.coyote = 0; IN.jumpBuf = 0;
+  }
+  if (!p.onGround) {
+    p.coyote -= dt;
+    if (!keys.jump && p.vy < -480) p.vy = -480;   // kort tikken = klein sprongetje
+    p.vy = Math.min(p.vy + GRAV * dt, 1700);
+    const ny = p.y + p.vy * dt;
+    if (p.vy >= 0) {
+      for (const t of L.tramps) {
+        if (Math.abs(p.x - t.x) < t.w / 2 + 8 && prevY <= t.y + 4 && ny >= t.y) {
+          p.y = t.y; p.vy = -(1250 + (keys.jump ? 200 : 0)); p.carry = t.vx * 0.85; t.squash = 1;
+          return;
+        }
+      }
+      const pit = pitAt(p.x);
+      if (pit && pit.type === 'touw' && p.noRope <= 0 && p.y <= pit.ropeY + 2 && ny >= pit.ropeY) { p.y = pit.ropeY; enterRope(pit); return; }
+      let land = null;
+      for (const s of supports(p.x)) if (s.y >= p.y - 14 && s.y <= ny + .01 && (!land || s.y < land.y)) land = s;
+      if (land) {
+        p.y = land.y; p.vy = 0; p.onGround = true; p.carry = 0; p.ground = land;
+        touchSupport(land, true);
+        puffs(p.x, p.y, .8, 5, '#f1e3d0', lvlFx);
+      } else p.y = ny;
+    } else p.y = ny;
+    if (p.y > SLIME + 50) die();
+  }
+}
+function updateRope(dt) {
+  const p = IN.p, r = p.rope;
+  const input = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
+  p.gustT -= dt;
+  if (p.gustT <= 0) { p.gust = rnd(-1, 1); p.gustT = rnd(.7, 1.5); }
+  p.leanV += (p.lean * 1.5 + p.gust * 0.6 + input * 3.2) * dt;
+  p.leanV *= Math.max(0, 1 - 1.2 * dt);
+  p.lean += p.leanV * dt;
+  p.x += 170 * dt; p.dir = 1;
+  p.y = r.ropeY + 26 * Math.sin(Math.PI * clamp((p.x - r.x0) / (r.x1 - r.x0), 0, 1));
+  $('balanceNeedle').style.left = `${50 + clamp(p.lean, -1, 1) * 46}%`;
+  if (Math.abs(p.lean) >= 1) {
+    Object.assign(p, { mode: 'normal', onGround: false, vy: -120, carry: Math.sign(p.lean) * 70, noRope: 1 });
+    setFace(IN.fig.f, true);
+    $('balance').hidden = true;
+  } else if (p.x >= r.x1) {
+    Object.assign(p, { mode: 'normal', y: FLOOR, onGround: true, lean: 0, leanV: 0 });
+    $('balance').hidden = true;
+  }
+}
+function renderPlayer(dt) {
+  const p = IN.p, f = IN.fig.f;
+  const walking = (p.mode === 'normal' && p.onGround && Math.abs(p.vx) > 10) || p.mode === 'rope';
+  if (walking) p.phase += dt * (p.mode === 'rope' ? 6 : 12);
+  const sw = walking ? Math.sin(p.phase) * (p.mode === 'rope' ? 14 : 28) : 0;
+  let lift = 0;
+  if (p.mode === 'normal' && !p.onGround) {
+    setRot(f.legL, 28); setRot(f.legR, -14);
+    setRot(f.armL, p.vy < 0 ? 150 : 115); setRot(f.armR, p.vy < 0 ? -150 : -115);
+  } else if (p.mode === 'rope') {
+    setRot(f.legL, sw); setRot(f.legR, -sw);
+    setRot(f.armL, 88 - p.lean * 12); setRot(f.armR, -88 - p.lean * 12);
+  } else if (p.mode === 'dead') {
+    const wv = Math.sin(IN.t * 22) * 22;
+    setRot(f.legL, 10); setRot(f.legR, -10); setRot(f.armL, 150 + wv); setRot(f.armR, -150 + wv);
+  } else if (p.mode === 'finish') {
+    setRot(f.legL, 0); setRot(f.legR, 0); setRot(f.armL, 155); setRot(f.armR, -155);
+    lift = -Math.abs(Math.sin(IN.t * 6)) * 24;
+  } else {
+    setRot(f.legL, sw); setRot(f.legR, -sw);
+    setRot(f.armL, f.armBase - sw * .5); setRot(f.armR, -f.armBase - sw * .5);
+    lift = walking ? -Math.abs(Math.sin(p.phase)) * 3 : 0;
+  }
+  IN.fig.lift.setAttribute('transform', `translate(0 ${lift.toFixed(1)})`);
+  IN.fig.rot.setAttribute('transform', `rotate(${(p.lean * 38).toFixed(1)})`);
+  IN.fig.body.setAttribute('transform', `scale(${p.dir} 1)`);
+  IN.fig.g.setAttribute('transform', `translate(${p.x.toFixed(1)} ${p.y.toFixed(1)}) scale(${PS})`);
+}
+
+function updateInside(dt) {
+  const L = IN.L, p = IN.p;
+  IN.t += dt;
+  IN.jumpBuf -= dt;
+  if (!IN.done) IN.time += dt;
+  for (const b of L.balls) {
+    b.cy = b.baseY + Math.sin(IN.t * 1.5 + b.phase) * 14;
+    b.squash = Math.max(0, b.squash - dt * 3);
+    b.g.setAttribute('transform', `translate(${b.cx} ${b.cy.toFixed(1)})`);
+    b.inner.setAttribute('transform', `scale(${(1 + b.squash * .12).toFixed(3)} ${(1 - b.squash * .12).toFixed(3)})`);
+  }
+  for (const t of L.tramps) {
+    const om = Math.PI * 2 / t.period;
+    t.x = t.cx0 - Math.cos(IN.t * om) * t.amp;
+    t.vx = Math.sin(IN.t * om) * t.amp * om;
+    t.squash = Math.max(0, t.squash - dt * 4);
+    t.g.setAttribute('transform', `translate(${t.x.toFixed(1)} 0)`);
+    t.bed.setAttribute('transform', `translate(0 ${(t.squash * 16).toFixed(1)})`);
+  }
+  for (const s of L.planks) {
+    if (s.state === 'shake') {
+      s.t -= dt;
+      s.g.setAttribute('transform', `translate(${rnd(-2.5, 2.5).toFixed(1)} ${rnd(-1.5, 1.5).toFixed(1)})`);
+      if (s.t <= 0) { s.state = 'fall'; s.vy = 0; s.rotV = rnd(-120, 120); }
+    } else if (s.state === 'fall') {
+      s.vy += GRAV * .6 * dt; s.dy += s.vy * dt; s.rot += s.rotV * dt;
+      s.g.setAttribute('transform', `translate(0 ${s.dy.toFixed(1)}) rotate(${s.rot.toFixed(1)} ${s.cx} ${FLOOR + 11})`);
+      if (s.dy > 400) { s.state = 'gone'; s.g.setAttribute('opacity', 0); }
+    }
+  }
+  updateSpiders();
+  updateSwings(dt);
+  if (p.mode === 'dead') {
+    p.deadT -= dt;
+    if (p.deadKind === 'spin') {
+      p.vy += GRAV * dt; p.y += p.vy * dt;
+      IN.fig.g.setAttribute('opacity', clamp(p.deadT, 0, 1).toFixed(2));
+    } else p.y = Math.min(p.y + p.vy * dt, SLIME + 200);
+    if (p.deadT <= 0) { resetPlanks(); spawnPlayer(p.cp); }
+  } else if (p.mode === 'rope') updateRope(dt);
+  else if (p.mode === 'normal') { updateNormal(dt); if (IN.p.mode === 'normal' && spiderHit(IN.p)) die('spin'); }
+  for (const r of L.ropes) {
+    const on = IN.p.mode === 'rope' && IN.p.rope === r;
+    const px = on ? IN.p.x : (r.x0 + r.x1) / 2, sy = on ? IN.p.y : r.ropeY + 12;
+    const d = `M${r.x0} ${r.ropeY} Q${((r.x0 + px) / 2).toFixed(1)} ${sy.toFixed(1)} ${px.toFixed(1)} ${sy.toFixed(1)} Q${((px + r.x1) / 2).toFixed(1)} ${sy.toFixed(1)} ${r.x1} ${r.ropeY}`;
+    r.path.setAttribute('d', d); r.path2.setAttribute('d', d);
+  }
+  renderPlayer(dt);
+  // voortgang en finish
+  const P_ = IN.p;
+  if (P_.mode === 'normal' && P_.onGround) {
+    for (let i = P_.cp + 1; i < L.checkpoints.length; i++) if (P_.x >= L.checkpoints[i].x) P_.cp = i;
+    if (!IN.done && P_.x >= L.finishX) finishRun();
+  }
+  const cp = L.checkpoints[P_.cp];
+  const label = IN.done ? 'Finish!' : cp.room < 0 ? 'Hal' : `Kamer ${cp.room + 1} van ${L.rooms.length}: ${ROOMS[L.rooms[cp.room]].name}`;
+  if (label !== IN.roomLabel) { IN.roomLabel = label; $('inRoom').textContent = label; }
+  $('inTime').textContent = IN.time.toFixed(1);
+  $('inFalls').textContent = IN.falls;
+  // camera
+  const target = clamp(P_.x - IN.vw * 0.4, -60, Math.max(-60, L.width - IN.vw + 60));
+  IN.camX = IN.camX == null ? target : IN.camX + (target - IN.camX) * Math.min(1, dt * 5);
+  inSvg.setAttribute('viewBox', `${IN.camX.toFixed(1)} ${IN.y0.toFixed(1)} ${IN.vw.toFixed(1)} ${IN.vh.toFixed(1)}`);
+}
+
+if (location.search.includes('debug')) window.__trol = { enterHouse, IN, keys, get state() { return state; } };
+
+/* ---------- start ---------- */
+load();
+state.avatar = state.avatar || 'blond';
+state.houses.forEach(h => { h.rooms = h.rooms || []; h.best = h.best || {}; });
+state.houses.forEach(h => makeHouseView(h, false));
+for (let i = 0; i < 4; i++) makeWalker(true);
+updateUI();
+if (firstVisit) setTimeout(() => toast('Wie langs een trolhuis loopt, wordt getrold! Elke trol = 5 munten.'), 600);
+
+let spawnTimer = 1, last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  if (IN.active) { updateInside(dt); requestAnimationFrame(frame); return; }
+  for (const c of clouds) {
+    c.x += c.v * dt; if (c.x > 2700) c.x = -1000;
+    c.el.setAttribute('transform', `translate(${c.x.toFixed(1)} ${c.y.toFixed(1)}) scale(${c.s.toFixed(2)})`);
+  }
+  spawnTimer -= dt;
+  if (!rareOnField()) rareCooldown -= dt;
+  const want = clamp(3 + state.houses.length * 2, 4, 16);
+  if (walkers.length < want && spawnTimer <= 0) { makeWalker(false); spawnTimer = rnd(1, 3.5); }
+  for (const w of walkers) updateWalker(w, dt);
+  checkPranks(dt);
+  for (let i = walkers.length - 1; i >= 0; i--) if (walkers[i].dead) {
+    if (walkers[i].rare) { rareCooldown = rnd(25, 45); $('rarePill').hidden = true; }
+    walkers[i].g.remove(); walkers.splice(i, 1);
+  }
+  sortWorld();
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
