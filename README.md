@@ -13,10 +13,13 @@ Na de eerste keer werkt het ook zonder internet.
 
 - **Buiten:** bouw trolhuizen (70 $). Wie langs een huis loopt, wordt getrold en dat levert munten op.
   Soms komt er een zeldzame bezoeker langs, die is 25 $ waard.
-- **Werelden:** wissel bovenin tussen de **Trolwereld** (grasveld) en de **Heksenwereld** (paarse grond, maan,
-  heksenhuizen met een hoed als dak en een heksenhoed met een bloem ernaast). Elke wereld heeft zijn eigen huizen.
+- **Werelden:** wissel bovenin tussen de **Trolwereld** (grasveld), de **Heksenwereld** (paarse grond, maan,
+  heksenhuizen met een hoed als dak en een heksenhoed met een bloem ernaast) en de **WC Poepier Wereld**
+  (lucht van blauw krijt, bruine grond, vallende poepjes, bloemen met een gezichtje en WC-huizen met oogjes,
+  blauw water en een poppetje in de wc). Elke wereld heeft zijn eigen huizen.
 - **Bezoekers:** in de Trolwereld lopen het blonde meisje, het regenboogmeisje en de jongen met het tasje;
-  in de Heksenwereld het heksje, de hond en de kat (alle drie met een heksenhoed).
+  in de Heksenwereld het heksje, de hond en de kat (alle drie met een heksenhoed);
+  in de WC Poepier Wereld het poepje en de grote drol met zijn vliegje.
   De zeldzame bezoeker met de paraplu mag in allebei de werelden komen.
 - **Binnen:** koop kamers voor een huis en loop zelf het parcours door.
   Gebruik ← → om te lopen en ↑ of spatie om te springen. Op een telefoon verschijnen knoppen.
@@ -43,6 +46,7 @@ Na de eerste keer werkt het ook zonder internet.
 - `kamers-schets1.jpg`, `kamers-schets2.jpg` en `kamers-schets-3.jpg`: de kamers
 - `personen-schets2-heksenwereld.jpg`: de bezoekers van de heksenwereld (ligt op zijn kant)
 - `wereld-huis-schets2-(heksenwereld).jpg`: de heksenwereld met het voorbeeldhuis (ligt op zijn kop)
+- `wereld-hus-schets3(wcpoepeiwereld).jpg`: de WC Poepier Wereld met het WC-huis nummer 68 (ligt op zijn kant)
 
 ## Nieuwe versie uitbrengen
 

@@ -41,8 +41,9 @@ input{-webkit-user-select:text;user-select:text}
 #bg{position:fixed;inset:0;width:100%;height:100%;display:block}
 #scene{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:manipulation}
 #scene.flat .scenery{display:none}
-#scene[data-world="trol"] .w-heks, #scene[data-world="heks"] .w-trol{display:none}
+#scene:not([data-world="trol"]) .w-trol, #scene:not([data-world="heks"]) .w-heks, #scene:not([data-world="wc"]) .w-wc{display:none}
 body[data-world="heks"]{background:#cfe6fb}
+body[data-world="wc"]{background:#bfe6fa}
 .top-left{display:flex;flex-direction:column;align-items:flex-start;gap:10px;pointer-events:none}
 .worlds{display:flex;gap:8px;flex-wrap:wrap;pointer-events:auto}
 .world-btn{font:inherit;font-size:18px;color:var(--ink);display:inline-flex;align-items:center;gap:6px;padding:3px 12px 5px 8px;cursor:pointer;
@@ -205,7 +206,27 @@ body.touch-ui .in-hint{display:none}
 @keyframes twinkle{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.3) rotate(18deg);opacity:.55}}
 .hatflower{transform-box:view-box;transform-origin:173px 150px;animation:sway 3.2s ease-in-out infinite alternate}
 @keyframes sway{from{transform:rotate(-6deg)}to{transform:rotate(6deg)}}
-@media (prefers-reduced-motion:reduce){.rays,.lampglow,.aura,.wandstar,.twinkle,.hatflower{animation:none}}
+/* WC Poepier Wereld */
+.wcflower{transform-box:view-box;transform-origin:176px 196px;animation:sway 2.8s ease-in-out infinite alternate}
+.wceyes{transform-box:fill-box;transform-origin:center;animation:blink 4.5s infinite}
+@keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+.wcbob{animation:bob 1.6s ease-in-out infinite alternate}
+@keyframes bob{from{transform:translateY(-1.5px)}to{transform:translateY(1.5px)}}
+.wcwave{animation:wave 1.4s ease-in-out infinite alternate}
+@keyframes wave{from{transform:translateX(-2px)}to{transform:translateX(2px)}}
+.wcpaper{transform-box:fill-box;transform-origin:50% 0;animation:sway 2.2s ease-in-out infinite alternate}
+.flail-l{transform-box:fill-box;transform-origin:100% 100%;animation:flailL .45s ease-in-out infinite alternate}
+.flail-r{transform-box:fill-box;transform-origin:0 100%;animation:flailR .45s ease-in-out infinite alternate}
+@keyframes flailL{from{transform:rotate(-22deg)}to{transform:rotate(18deg)}}
+@keyframes flailR{from{transform:rotate(22deg)}to{transform:rotate(-18deg)}}
+.kick-l{transform-box:fill-box;transform-origin:50% 0;animation:flailR .38s ease-in-out infinite alternate}
+.kick-r{transform-box:fill-box;transform-origin:50% 0;animation:flailL .38s ease-in-out infinite alternate}
+.flap{transform-box:fill-box;transform-origin:center;animation:flap .5s ease-in-out infinite alternate}
+@keyframes flap{from{transform:scaleY(1)}to{transform:scaleY(.35) translateY(6px)}}
+.swirl{transform-box:fill-box;transform-origin:center;animation:spin 14s linear infinite}
+.fly{animation:fly 1.3s linear infinite}
+@keyframes fly{0%{transform:translate(9px,0)}25%{transform:translate(0,-6px)}50%{transform:translate(-9px,0)}75%{transform:translate(0,5px)}100%{transform:translate(9px,0)}}
+@media (prefers-reduced-motion:reduce){.rays,.lampglow,.aura,.wandstar,.twinkle,.hatflower,.wcflower,.wceyes,.wcbob,.wcwave,.wcpaper,.flail-l,.flail-r,.kick-l,.kick-r,.flap,.swirl,.fly{animation:none}}
 </style>
 </head>
 <body>
@@ -396,6 +417,124 @@ body.touch-ui .in-hint{display:none}
       <path d="M-13 -13 Q-12 -27 0 -27 Q12 -27 13 -13 Z" fill="#7048e8" stroke="#4c2a9e" stroke-width="1.2"/>
       <circle cx="-5" cy="-20" r="2" fill="#fff"/><circle cx="4" cy="-22" r="1.6" fill="#fff"/><circle cx="7" cy="-16" r="1.4" fill="#fff"/>
     </g>
+    <!-- ======== HET WC-HUIS (naar de schets van de WC Poepier Wereld) ======== -->
+    <symbol id="wcHouse" viewBox="0 0 200 200" overflow="visible">
+      <!-- doortrekhendel linksboven -->
+      <path d="M58 46 L40 37" stroke="#1d1d1d" stroke-width="4.5" stroke-linecap="round"/>
+      <circle cx="38" cy="36" r="4.8" fill="#1d1d1d"/>
+      <!-- het huis zelf: een grote witte wc -->
+      <path d="M54 36 Q54 26 64 26 L138 24 Q148 24 148 34 L150 196 L50 196 Z" style="fill:var(--wall)" stroke="#1d1d1d" stroke-width="2.8" stroke-linejoin="round"/>
+      <path d="M137 25 Q148 25 148 35 L150 196 L137 196 Z" fill="rgba(60,120,190,.13)"/>
+      <path d="M50 196 L52 140 L150 140 L150 196 Z" fill="rgba(60,120,190,.06)"/>
+      <!-- het deksel staat open en kijkt je aan -->
+      <path d="M64 104 L64 64 Q64 37 100 37 Q136 37 136 64 L136 104 Z" style="fill:var(--roof)" stroke="#1d1d1d" stroke-width="2.4" stroke-linejoin="round"/>
+      <path d="M72 100 L72 66 Q72 46 100 46 Q128 46 128 66 L128 100" fill="none" stroke="rgba(0,0,0,.09)" stroke-width="2.2"/>
+      <g class="wceyes">
+        <ellipse cx="88" cy="66" rx="3.8" ry="4.8" fill="#1d1d1d"/><ellipse cx="112" cy="66" rx="3.8" ry="4.8" fill="#1d1d1d"/>
+        <circle cx="89.3" cy="64.2" r="1.2" fill="#fff"/><circle cx="113.3" cy="64.2" r="1.2" fill="#fff"/>
+      </g>
+      <!-- de bril, met blauw water en een poppetje dat erin zit -->
+      <path d="M50 100 Q100 87 150 100 Q144 136 100 138 Q56 136 50 100 Z" style="fill:var(--wall)" stroke="#1d1d1d" stroke-width="2.6" stroke-linejoin="round"/>
+      <path d="M62 102 Q100 92 138 102 Q132 126 100 128 Q68 126 62 102 Z" fill="#1c9ad6" stroke="#1d1d1d" stroke-width="1.6"/>
+      <g class="wcbob">
+        <ellipse cx="100" cy="114" rx="6.5" ry="7" fill="#3b4cc0"/>
+        <path d="M86 101 L89 108 Q100 112 111 108 L114 101" stroke="#c9773a" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="100" cy="103" r="5.5" fill="#c9773a" stroke="#8a4b1f" stroke-width="1"/>
+        <circle cx="98" cy="102.5" r=".9" fill="#1d1d1d"/><circle cx="102" cy="102.5" r=".9" fill="#1d1d1d"/>
+        <path d="M98 105 Q100 106.6 102 105" stroke="#1d1d1d" stroke-width=".8" fill="none"/>
+      </g>
+      <path d="M63.5 109 Q100 114 136.5 109 Q131 126 100 128 Q69 126 63.5 109 Z" fill="#1c9ad6" opacity=".92"/>
+      <path class="wcwave" d="M74 118 q6 -3 12 0 q6 3 12 0 M106 120 q6 -3 12 0" stroke="#a5d8ff" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+      <!-- deur met een hartje, knop en huisnummer -->
+      <rect x="78" y="146" width="38" height="50" rx="2" style="fill:var(--door)" stroke="#1d1d1d" stroke-width="2.4"/>
+      <path d="M97 157 C94.5 153.6 90.2 156.2 97 161.4 C103.8 156.2 99.5 153.6 97 157 Z" fill="#1d1d1d"/>
+      <circle cx="86" cy="173" r="4" fill="#1d1d1d"/>
+      <circle cx="126" cy="175" r="1.8" fill="#1d1d1d"/>
+      <rect x="55" y="160" width="19" height="14" rx="1.5" fill="#fff" stroke="#1d1d1d" stroke-width="1.8"/>
+      <!-- wc-rol aan de muur -->
+      <path class="wcpaper" d="M31 131 H40 V160 L38 158 L36 160 L34 158 L32 160 L31 158 Z" fill="#fff" stroke="#9aa5b1" stroke-width="1.1" stroke-linejoin="round"/>
+      <path d="M51 131 H43" stroke="#1d1d1d" stroke-width="3" stroke-linecap="round"/>
+      <circle cx="39" cy="131" r="8.5" fill="#fff" stroke="#9aa5b1" stroke-width="1.4"/>
+      <circle cx="39" cy="131" r="3" fill="#d8c3a5" stroke="#9aa5b1" stroke-width="1"/>
+      <!-- de bloem uit de tekening, met een gezichtje -->
+      <g class="wcflower">
+        <path d="M176 196 Q170 160 180 122" stroke="#7a4f27" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <path d="M174.5 166 q-13 -2 -15 -12 q12 0 15 12 Z" fill="#8a5a2b" stroke="#5c3311" stroke-width="1"/>
+        <g fill="#8a5a2b" stroke="#5c3311" stroke-width="1.2"><ellipse cx="192.0" cy="112.0" rx="7" ry="10.5" transform="rotate(90 192.0 112.0)"/><ellipse cx="186.0" cy="122.4" rx="7" ry="10.5" transform="rotate(150 186.0 122.4)"/><ellipse cx="174.0" cy="122.4" rx="7" ry="10.5" transform="rotate(210 174.0 122.4)"/><ellipse cx="168.0" cy="112.0" rx="7" ry="10.5" transform="rotate(270 168.0 112.0)"/><ellipse cx="174.0" cy="101.6" rx="7" ry="10.5" transform="rotate(330 174.0 101.6)"/><ellipse cx="186.0" cy="101.6" rx="7" ry="10.5" transform="rotate(390 186.0 101.6)"/></g>
+        <circle cx="180" cy="112" r="10" fill="#ffe066" stroke="#e8b400" stroke-width="1.6"/>
+        <path d="M175.5 110 q1.6 -2 3.2 0 M181.3 110 q1.6 -2 3.2 0" stroke="#5c3311" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+        <path d="M176 114.5 Q180 119 184 114.5" stroke="#5c3311" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+      </g>
+      <path d="M36 196 q-2 -6 -5 -9 M40 196 q0 -7 2 -10 M158 196 q1 -6 -1 -9 M190 196 q2 -5 6 -8 M64 196 q-1 -5 -4 -7 M136 196 q1 -6 4 -8" stroke="#6e4522" stroke-width="2" fill="none" stroke-linecap="round"/>
+    </symbol>
+
+    <!-- WC Poepier Wereld: lucht van blauw krijt, bruine grond -->
+    <linearGradient id="wcSkyGrad" gradientUnits="userSpaceOnUse" x1="0" y1="-600" x2="0" y2="380">
+      <stop offset="0" stop-color="#4aa8e0"/><stop offset=".55" stop-color="#86ccf0"/><stop offset="1" stop-color="#d4f0fc"/>
+    </linearGradient>
+    <linearGradient id="wcGroundGrad" gradientUnits="userSpaceOnUse" x1="0" y1="350" x2="0" y2="1100">
+      <stop offset="0" stop-color="#c99a6b"/><stop offset=".5" stop-color="#b07b4b"/><stop offset="1" stop-color="#94643b"/>
+    </linearGradient>
+    <pattern id="hatchBlue" width="90" height="90" patternUnits="userSpaceOnUse" patternTransform="rotate(-28)">
+      <path d="M0 10 Q45 4 90 12 M0 32 Q45 27 90 34 M0 55 Q45 50 90 57 M0 77 Q45 73 90 79" stroke="rgba(21,128,200,.24)" stroke-width="5" fill="none" stroke-linecap="round"/>
+    </pattern>
+    <pattern id="hatchBlue2" width="60" height="60" patternUnits="userSpaceOnUse" patternTransform="rotate(64)">
+      <path d="M0 15 Q30 11 60 16 M0 45 Q30 41 60 46" stroke="rgba(21,128,200,.14)" stroke-width="4" fill="none" stroke-linecap="round"/>
+    </pattern>
+    <pattern id="hatchMud" width="80" height="22" patternUnits="userSpaceOnUse" patternTransform="rotate(-3)">
+      <path d="M0 8 Q40 4 80 9" stroke="rgba(110,60,25,.2)" stroke-width="4" fill="none" stroke-linecap="round"/>
+    </pattern>
+    <clipPath id="aboveGround" clipPathUnits="userSpaceOnUse"><rect x="-4000" y="-4000" width="9600" height="4345"/></clipPath>
+    <g id="faceFlower">
+      <path d="M0 0 Q-4 -30 2 -56" stroke="#7a4f27" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+      <path d="M-1.5 -22 q-11 -2 -13 -10 q10 0 13 10 Z" fill="#8a5a2b"/>
+      <g transform="translate(2 -63)">
+        <g fill="#8a5a2b" stroke="#5c3311" stroke-width="1.2"><ellipse cx="9.0" cy="0.0" rx="5.5" ry="8" transform="rotate(90 9.0 0.0)"/><ellipse cx="4.5" cy="7.8" rx="5.5" ry="8" transform="rotate(150 4.5 7.8)"/><ellipse cx="-4.5" cy="7.8" rx="5.5" ry="8" transform="rotate(210 -4.5 7.8)"/><ellipse cx="-9.0" cy="0.0" rx="5.5" ry="8" transform="rotate(270 -9.0 0.0)"/><ellipse cx="-4.5" cy="-7.8" rx="5.5" ry="8" transform="rotate(330 -4.5 -7.8)"/><ellipse cx="4.5" cy="-7.8" rx="5.5" ry="8" transform="rotate(390 4.5 -7.8)"/></g>
+        <circle r="7.5" fill="#ffe066" stroke="#e8b400" stroke-width="1.3"/>
+        <path d="M-4 -1.5 q1.3 -1.6 2.6 0 M1.4 -1.5 q1.3 -1.6 2.6 0 M-3 2 Q0 5 3 2" stroke="#5c3311" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+      </g>
+    </g>
+    <g id="tuftBrown">
+      <path d="M0 0 Q-3 -7 -7 -11 M0 0 Q0 -9 1 -15 M0 0 Q3 -6 7 -10" stroke="#7a4a22" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    </g>
+    <g id="wcRoll">
+      <path d="M4 -1 Q14 1 28 -1 L29 2.5 Q14 4.5 3 2.5 Z" fill="#fff" stroke="#9aa5b1" stroke-width="1"/>
+      <path d="M-12 -14 H6 A6 7 0 0 1 6 0 H-12 Z" fill="#fff" stroke="#9aa5b1" stroke-width="1.2"/>
+      <ellipse cx="-12" cy="-7" rx="6" ry="7" fill="#fff" stroke="#9aa5b1" stroke-width="1.2"/>
+      <ellipse cx="-12" cy="-7" rx="2.2" ry="2.8" fill="#c9a37a"/>
+    </g>
+    <g id="puddle">
+      <ellipse rx="24" ry="6.5" fill="#4dabf7" opacity=".75"/>
+      <path d="M-12 -1.5 Q-4 -4 6 -2" stroke="#d0ebff" stroke-width="2" fill="none" stroke-linecap="round"/>
+    </g>
+    <g id="miniPoop">
+      <path transform="scale(.5)" d="M-26 0 Q-28 -12 -14 -13 Q-18 -26 -2 -26 Q-8 -38 6 -40 Q14 -32 9 -26 Q24 -26 18 -13 Q30 -12 26 0 Z" fill="#8a5a2b" stroke="#5c3311" stroke-width="2.5" stroke-linejoin="round"/>
+      <circle cx="-2.5" cy="-11" r="1.1" fill="#1d1d1d"/><circle cx="2.5" cy="-11" r="1.1" fill="#1d1d1d"/>
+      <g transform="translate(9 -26)"><ellipse cx="-2" cy="-2" rx="2.4" ry="1.4" fill="#e7f5ff" opacity=".9"/><ellipse cx="2" cy="-2" rx="2.4" ry="1.4" fill="#e7f5ff" opacity=".9"/><circle r="1.8" fill="#1d1d1d"/></g>
+    </g>
+    <!-- een vallend poepje met armpjes en beentjes (naar de schets) -->
+    <g id="fallPoopBody">
+      <g class="kick-l"><path d="M-7 12 L-10 29 M-14 29 H-6" stroke="#1d1d1d" stroke-width="2.6" stroke-linecap="round" fill="none"/></g>
+      <g class="kick-r"><path d="M7 12 L10 29 M6 29 H14" stroke="#1d1d1d" stroke-width="2.6" stroke-linecap="round" fill="none"/></g>
+      <g class="flail-l"><path d="M-15 -4 L-28 -20 M-31.5 -17 L-24.5 -23" stroke="#1d1d1d" stroke-width="2.6" stroke-linecap="round" fill="none"/></g>
+      <g class="flail-r"><path d="M15 -4 L28 -20 M24.5 -23 L31.5 -17" stroke="#1d1d1d" stroke-width="2.6" stroke-linecap="round" fill="none"/></g>
+      <path transform="translate(0 16)" d="M-26 0 Q-28 -12 -14 -13 Q-18 -26 -2 -26 Q-8 -38 6 -40 Q14 -32 9 -26 Q24 -26 18 -13 Q30 -12 26 0 Z" fill="#9a5b28" stroke="#5c3311" stroke-width="2.2" stroke-linejoin="round"/>
+      <path d="M-15 8 Q-4 5 8 7 M-9 -4 Q0 -7 9 -5" stroke="#c0814a" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M-6 -34 V-44 M6 -34 V-46 M0 -36 V-50" stroke="rgba(255,255,255,.85)" stroke-width="2.4" stroke-linecap="round"/>
+    </g>
+    <g id="fallPoopA">
+      <use href="#fallPoopBody"/>
+      <circle cx="-5" cy="1" r="3.6" fill="#fff" stroke="#1d1d1d" stroke-width="1.3"/><circle cx="5" cy="1" r="3.6" fill="#fff" stroke="#1d1d1d" stroke-width="1.3"/>
+      <circle cx="-5" cy="1.6" r="1.4" fill="#1d1d1d"/><circle cx="5" cy="1.6" r="1.4" fill="#1d1d1d"/>
+      <ellipse cx="0" cy="9" rx="2.6" ry="3.2" fill="#3a1a0a"/>
+      <path d="M0 33 q-4 6 0 9 q4 -3 0 -9 Z" fill="#8a5a2b"/>
+    </g>
+    <g id="fallPoopB">
+      <use href="#fallPoopBody"/>
+      <path d="M-7 1 q2.4 -3 4.8 0 M2.2 1 q2.4 -3 4.8 0" stroke="#1d1d1d" stroke-width="1.7" fill="none" stroke-linecap="round"/>
+      <path d="M-4.5 6 Q0 10.5 4.5 6" stroke="#1d1d1d" stroke-width="1.7" fill="none" stroke-linecap="round"/>
+    </g>
+    <path id="wcSpiral" d="M3.0 0.0 L3.2 0.5 L3.4 1.0 L3.5 1.6 L3.4 2.3 L3.3 2.9 L3.0 3.6 L2.6 4.2 L2.0 4.8 L1.4 5.3 L0.6 5.8 L-0.3 6.1 L-1.2 6.2 L-2.2 6.3 L-3.2 6.1 L-4.2 5.8 L-5.2 5.3 L-6.2 4.7 L-7.0 3.9 L-7.8 2.9 L-8.4 1.8 L-8.8 0.6 L-9.1 -0.8 L-9.2 -2.1 L-9.0 -3.6 L-8.6 -5.0 L-8.0 -6.4 L-7.2 -7.7 L-6.2 -8.9 L-4.9 -9.9 L-3.5 -10.8 L-1.9 -11.5 L-0.2 -11.9 L1.5 -12.1 L3.4 -12.0 L5.2 -11.6 L7.0 -11.0 L8.7 -10.1 L10.3 -8.9 L11.7 -7.4 L12.9 -5.8 L13.9 -3.9 L14.6 -1.8 L15.0 0.3 L15.0 2.5 L14.8 4.8 L14.2 7.0 L13.2 9.2 L11.9 11.2 L10.3 13.0 L8.5 14.7 L6.3 16.0 L4.0 17.0 L1.5 17.7 L-1.1 18.0 L-3.8 17.9 L-6.5 17.4 L-9.1 16.5 L-11.6 15.3 L-13.9 13.6 L-15.9 11.6 L-17.7 9.3 L-19.1 6.7 L-20.2 3.9 L-20.8 0.9 L-21.0 -2.2 L-20.7 -5.3 L-20.0 -8.4 L-18.8 -11.4 L-17.1 -14.2 L-15.1 -16.7 L-12.6 -19.0 L-9.8 -20.9 L-6.7 -22.3 L-3.4 -23.4 L0.0 -23.9 L3.5 -23.9 L7.1 -23.4 L10.5 -22.4 L13.8 -20.8 L16.9 -18.8 L19.7 -16.3 L22.1 -13.4 L24.1 -10.1 L25.6 -6.6 L26.5 -2.8 L26.9 1.1 L26.8 5.1 L26.0 9.0 L24.6 12.9 L22.7 16.5 L20.3 19.8 L17.3 22.8 L13.9 25.3 L10.2 27.4 L6.1 28.8 L1.9 29.7 L-2.5 29.9 L-6.9 29.5 L-11.3 28.4 L-15.4 26.7 L-19.3 24.4 L-22.9 21.5 L-26.0 18.1 L-28.6 14.2 L-30.7 10.0 L-32.1 5.4 L-32.8 0.7 L-32.8 -4.1 L-32.1 -9.0 L-30.7 -13.7 L-28.6 -18.2 L-25.9 -22.3 L-22.5 -26.1 L-18.6 -29.3 L-14.2 -32.0 L-9.5 -34.0 L-4.5 -35.3 L0.8 -35.9 L6.0 -35.6 L11.3 -34.6 L16.3 -32.9 L21.1 -30.4 L25.5 -27.2 L29.4 -23.3 L32.8 -18.9 L35.4 -14.0 L37.4 -8.8 L38.5 -3.2 L38.9 2.4 L38.4 8.2 L37.0 13.8 L34.9 19.2 L31.9 24.2 L28.2 28.8 L23.9 32.9 L18.9 36.2 L13.5 38.9 L7.8 40.7 L1.7 41.7 L-4.4 41.8 L-10.5 40.9 L-16.5 39.2 L-22.2 36.6 L-27.5 33.2 L-32.2 29.0 L-36.4 24.2 L-39.8 18.7 L-42.3 12.8 L-44.0 6.5 L-44.8 -0.0 L-44.6 -6.6 L-43.4 -13.1 L-41.3 -19.4 L-38.2 -25.4 L-34.3 -30.9 L-29.6 -35.8 L-24.2 -40.0 L-18.2 -43.3 L-11.8 -45.8 L-5.0 -47.3 L2.0 -47.8 L9.0 -47.3 L15.9 -45.7 L22.6 -43.1 L28.8 -39.6 L34.5 -35.2 L39.4 -29.9 L43.6 -24.0 L46.9 -17.5 L49.3 -10.5 L50.5 -3.2 L50.7 4.3 L49.8 11.7 L47.9 18.9 L44.8 25.9 L40.8 32.3 L35.8 38.1 L30.0 43.2 L23.5 47.3 L16.4 50.5"/>
     <symbol id="coin" viewBox="-12 -12 24 24">
       <circle r="10.5" fill="#f5c542" stroke="#a87508" stroke-width="2"/>
       <circle r="7" fill="none" stroke="#e0a91c" stroke-width="1.2"/>
@@ -462,9 +601,29 @@ body.touch-ui .in-hint{display:none}
   <rect x="-4000" y="362" width="9600" height="5000" fill="url(#hatchHeath)"/>
   <g id="heksDecor"></g>
   </g>
+  <g id="staticWc" class="scenery w-wc">
+  <rect x="-4000" y="-4000" width="9600" height="4400" fill="url(#wcSkyGrad)"/>
+  <rect x="-4000" y="-4000" width="9600" height="4400" fill="url(#hatchBlue)"/>
+  <rect x="-4000" y="-4000" width="9600" height="4400" fill="url(#hatchBlue2)"/>
+  <!-- de blauwe zon rechts, zoals in de tekening -->
+  <circle cx="1330" cy="150" r="58" fill="#e3f4ff" stroke="#1c8fd0" stroke-width="5"/>
+  <path d="M1290 146 Q1330 128 1372 146 M1286 162 Q1330 144 1374 164 M1298 180 Q1330 166 1362 182" stroke="rgba(28,143,208,.45)" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M-4000 366 C-1000 366 -200 346 200 342 S 700 358 1000 348 S 1500 340 1800 352 S 2600 360 5600 362 V 600 H -4000 Z" fill="#bb8a58"/>
+  <g id="wcFar"></g>
+  <path d="M-4000 380 C-500 378 0 360 400 358 S 1000 374 1300 362 S 1900 362 5600 374 V 600 H -4000 Z" fill="#c4935f"/>
+  <rect x="-4000" y="362" width="9600" height="5000" fill="url(#wcGroundGrad)"/>
+  <rect x="-4000" y="362" width="9600" height="5000" fill="url(#hatchMud)"/>
+  <g id="wcDecor"></g>
+  </g>
 
   <!-- wat beweegt -->
   <g id="sparkles" class="w-heks"></g>
+  <g id="wcSky" class="w-wc">
+    <!-- de blauwe krul uit de tekening draait rond -->
+    <g transform="translate(1030 105)"><use href="#wcSpiral" class="swirl" stroke="#1c8fd0" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <g id="wcBirds"></g>
+    <g id="poopRain" clip-path="url(#aboveGround)"></g>
+  </g>
   <g id="sun" class="w-trol" transform="translate(1500 70)">
     <g class="rays">
       <circle r="150" fill="none" stroke="none"/>
@@ -488,6 +647,7 @@ body.touch-ui .in-hint{display:none}
     <div class="worlds" aria-label="Kies een wereld">
       <button class="world-btn" data-world="trol"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12 L12 4 L21 12 Z" fill="#b8b8c1" stroke="#2a1846" stroke-width="1.5" stroke-linejoin="round"/><rect x="5" y="11" width="14" height="10" fill="#7a4cc2" stroke="#2a1846" stroke-width="1.5"/><rect x="10" y="15" width="4" height="6" fill="#f6b892"/></svg>Trolwereld</button>
       <button class="world-btn" data-world="heks"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 19 L11 4 Q12 2 15 3 Q13 5 13 8 L17 19 Z" fill="#7048e8" stroke="#2a1846" stroke-width="1.5" stroke-linejoin="round"/><path d="M2 20 Q12 17 22 20 Q12 23 2 20 Z" fill="#4c2a9e" stroke="#2a1846" stroke-width="1.2"/><path d="M9.5 15 H14.5" stroke="#111" stroke-width="2"/></svg>Heksenwereld</button>
+      <button class="world-btn" data-world="wc"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 12 V6.5 Q6.5 2.5 12 2.5 Q17.5 2.5 17.5 6.5 V12 Z" fill="#fff" stroke="#2a1846" stroke-width="1.5" stroke-linejoin="round"/><circle cx="10" cy="7" r="1.1" fill="#111"/><circle cx="14" cy="7" r="1.1" fill="#111"/><path d="M3.5 11.5 Q12 10 20.5 11.5 Q19.5 17 14 18 L15 21.5 H9 L10 18 Q4.5 17 3.5 11.5 Z" fill="#fff" stroke="#2a1846" stroke-width="1.5" stroke-linejoin="round"/><path d="M6.5 13 Q12 12 17.5 13 Q16 15.5 12 15.6 Q8 15.5 6.5 13 Z" fill="#1c9ad6"/></svg>WC Poepier Wereld</button>
     </div>
   </div>
   <div class="stats">
@@ -638,7 +798,28 @@ function rasterizeScenery() {
 }
 
 /* ---------- decor: bomen, gras, bloemen, wolken ---------- */
-const clouds = [];
+const clouds = [], wcBirds = [], poops = [];
+// een poepje begint weer bovenin de lucht (net boven wat je ziet)
+function resetPoop(p, first) {
+  const vb = svg.viewBox.baseVal;
+  p.x = rnd(vb.x + 40, vb.x + vb.width - 40);
+  p.y = first ? rnd(vb.y - 60, 300) : vb.y - rnd(80, 420);
+  p.v = rnd(70, 130); p.s = rnd(0.85, 1.45);
+  p.rot = rnd(0, 360); p.vr = rnd(-70, 70);
+  p.t = rnd(0, 6);
+}
+function updateWcSky(dt) {
+  for (const b of wcBirds) {
+    b.x += b.v * dt; if (b.x > 2300) b.x = -700;
+    b.el.setAttribute('transform', `translate(${b.x.toFixed(1)} ${(b.y + Math.sin(b.x / 60) * 8).toFixed(1)}) scale(${b.s.toFixed(2)})`);
+  }
+  for (const p of poops) {
+    p.t += dt; p.y += p.v * dt; p.rot += p.vr * dt;
+    if (p.y > 420) resetPoop(p, false);
+    const x = p.x + Math.sin(p.t * 1.7) * 18;
+    p.el.setAttribute('transform', `translate(${x.toFixed(1)} ${p.y.toFixed(1)}) rotate(${p.rot.toFixed(1)}) scale(${p.s.toFixed(2)})`);
+  }
+}
 (function decor() {
   const r = seeded(7);
   const d = $('decor'), trees = $('farTrees'), cl = $('clouds');
@@ -675,6 +856,38 @@ const clouds = [];
     const sp = el('path', { class: 'twinkle', d: 'M0 -8 L2 -2 L8 0 L2 2 L0 8 L-2 2 L-8 0 L-2 -2 Z', fill: '#fff3bf' }, g);
     sp.style.animationDelay = `${(r() * 2.4).toFixed(2)}s`;
   }
+  // WC Poepier Wereld: grote bloemen met een gezichtje, plasjes, wc-rollen en drolletjes met een vlieg
+  for (let i = 0; i < 16; i++) {
+    const x = -900 + r() * 3400, y = 334 + r() * 22, s = 1.2 + r() * 1.1;
+    el('use', { href: '#faceFlower', transform: `translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${s.toFixed(2)})` }, $('wcFar'));
+  }
+  const wItems = [];
+  for (let i = 0; i < 230; i++) wItems.push(['#tuftBrown', -1500 + r() * 4600, 370 + Math.pow(r(), .8) * 1300]);
+  for (let i = 0; i < 38; i++) wItems.push(['#faceFlower', -1200 + r() * 4000, 390 + r() * 1000]);
+  for (let i = 0; i < 16; i++) wItems.push(['#puddle', -1200 + r() * 4000, 400 + r() * 1000]);
+  for (let i = 0; i < 12; i++) wItems.push(['#wcRoll', -1200 + r() * 4000, 400 + r() * 1000]);
+  for (let i = 0; i < 12; i++) wItems.push(['#miniPoop', -1200 + r() * 4000, 400 + r() * 1000]);
+  // net als in de tekening: een grote bloem rechtsvoor
+  wItems.push(['#faceFlower', 1500, 975], ['#faceFlower', 1555, 960]);
+  wItems.sort((a, b) => a[2] - b[2]).forEach(([ref, x, y]) => {
+    const s = scaleAt(y) * (ref === '#tuftBrown' ? 1.1 : ref === '#faceFlower' ? 1.45 : 1.3);
+    el('use', { href: ref, transform: `translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${s.toFixed(3)})` }, $('wcDecor'));
+  });
+  // donkerblauwe vogels (de M uit de tekening)
+  for (let i = 0; i < 3; i++) {
+    const b = { x: r() * 2000 - 300, y: 150 + r() * 120, s: 1.3 + r() * 0.6, v: 25 + r() * 25 };
+    b.el = el('g', {}, $('wcBirds'));
+    const f = el('path', { class: 'flap', d: 'M-26 4 Q-14 -14 0 2 Q14 -14 26 4 Q14 -5 0 9 Q-14 -5 -26 4 Z', fill: '#1864ab' }, b.el);
+    f.style.animationDelay = `${(r() * .5).toFixed(2)}s`;
+    wcBirds.push(b);
+  }
+  // de vallende poepjes
+  for (let i = 0; i < 6; i++) {
+    const p = { el: el('g', {}, $('poopRain')) };
+    el('use', { href: i % 2 ? '#fallPoopB' : '#fallPoopA' }, p.el);
+    resetPoop(p, true);
+    poops.push(p);
+  }
   for (let i = 0; i < 6; i++) {
     const c = { x: r() * 2600 - 600, y: 20 + r() * 140, s: 0.55 + r() * 0.6, v: 6 + r() * 12 };
     c.el = el('use', { href: '#cloud', width: 220, height: 100 }, cl);
@@ -694,14 +907,18 @@ const WORLDS = {
   heks: { name: 'Heksenwereld', sym: '#witchHouse', house: 'heksenhuis', people: ['heksje', 'hond', 'kat'],
     walls: ['#9775fa', '#a78bfa', '#8f6ee8', '#b197fc', '#9b80f0'], roofs: ['#7048e8', '#6741d9', '#5f3dc4', '#7950f2'], doors: ['#b197fc', '#c0aaff', '#a48bf5'],
     namesA: ['Huize', 'Toren', 'Heksenhuis', 'Hutje', 'Paleis'], namesB: ['Hokuspokus', 'Abracadabra', 'Simsalabim', 'Bezemsteel', 'Toverdrank', 'Kikkerpoot', 'Sterrenstof', 'Maanlicht'],
-    sketch: 'assets/heks-schets-klein.jpg', caption: 'ontwerp: heksenwereld', bubbleY: -292, tagline: 'tover je heksenhuis en trol iedereen die langskomt' },
+    sketch: 'assets/heks-schets-klein.jpg', caption: 'ontwerp: heksenwereld', bubbleY: -292, numPos: [-12, -44.6], tagline: 'tover je heksenhuis en trol iedereen die langskomt' },
+  wc: { name: 'WC Poepier Wereld', sym: '#wcHouse', house: 'WC-huis', people: ['poepje', 'drol'],
+    walls: ['#ffffff', '#f8fbff', '#fffaf0', '#f3f8fc'], roofs: ['#ffffff', '#d0ebff', '#ffdeeb', '#fff3bf', '#d3f9d8'], doors: ['#ffffff', '#e7f5ff', '#fff9db'],
+    namesA: ['Huize', 'Villa', 'Paleis', 'Hokje', 'Kasteel'], namesB: ['Plons', 'Doortrek', 'Pruttel', 'Drolletje', 'Wc-rol', 'Spoelbak', 'Poepiedoepie', 'Pfrrrt', 'Wiebelbril'],
+    sketch: 'assets/wc-schets-klein.jpg', caption: 'ontwerp: WC Poepier Wereld', bubbleY: -196, numPos: [-35.5, -25], tagline: 'bouw je WC-huis en trol iedereen die langskomt' },
 };
 const worldOf = h => h.world || 'trol';
 let nextId = 1;
 function newHouse(x, y, world = 'trol') {
   const W_ = WORLDS[world];
   const h = { id: nextId++, x, y, world, name: `${pick(W_.namesA)} ${pick(W_.namesB)}`, wall: pick(W_.walls), roof: pick(W_.roofs), door: pick(W_.doors), trolled: 0, rooms: [], best: {} };
-  if (world === 'heks') h.num = 1 + Math.floor(Math.random() * 99);
+  if (WORLDS[world].numPos) h.num = 1 + Math.floor(Math.random() * 99);
   return h;
 }
 
@@ -739,8 +956,8 @@ function makeHouseView(h, animate) {
   const W_ = WORLDS[worldOf(h)];
   const use = el('use', { href: W_.sym, x: -100, y: -196, width: 200, height: 200 }, inner);
   applyColors(use, h);
-  if (worldOf(h) === 'heks') {   // huisnummer op het bordje
-    const t = el('text', { x: -12, y: -44.6, 'text-anchor': 'middle', 'font-family': 'Patrick Hand, Comic Sans MS, cursive', 'font-size': 12, fill: '#1d1d1d' }, inner);
+  if (W_.numPos) {   // huisnummer op het bordje
+    const t = el('text', { x: W_.numPos[0], y: W_.numPos[1], 'text-anchor': 'middle', 'font-family': 'Patrick Hand, Comic Sans MS, cursive', 'font-size': 12, fill: '#1d1d1d' }, inner);
     t.textContent = h.num ?? 68;
   }
   const bub = el('g', {}, g);
@@ -1037,7 +1254,45 @@ const LOOKS = {
     witchHat(b, 16, -71, .75);
     w.bubbleY = -114;
   },
+  // WC POEPIER WERELD: een blij poepje met stokarmpjes en stokbeentjes (naar de schets)
+  poepje(b, w) {
+    b = el('g', { transform: 'scale(1.4)' }, b);
+    poopLimbs(b, w, -14, 13, -30, 50);
+    P(b, POOP_D, { transform: 'translate(0 -10) scale(.85)', fill: '#a8692f', stroke: '#5c3311', 'stroke-width': 2.2, 'stroke-linejoin': 'round' });
+    P(b, 'M-14 -18 Q-4 -21 8 -19 M-8 -28 Q0 -31 8 -29', { stroke: '#c98c52', 'stroke-width': 1.8, fill: 'none', 'stroke-linecap': 'round' });
+    face(el('g', { transform: 'translate(0 35)' }, b), w);
+    w.bubbleY = -80;
+  },
+  // WC POEPIER WERELD: een grote drol met de armen omhoog en een vliegje dat rondzoemt
+  drol(b, w) {
+    b = el('g', { transform: 'scale(1.15)' }, b);
+    poopLimbs(b, w, -16, 15, -40, 140);
+    P(b, 'M-24 0 Q-27 -11 -15 -12 Q-20 -23 -8 -24 Q-14 -35 -2 -37 Q-6 -48 4 -52 Q12 -46 8 -38 Q20 -36 14 -25 Q26 -23 18 -12 Q28 -10 24 0 Z',
+      { transform: 'translate(0 -12)', fill: '#7d4a1e', stroke: '#4a2a0e', 'stroke-width': 2, 'stroke-linejoin': 'round' });
+    P(b, 'M-15 -25 Q-4 -28 10 -26 M-8 -36 Q2 -39 12 -37 M-3 -48 Q3 -50 9 -48', { stroke: '#a0662f', 'stroke-width': 1.8, fill: 'none', 'stroke-linecap': 'round' });
+    face(el('g', { transform: 'translate(0 22)' }, b), w);
+    const fly = el('g', { transform: 'translate(12 -74)' }, b);
+    const fi = el('g', { class: 'fly' }, fly);
+    el('ellipse', { cx: -2, cy: -2.5, rx: 2.8, ry: 1.6, fill: '#e7f5ff', stroke: '#74c0fc', 'stroke-width': .5 }, fi);
+    el('ellipse', { cx: 2, cy: -2.5, rx: 2.8, ry: 1.6, fill: '#e7f5ff', stroke: '#74c0fc', 'stroke-width': .5 }, fi);
+    el('circle', { r: 2, fill: '#1d1d1d' }, fi);
+    w.bubbleY = -108;
+  },
 };
+
+const POOP_D = 'M-26 0 Q-28 -12 -14 -13 Q-18 -26 -2 -26 Q-8 -38 6 -40 Q14 -32 9 -26 Q24 -26 18 -13 Q30 -12 26 0 Z';
+// stokarmpjes en stokbeentjes met een streepje als hand en voet, zoals in de tekening
+function poopLimbs(b, w, xl, xr, ay, base) {
+  const STICK = { stroke: '#1d1d1d', 'stroke-width': 2.4, 'stroke-linecap': 'round' };
+  w.armL = limb(b, xl, ay, 15, '#1d1d1d', 2.4);
+  w.armR = limb(b, xr, ay, 15, '#1d1d1d', 2.4);
+  for (const g of [w.armL, w.armR]) el('line', { x1: -3.5, y1: 15, x2: 3.5, y2: 15, ...STICK }, g);
+  w.armBase = base;
+  w.legL = limb(b, -6, -14, 13, '#1d1d1d', 2.4);
+  w.legR = limb(b, 6, -14, 13, '#1d1d1d', 2.4);
+  el('line', { x1: -4.5, y1: 13, x2: 2, y2: 13, ...STICK }, w.legL);
+  el('line', { x1: -2, y1: 13, x2: 4.5, y2: 13, ...STICK }, w.legR);
+}
 
 function makeWalker(onField) {
   let type = pick(WORLDS[state.world].people);
@@ -1149,9 +1404,18 @@ const HEKS_PRANKS = [
   { house: 'Bezem-bam!', walker: 'Wie gooide die bezem?' },
   { house: 'Kwaak!', walker: 'Kwaak? Ik zei kwaak!' },
 ];
+const WC_PRANKS = [
+  { house: 'Doortrekken!', walker: 'Help, ik word doorgespoeld!', wet: true },
+  { house: 'Plons!', walker: 'Iel, wc-water!', wet: true },
+  { house: 'Pruttel prut!', walker: 'Wie heeft hier gepoept?' },
+  { house: 'Pffffrrrt!', walker: 'Wat ruik ik nou?!' },
+  { house: 'Hihi, wc-rol!', walker: 'Ik ben een mummie!' },
+  { house: 'Spoel spoel!', walker: 'Kleddernat!', wet: true },
+  { house: 'Bril omhoog!', walker: 'Neeee, niet de wc in!' },
+];
 function prank(v, w) {
-  const heks = worldOf(v.h) === 'heks';
-  const p = pick(heks ? HEKS_PRANKS : PRANKS);
+  const wld = worldOf(v.h), heks = wld === 'heks', wc = wld === 'wc';
+  const p = pick(heks ? HEKS_PRANKS : wc ? WC_PRANKS : PRANKS);
   const reward = (w.rare ? RARE_REWARD : REWARD) + v.h.rooms.length;
   v.cool = rnd(5, 8); w.immune = 9;
   w.state = 'shock'; w.timer = 0.6;
@@ -1159,11 +1423,13 @@ function prank(v, w) {
   w.flee = { x: fx / len, y: fy / len };
   setFace(w, true);
   if (p.wet) puffs(w.x, w.y - 50 * w.s, w.s, 8, '#a5d8ff');
-  const ANIMAL_LINES = { hond: ['Woef?!', 'Wraf wraf!', 'Kwaak? Ik ben een hond!'], kat: ['Miauw!?', 'Ssssss!', 'Mijn snorharen!'] };
+  const ANIMAL_LINES = { hond: ['Woef?!', 'Wraf wraf!', 'Kwaak? Ik ben een hond!'], kat: ['Miauw!?', 'Ssssss!', 'Mijn snorharen!'],
+    poepje: ['Plons?!', 'Hé, ik ben al bruin!', 'Niet doortrekken!'], drol: ['Bzzz, mijn vliegje!', 'Ik stink niet hoor!', 'Neeee, niet de wc in!'] };
   const line = w.rare ? pick(RARE_LINES) : ANIMAL_LINES[w.type] ? pick(ANIMAL_LINES[w.type]) : p.walker;
   bubble(w.bub, line, w.bubbleY || -100, w.rare ? '#fff3bf' : '#fff', w.s);
-  bubble(v.bub, p.house, v.bubbleY, heks ? '#e5dbff' : '#ffe3f1', v.s);
+  bubble(v.bub, p.house, v.bubbleY, heks ? '#e5dbff' : wc ? '#d0ebff' : '#ffe3f1', v.s);
   if (heks) puffs(v.h.x + 80 * v.s, v.h.y - 166 * v.s, v.s, 9, '#ffe066');
+  if (wc) puffs(v.h.x, v.h.y - 92 * v.s, v.s, 10, '#4dabf7');   // plons, het water spat uit de wc
   replay(v.inner, 'giggle');
   state.coins += reward; state.trolled++; v.h.trolled++;
   if (w.rare) {
@@ -2207,7 +2473,7 @@ function renderAvatars() {
   const box = $('avatars');
   box.replaceChildren();
   const wld = worldOf(IN.h);
-  const VIEW = { heksje: '-36 -114 72 120', hond: '-58 -104 100 108', kat: '-58 -104 100 108' };
+  const VIEW = { heksje: '-36 -114 72 120', hond: '-58 -104 100 108', kat: '-58 -104 100 108', poepje: '-40 -76 80 82', drol: '-42 -100 84 106' };
   for (const t of [...WORLDS[wld].people, 'zeldzaam']) {
     const locked = t === 'zeldzaam' && !state.rareTrolled;
     const b = document.createElement('button');
@@ -2661,6 +2927,7 @@ document.querySelectorAll('.world-btn').forEach(b => b.addEventListener('click',
 /* ---------- start ---------- */
 load();
 state.avatars = state.avatars || { trol: state.avatar || 'blond', heks: 'heksje' };
+state.avatars.wc = state.avatars.wc || 'poepje';
 delete state.avatar;
 state.world = state.world || 'trol';
 state.houses.forEach(h => { h.rooms = h.rooms || []; h.best = h.best || {}; h.world = h.world || 'trol'; });
@@ -2670,6 +2937,14 @@ if (!state.heksDemo) {
   Object.assign(d, { name: 'Huize Hokuspokus', num: 68, wall: '#9775fa', roof: '#7048e8', door: '#b197fc', rooms: ['spinnen'] });
   state.houses.push(d);
   state.heksDemo = true;
+  save();
+}
+if (!state.wcDemo) {
+  // het WC-huis uit de tekening, met nummer 68 en de bloem ernaast
+  const d = newHouse(760, 640, 'wc');
+  Object.assign(d, { name: 'Huize Plons', num: 68, wall: '#ffffff', roof: '#ffffff', door: '#ffffff', rooms: ['touw'] });
+  state.houses.push(d);
+  state.wcDemo = true;
   save();
 }
 showWorld();
@@ -2689,6 +2964,7 @@ function frame(now) {
     c.x += c.v * dt; if (c.x > 2700) c.x = -1000;
     c.el.setAttribute('transform', `translate(${c.x.toFixed(1)} ${c.y.toFixed(1)}) scale(${c.s.toFixed(2)})`);
   }
+  if (state.world === 'wc') updateWcSky(dt);
   spawnTimer -= dt;
   if (!rareOnField()) rareCooldown -= dt;
   const want = clamp(3 + views.size * 2, 4, 16);
