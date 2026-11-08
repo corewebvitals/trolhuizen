@@ -224,15 +224,13 @@ body.touch-ui .in-hint{display:none}
 .flap{transform-box:fill-box;transform-origin:center;animation:flap .5s ease-in-out infinite alternate}
 @keyframes flap{from{transform:scaleY(1)}to{transform:scaleY(.35) translateY(6px)}}
 .swirl{transform-box:fill-box;transform-origin:center;animation:spin 14s linear infinite}
-.fly{animation:fly 1.3s linear infinite}
-@keyframes fly{0%{transform:translate(9px,0)}25%{transform:translate(0,-6px)}50%{transform:translate(-9px,0)}75%{transform:translate(0,5px)}100%{transform:translate(9px,0)}}
 /* kamers Frisdrank en Scheten */
 .drip{animation:drip 1.1s linear infinite}
 @keyframes drip{0%{transform:translateY(0);opacity:0}10%{opacity:1}100%{transform:translateY(200px);opacity:.3}}
 .fartline{animation:fartline .6s ease-out forwards}
 @keyframes fartline{to{transform:translate(var(--dx),0);opacity:0}}
 @media (prefers-reduced-motion:reduce){.drip{animation:none}}
-@media (prefers-reduced-motion:reduce){.rays,.lampglow,.aura,.wandstar,.twinkle,.hatflower,.wcflower,.wceyes,.wcbob,.wcwave,.wcpaper,.flail-l,.flail-r,.kick-l,.kick-r,.flap,.swirl,.fly{animation:none}}
+@media (prefers-reduced-motion:reduce){.rays,.lampglow,.aura,.wandstar,.twinkle,.hatflower,.wcflower,.wceyes,.wcbob,.wcwave,.wcpaper,.flail-l,.flail-r,.kick-l,.kick-r,.flap,.swirl{animation:none}}
 </style>
 </head>
 <body>
@@ -914,7 +912,7 @@ const WORLDS = {
     walls: ['#9775fa', '#a78bfa', '#8f6ee8', '#b197fc', '#9b80f0'], roofs: ['#7048e8', '#6741d9', '#5f3dc4', '#7950f2'], doors: ['#b197fc', '#c0aaff', '#a48bf5'],
     namesA: ['Huize', 'Toren', 'Heksenhuis', 'Hutje', 'Paleis'], namesB: ['Hokuspokus', 'Abracadabra', 'Simsalabim', 'Bezemsteel', 'Toverdrank', 'Kikkerpoot', 'Sterrenstof', 'Maanlicht'],
     sketch: 'assets/heks-schets-klein.jpg', caption: 'ontwerp: heksenwereld', bubbleY: -292, numPos: [-12, -44.6], tagline: 'tover je heksenhuis en trol iedereen die langskomt' },
-  wc: { name: 'WC Poepier Wereld', sym: '#wcHouse', house: 'WC-huis', people: ['poepje', 'drol'],
+  wc: { name: 'WC Poepier Wereld', sym: '#wcHouse', house: 'WC-huis', people: ['wcmeisje', 'wcjongen', 'ballerina', 'wchond', 'wckat', 'drolmeneer'],
     walls: ['#ffffff', '#f8fbff', '#fffaf0', '#f3f8fc'], roofs: ['#ffffff', '#d0ebff', '#ffdeeb', '#fff3bf', '#d3f9d8'], doors: ['#ffffff', '#e7f5ff', '#fff9db'],
     namesA: ['Huize', 'Villa', 'Paleis', 'Hokje', 'Kasteel'], namesB: ['Plons', 'Doortrek', 'Pruttel', 'Drolletje', 'Wc-rol', 'Spoelbak', 'Poepiedoepie', 'Pfrrrt', 'Wiebelbril'],
     sketch: 'assets/wc-schets-klein.jpg', caption: 'ontwerp: WC Poepier Wereld', bubbleY: -196, numPos: [-35.5, -25], tagline: 'bouw je WC-huis en trol iedereen die langskomt' },
@@ -1225,7 +1223,7 @@ const LOOKS = {
     w.bubbleY = -124;
   },
   // HEKSENWERELD: bruine hond met flaporen, rode wangetjes en een heksenhoed
-  hond(b, w) {
+  hond(b, w, hat = b => witchHat(b, 16, -67, .9)) {
     const BR = '#a0612b', BRD = '#7a4519';
     P(b, 'M-30 -34 Q-44 -30 -52 -12', { stroke: BR, 'stroke-width': 6, fill: 'none', 'stroke-linecap': 'round' });
     legsFar(b, w, BRD, '#5c3311');
@@ -1238,55 +1236,98 @@ const LOOKS = {
     el('circle', { cx: 22.5, cy: -51, r: 3.3, fill: '#ff6b6b', opacity: .7 }, b);
     face(el('g', { transform: 'translate(16 6)' }, b), w);
     el('ellipse', { cx: 16, cy: -53, rx: 2.4, ry: 1.7, fill: '#2b1a10' }, b);
-    witchHat(b, 16, -67, .9);
+    hat(b);
     w.bubbleY = -112;
   },
   // HEKSENWERELD: bruine kat met zwarte strepen, zwarte poten, puntoren en een heksenhoed
-  kat(b, w) {
-    const BR = '#b5743c', BK = '#1d1d1d';
+  kat(b, w, o = {}) {
+    const BR = '#b5743c', BK = '#1d1d1d', LEG = o.legs || BK;
     P(b, 'M-30 -36 Q-46 -40 -50 -58', { stroke: BR, 'stroke-width': 7, fill: 'none', 'stroke-linecap': 'round' });
-    P(b, 'M-30 -36 Q-46 -40 -50 -58', { stroke: BK, 'stroke-width': 7, fill: 'none', 'stroke-dasharray': '4 6' });
-    legsFar(b, w, BK, BK);
+    if (!o.legs) P(b, 'M-30 -36 Q-46 -40 -50 -58', { stroke: BK, 'stroke-width': 7, fill: 'none', 'stroke-dasharray': '4 6' });
+    legsFar(b, w, LEG, LEG === BK ? BK : '#7f4a1d');
     el('rect', { x: -34, y: -44, width: 50, height: 21, rx: 10, fill: BR, stroke: '#7f4a1d', 'stroke-width': 1.5 }, b);
-    P(b, 'M-26 -44 l3 21 M-17 -44 l2 21 M-8 -44 l2 21 M1 -43 l1 17', { stroke: BK, 'stroke-width': 3.5, 'stroke-linecap': 'round' });
-    legsNear(b, w, BK, BK);
+    if (!o.legs) P(b, 'M-26 -44 l3 21 M-17 -44 l2 21 M-8 -44 l2 21 M1 -43 l1 17', { stroke: BK, 'stroke-width': 3.5, 'stroke-linecap': 'round' });
+    legsNear(b, w, LEG, LEG === BK ? BK : '#7f4a1d');
     P(b, 'M5 -63 L-3 -79 L12 -69 Z M27 -63 L35 -79 L20 -69 Z', { fill: BK, 'stroke-linejoin': 'round' });
     P(b, 'M5.5 -66 L1 -75 L10 -69.5 Z M26.5 -66 L31 -75 L22 -69.5 Z', { fill: '#f783ac' });
     el('circle', { cx: 16, cy: -56, r: 14, fill: BR, stroke: '#7f4a1d', 'stroke-width': 1.5 }, b);
-    P(b, 'M11 -69 l1 5 M16 -70 v5 M21 -69 l-1 5 M3 -56 h5 M29 -56 h-5 M3.5 -51 h5 M28.5 -51 h-5', { stroke: BK, 'stroke-width': 2.4, 'stroke-linecap': 'round' });
+    if (!o.legs) P(b, 'M11 -69 l1 5 M16 -70 v5 M21 -69 l-1 5 M3 -56 h5 M29 -56 h-5 M3.5 -51 h5 M28.5 -51 h-5', { stroke: BK, 'stroke-width': 2.4, 'stroke-linecap': 'round' });
     face(el('g', { transform: 'translate(16 6)' }, b), w);
     P(b, 'M14 -53.5 h4 l-2 2.2 Z', { fill: '#f783ac' });
     P(b, 'M10 -51 l-9 -1.5 M10 -49.5 l-9 2 M22 -51 l9 -1.5 M22 -49.5 l9 2', { stroke: '#555', 'stroke-width': .8 });
-    witchHat(b, 16, -71, .75);
+    (o.hat || (b => witchHat(b, 16, -71, .75)))(b);
     w.bubbleY = -114;
   },
-  // WC POEPIER WERELD: een blij poepje met stokarmpjes en stokbeentjes (naar de schets)
-  poepje(b, w) {
+  // WC POEPIER WERELD (personen-schets 3): blond meisje met een poepje op haar haarband en een bruine jurk
+  wcmeisje(b, w) {
+    P(b, 'M-15 -64 Q-16 -80 0 -80 Q16 -80 15 -64 L17 -38 L-17 -38 Z', { fill: '#f9d71c', stroke: '#e0b90b', 'stroke-width': 1 });
+    legs(b, w, '#5c3311'); stockings(w, '#8a5a2b', '#4a2c12');
+    arms(b, w, SKIN);
+    P(b, 'M-10 -50 H10 L15 -16 H-15 Z', { fill: '#8a5a2b', stroke: '#5c3311', 'stroke-width': 1.2, 'stroke-linejoin': 'round' });
+    P(b, 'M-13.6 -25 H13.6 M-14.2 -21 H14.2', { stroke: '#6b4220', 'stroke-width': 1.3 });
+    P(b, POOP_D, { transform: 'translate(0 -33) scale(.27)', fill: '#3d2410' });
+    head(b); face(b, w);
+    P(b, FRINGE, { fill: '#f9d71c' });
+    poopBand(b, 0, -62, 13.5);
+    w.bubbleY = -120;
+  },
+  // WC POEPIER WERELD: jongen met bruin haar, een zwart shirt met een poepje erop en een bruine broek
+  wcjongen(b, w) {
+    legs(b, w, '#4a2c12'); stockings(w, '#8a5a2b');
+    P(b, 'M-10.5 -31 H10.5 L11 -21 H-11 Z', { fill: '#8a5a2b' });
+    arms(b, w, SKIN, { base: 30 });
+    P(b, 'M-10 -51 H10 L15 -46 L12.5 -41 L10 -43 L10.5 -29 H-10.5 L-10 -43 L-12.5 -41 L-15 -46 Z', { fill: '#222', stroke: '#111', 'stroke-width': 1, 'stroke-linejoin': 'round' });
+    P(b, POOP_D, { transform: 'translate(0 -33) scale(.27)', fill: '#a0662f', stroke: '#5c3311', 'stroke-width': 3 });
+    head(b); face(b, w);
+    P(b, 'M-13.5 -60 Q-15 -79 0 -78.5 Q15 -78.5 14 -59 L12 -67 Q7 -72 0 -71 Q-8 -72 -12 -66 Z', { fill: '#7a4519' });
+    P(b, 'M-6 -78 l-3 -4 M-1 -78.5 l0 -4.5 M4 -78 l3 -4 M9 -76 l4 -3', { stroke: '#7a4519', 'stroke-width': 2.2, 'stroke-linecap': 'round' });
+    w.bubbleY = -100;
+  },
+  // WC POEPIER WERELD: ballerina met blonde staartjes, een bruin topje en een bruin-zwart tutu
+  ballerina(b, w) {
+    for (const k of [-1, 1]) {
+      P(b, `M${k * 11} -71 Q${k * 30} -74 ${k * 26} -50 Q${k * 21} -57 ${k * 11} -62 Z`, { fill: '#f9d71c', stroke: '#e0b90b', 'stroke-width': 1, 'stroke-linejoin': 'round' });
+      el('circle', { cx: k * 14.5, cy: -68.5, r: 2.8, fill: '#7a4519' }, b);
+    }
+    legs(b, w, '#4a2c12'); stockings(w, '#8a5a2b', '#4a2c12');
+    P(b, 'M-9 -31 L-22 -15 L-17 -17 L-14 -11 L-9 -16 L-5 -10 L0 -16 L5 -10 L9 -16 L14 -11 L17 -17 L22 -15 L9 -31 Z', { fill: '#8a5a2b', stroke: '#5c3311', 'stroke-width': 1, 'stroke-linejoin': 'round' });
+    P(b, 'M-6 -29 L-15 -14 M-1 -29 L-4 -12 M4 -29 L6 -12 M8 -29 L16 -14', { stroke: '#1d1d1d', 'stroke-width': 1.8 });
+    arms(b, w, SKIN, { base: 58 });
+    P(b, 'M-9 -50 H9 L9.5 -30 H-9.5 Z', { fill: '#8a5a2b', stroke: '#5c3311', 'stroke-width': 1, 'stroke-linejoin': 'round' });
+    P(b, 'M-4 -49 V-31 M0 -49 V-31 M4 -49 V-31', { stroke: '#6b4220', 'stroke-width': 1 });
+    head(b); face(b, w);
+    P(b, FRINGE, { fill: '#f9d71c' });
+    w.bubbleY = -104;
+  },
+  // WC POEPIER WERELD: bruine hond en kat, allebei met een haarband met een poepje erop
+  wchond(b, w) { LOOKS.hond(b, w, b => poopBand(b, 16, -56, 14)); },
+  wckat(b, w) { LOOKS.kat(b, w, { legs: '#b5743c', hat: b => poopBand(b, 16, -56, 14) }); },
+  // WC POEPIER WERELD: de drolletjemeneer met stokarmpjes, stokbeentjes en wenkbrauwen
+  drolmeneer(b, w) {
     b = el('g', { transform: 'scale(1.4)' }, b);
     poopLimbs(b, w, -14, 13, -30, 50);
-    P(b, POOP_D, { transform: 'translate(0 -10) scale(.85)', fill: '#a8692f', stroke: '#5c3311', 'stroke-width': 2.2, 'stroke-linejoin': 'round' });
-    P(b, 'M-14 -18 Q-4 -21 8 -19 M-8 -28 Q0 -31 8 -29', { stroke: '#c98c52', 'stroke-width': 1.8, fill: 'none', 'stroke-linecap': 'round' });
+    P(b, POOP_D, { transform: 'translate(0 -10) scale(.85)', fill: '#b9733a', stroke: '#6b3d17', 'stroke-width': 2.2, 'stroke-linejoin': 'round' });
+    P(b, 'M-14 -18 Q-4 -21 8 -19 M-8 -28 Q0 -31 8 -29', { stroke: '#d6955a', 'stroke-width': 1.8, fill: 'none', 'stroke-linecap': 'round' });
     face(el('g', { transform: 'translate(0 35)' }, b), w);
+    P(b, 'M-8.5 -33 L-3 -31 M8.5 -33 L3 -31', { stroke: '#1d1d1d', 'stroke-width': 1.7, 'stroke-linecap': 'round' });
     w.bubbleY = -80;
-  },
-  // WC POEPIER WERELD: een grote drol met de armen omhoog en een vliegje dat rondzoemt
-  drol(b, w) {
-    b = el('g', { transform: 'scale(1.15)' }, b);
-    poopLimbs(b, w, -16, 15, -40, 140);
-    P(b, 'M-24 0 Q-27 -11 -15 -12 Q-20 -23 -8 -24 Q-14 -35 -2 -37 Q-6 -48 4 -52 Q12 -46 8 -38 Q20 -36 14 -25 Q26 -23 18 -12 Q28 -10 24 0 Z',
-      { transform: 'translate(0 -12)', fill: '#7d4a1e', stroke: '#4a2a0e', 'stroke-width': 2, 'stroke-linejoin': 'round' });
-    P(b, 'M-15 -25 Q-4 -28 10 -26 M-8 -36 Q2 -39 12 -37 M-3 -48 Q3 -50 9 -48', { stroke: '#a0662f', 'stroke-width': 1.8, fill: 'none', 'stroke-linecap': 'round' });
-    face(el('g', { transform: 'translate(0 22)' }, b), w);
-    const fly = el('g', { transform: 'translate(12 -74)' }, b);
-    const fi = el('g', { class: 'fly' }, fly);
-    el('ellipse', { cx: -2, cy: -2.5, rx: 2.8, ry: 1.6, fill: '#e7f5ff', stroke: '#74c0fc', 'stroke-width': .5 }, fi);
-    el('ellipse', { cx: 2, cy: -2.5, rx: 2.8, ry: 1.6, fill: '#e7f5ff', stroke: '#74c0fc', 'stroke-width': .5 }, fi);
-    el('circle', { r: 2, fill: '#1d1d1d' }, fi);
-    w.bubbleY = -108;
   },
 };
 
 const POOP_D = 'M-26 0 Q-28 -12 -14 -13 Q-18 -26 -2 -26 Q-8 -38 6 -40 Q14 -32 9 -26 Q24 -26 18 -13 Q30 -12 26 0 Z';
+// een zwarte haarband met een poepje erop (personen-schets 3)
+function poopBand(b, cx, cy, r) {
+  P(b, `M${cx - r * .97} ${cy - r * .25} Q${cx} ${cy - r * 1.55} ${cx + r * .97} ${cy - r * .25}`, { stroke: '#1d1d1d', 'stroke-width': 3.2, fill: 'none', 'stroke-linecap': 'round' });
+  P(b, POOP_D, { transform: `translate(${cx} ${cy - r * 1.02}) scale(.42)`, fill: '#8a5a2b', stroke: '#4a2c12', 'stroke-width': 3, 'stroke-linejoin': 'round' });
+}
+// bruine kousen (met krulletjes) over de benen, onder de schoentjes
+function stockings(w, color, stripe) {
+  for (const g of [w.legL, w.legR]) {
+    const shoe = g.lastChild;
+    g.insertBefore(el('line', { x1: 0, y1: 0, x2: 0, y2: 20, stroke: color, 'stroke-width': 3.8, 'stroke-linecap': 'round' }), shoe);
+    if (stripe) g.insertBefore(el('path', { d: 'M-1.9 4 L1.9 6.5 M-1.9 9 L1.9 11.5 M-1.9 14 L1.9 16.5', stroke: stripe, 'stroke-width': 1.3 }), shoe);
+  }
+}
 // stokarmpjes en stokbeentjes met een streepje als hand en voet, zoals in de tekening
 function poopLimbs(b, w, xl, xr, ay, base) {
   const STICK = { stroke: '#1d1d1d', 'stroke-width': 2.4, 'stroke-linecap': 'round' };
@@ -1430,7 +1471,8 @@ function prank(v, w) {
   setFace(w, true);
   if (p.wet) puffs(w.x, w.y - 50 * w.s, w.s, 8, '#a5d8ff');
   const ANIMAL_LINES = { hond: ['Woef?!', 'Wraf wraf!', 'Kwaak? Ik ben een hond!'], kat: ['Miauw!?', 'Ssssss!', 'Mijn snorharen!'],
-    poepje: ['Plons?!', 'Hé, ik ben al bruin!', 'Niet doortrekken!'], drol: ['Bzzz, mijn vliegje!', 'Ik stink niet hoor!', 'Neeee, niet de wc in!'] };
+    wchond: ['Woef?!', 'Wraf! Wie scheet daar?', 'Mijn poepjes-haarband!'], wckat: ['Miauw!?', 'Ssssss!', 'Bah, mijn pootjes zijn nat!'],
+    drolmeneer: ['Plons?!', 'Hé, ik ben al bruin!', 'Niet doortrekken, meneer!'] };
   const line = w.rare ? pick(RARE_LINES) : ANIMAL_LINES[w.type] ? pick(ANIMAL_LINES[w.type]) : p.walker;
   bubble(w.bub, line, w.bubbleY || -100, w.rare ? '#fff3bf' : '#fff', w.s);
   bubble(v.bub, p.house, v.bubbleY, heks ? '#e5dbff' : wc ? '#d0ebff' : '#ffe3f1', v.s);
@@ -2779,7 +2821,7 @@ function renderAvatars() {
   const box = $('avatars');
   box.replaceChildren();
   const wld = worldOf(IN.h);
-  const VIEW = { heksje: '-36 -114 72 120', hond: '-58 -104 100 108', kat: '-58 -104 100 108', poepje: '-40 -76 80 82', drol: '-42 -100 84 106' };
+  const VIEW = { heksje: '-36 -114 72 120', hond: '-58 -104 100 108', kat: '-58 -104 100 108', wcmeisje: '-36 -102 72 108', ballerina: '-38 -92 76 98', wchond: '-58 -104 100 108', wckat: '-58 -104 100 108', drolmeneer: '-40 -76 80 82' };
   for (const t of [...WORLDS[wld].people, 'zeldzaam']) {
     const locked = t === 'zeldzaam' && !state.rareTrolled;
     const b = document.createElement('button');
@@ -3260,7 +3302,8 @@ document.querySelectorAll('.world-btn').forEach(b => b.addEventListener('click',
 /* ---------- start ---------- */
 load();
 state.avatars = state.avatars || { trol: state.avatar || 'blond', heks: 'heksje' };
-state.avatars.wc = state.avatars.wc || 'poepje';
+// het poepje en de drol van eerst zijn vervangen door de personen uit de tekening
+if (!['zeldzaam', ...WORLDS.wc.people].includes(state.avatars.wc)) state.avatars.wc = 'wcmeisje';
 delete state.avatar;
 state.world = state.world || 'trol';
 state.houses.forEach(h => { h.rooms = h.rooms || []; h.best = h.best || {}; h.world = h.world || 'trol'; });

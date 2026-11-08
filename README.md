@@ -19,7 +19,8 @@ Na de eerste keer werkt het ook zonder internet.
   blauw water en een poppetje in de wc). Elke wereld heeft zijn eigen huizen.
 - **Bezoekers:** in de Trolwereld lopen het blonde meisje, het regenboogmeisje en de jongen met het tasje;
   in de Heksenwereld het heksje, de hond en de kat (alle drie met een heksenhoed);
-  in de WC Poepier Wereld het poepje en de grote drol met zijn vliegje.
+  in de WC Poepier Wereld het meisje, de jongen, de ballerina, de hond, de kat en de drolletjemeneer
+  (de meisjes, de hond en de kat dragen een haarband met een poepje erop).
   De zeldzame bezoeker met de paraplu mag in allebei de werelden komen.
 - **Binnen:** koop kamers voor een huis en loop zelf het parcours door.
   Gebruik ← → om te lopen en ↑ of spatie om te springen. Op een telefoon verschijnen knoppen.
@@ -49,6 +50,7 @@ Na de eerste keer werkt het ook zonder internet.
 - `personen-schets2-heksenwereld.jpg`: de bezoekers van de heksenwereld (ligt op zijn kant)
 - `wereld-huis-schets2-(heksenwereld).jpg`: de heksenwereld met het voorbeeldhuis (ligt op zijn kop)
 - `wereld-hus-schets3(wcpoepeiwereld).jpg`: de WC Poepier Wereld met het WC-huis nummer 68 (ligt op zijn kant)
+- `personen-schets-3-poepjeswereld.jpg`: de bezoekers van de WC Poepier Wereld (ligt op zijn kant)
 
 ## Nieuwe versie uitbrengen
 
