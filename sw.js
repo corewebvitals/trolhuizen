@@ -1,7 +1,7 @@
 /* Service worker voor Trolhuizen.
    Nieuwe versie uitbrengen? Verhoog VERSION. Spelers krijgen dan de melding
    "Er is een nieuwe versie" en kunnen met één tik bijwerken. */
-const VERSION = 'trolhuizen-v10';
+const VERSION = 'trolhuizen-v11';
 const FONT_CACHE = 'trolhuizen-fonts';
 const SHELL = [
   './',
@@ -10,6 +10,7 @@ const SHELL = [
   './assets/schets1-klein.jpg',
   './assets/heks-schets-klein.jpg',
   './assets/wc-schets-klein.jpg',
+  './assets/snoep-schets-klein.jpg',
   './icons/icon.svg',
   './icons/icon-192.png',
   './icons/icon-512.png',

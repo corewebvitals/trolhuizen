@@ -16,11 +16,14 @@ Na de eerste keer werkt het ook zonder internet.
 - **Werelden:** wissel bovenin tussen de **Trolwereld** (grasveld), de **Heksenwereld** (paarse grond, maan,
   heksenhuizen met een hoed als dak en een heksenhoed met een bloem ernaast) en de **WC Poepier Wereld**
   (lucht van blauw krijt, bruine grond, vallende poepjes, bloemen met een gezichtje en WC-huizen met oogjes,
-  blauw water en een poppetje in de wc). Elke wereld heeft zijn eigen huizen.
+  blauw water en een poppetje in de wc) en **Snoepland** (paarse krijtlucht met pluizige wolkjes en een
+  pepermuntzon, grond van roze suikerspin, ronde roze snoephuisjes met een gezichtje, glazuur, een kersje,
+  zwaaiende armpjes en een lollieboom). Elke wereld heeft zijn eigen huizen.
 - **Bezoekers:** in de Trolwereld lopen het blonde meisje, het regenboogmeisje en de jongen met het tasje;
   in de Heksenwereld het heksje, de hond en de kat (alle drie met een heksenhoed);
   in de WC Poepier Wereld het meisje, de jongen, de ballerina, de hond, de kat en de drolletjemeneer
-  (de meisjes, de hond en de kat dragen een haarband met een poepje erop).
+  (de meisjes, de hond en de kat dragen een haarband met een poepje erop);
+  in Snoepland voorlopig dezelfde bezoekers als in de Trolwereld.
   De zeldzame bezoeker met de paraplu mag in allebei de werelden komen.
 - **Binnen:** koop kamers voor een huis en loop zelf het parcours door.
   Gebruik ← → om te lopen en ↑ of spatie om te springen. Op een telefoon verschijnen knoppen.
@@ -51,6 +54,7 @@ Na de eerste keer werkt het ook zonder internet.
 - `wereld-huis-schets2-(heksenwereld).jpg`: de heksenwereld met het voorbeeldhuis (ligt op zijn kop)
 - `wereld-hus-schets3(wcpoepeiwereld).jpg`: de WC Poepier Wereld met het WC-huis nummer 68 (ligt op zijn kant)
 - `personen-schets-3-poepjeswereld.jpg`: de bezoekers van de WC Poepier Wereld (ligt op zijn kant)
+- `wereld-huis-schets-schets4(snoepwereld).jpg`: Snoepland met het snoephuisje nummer 68 en de lollieboom (ligt op zijn kant)
 
 ## Nieuwe versie uitbrengen
 
