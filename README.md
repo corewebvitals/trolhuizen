@@ -38,12 +38,14 @@ Na de eerste keer werkt het ook zonder internet.
 | Ogen dicht | 10 $ | alleen lopen als het meisje haar ogen dicht heeft, anders word je een kikker |
 | Toverdrank | 15 $ | tegen de plank springen onder de goede ingrediënten, in de volgorde van het recept |
 | Ballon | 20 $ | met je poppetje in een ballon alle 6 heksenhoedjes wegbeuken binnen 30 seconden (één tik = weg) |
+| Frisdrank | 12 $ | binnen 15 seconden alle 7 blikjes opdrinken (twee staan op een plank, daarvoor moet je springen); dan scheet je de kamer uit, over het hek |
+| Scheten | 15 $ | op de grote drol zitten en zo snel mogelijk op spatie of 💨 drukken: elke scheet blaast de vliegende poepjes terug, jaag er 12 weg |
 
 ## Tekeningen
 
 - `huis-schets1.jpg`: het trolhuis
 - `personen-schets1.jpg`: de bezoekers (de onderste is zeldzaam)
-- `kamers-schets1.jpg`, `kamers-schets2.jpg` en `kamers-schets-3.jpg`: de kamers
+- `kamers-schets1.jpg`, `kamers-schets2.jpg`, `kamers-schets-3.jpg` en `kamers-schets4.jpg`: de kamers (schets 4 ligt op zijn kant)
 - `personen-schets2-heksenwereld.jpg`: de bezoekers van de heksenwereld (ligt op zijn kant)
 - `wereld-huis-schets2-(heksenwereld).jpg`: de heksenwereld met het voorbeeldhuis (ligt op zijn kop)
 - `wereld-hus-schets3(wcpoepeiwereld).jpg`: de WC Poepier Wereld met het WC-huis nummer 68 (ligt op zijn kant)
