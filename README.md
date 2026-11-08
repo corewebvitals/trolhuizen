@@ -27,6 +27,7 @@ Na de eerste keer werkt het ook zonder internet.
   De zeldzame bezoeker met de paraplu mag in allebei de werelden komen.
 - **Binnen:** koop kamers voor een huis en loop zelf het parcours door.
   Gebruik ← → om te lopen en ↑ of spatie om te springen. Op een telefoon verschijnen knoppen.
+  In het doolhof en bij het dansen gebruik je alle vier de pijltjes (op een telefoon komt er een ▼-knop bij).
 
 ## Kamers
 
@@ -43,13 +44,16 @@ Na de eerste keer werkt het ook zonder internet.
 | Toverdrank | 15 $ | tegen de plank springen onder de goede ingrediënten, in de volgorde van het recept |
 | Ballon | 20 $ | met je poppetje in een ballon alle 6 heksenhoedjes wegbeuken binnen 30 seconden (één tik = weg) |
 | Frisdrank | 12 $ | binnen 15 seconden alle 7 blikjes opdrinken (twee staan op een plank, daarvoor moet je springen); dan scheet je de kamer uit, over het hek |
+| Tekenen | 0 $ | met je muis of vinger een zuurstok-weg over het slijm tekenen (de inkt is beperkt, wissen mag), via de trampoline naar het rode sterrensnoepje op de richel springen |
+| Doolhof | 0 $ | elke keer een nieuw doolhof: loop met de pijltjes, pak de 3 snoepjes en vind dan de uitgang |
+| Dansen | 2 $ | tik de pijltjes na in de goede volgorde (het ritme maakt niet uit); 3 dansjes van 4, 5 en 6 pijltjes, fout = dat dansje opnieuw |
 | Scheten | 15 $ | op de grote drol zitten en zo snel mogelijk op spatie of 💨 drukken: elke scheet blaast de vliegende poepjes terug, jaag er 12 weg |
 
 ## Tekeningen
 
 - `huis-schets1.jpg`: het trolhuis
 - `personen-schets1.jpg`: de bezoekers (de onderste is zeldzaam)
-- `kamers-schets1.jpg`, `kamers-schets2.jpg`, `kamers-schets-3.jpg` en `kamers-schets4.jpg`: de kamers (schets 4 ligt op zijn kant)
+- `kamers-schets1.jpg`, `kamers-schets2.jpg`, `kamers-schets-3.jpg`, `kamers-schets4.jpg` en `kamers-schets5.jpg`: de kamers (schets 4 en 5 liggen op hun kant)
 - `personen-schets2-heksenwereld.jpg`: de bezoekers van de heksenwereld (ligt op zijn kant)
 - `wereld-huis-schets2-(heksenwereld).jpg`: de heksenwereld met het voorbeeldhuis (ligt op zijn kop)
 - `wereld-hus-schets3(wcpoepeiwereld).jpg`: de WC Poepier Wereld met het WC-huis nummer 68 (ligt op zijn kant)

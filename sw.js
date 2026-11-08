@@ -1,7 +1,7 @@
 /* Service worker voor Trolhuizen.
    Nieuwe versie uitbrengen? Verhoog VERSION. Spelers krijgen dan de melding
    "Er is een nieuwe versie" en kunnen met één tik bijwerken. */
-const VERSION = 'trolhuizen-v11';
+const VERSION = 'trolhuizen-v12';
 const FONT_CACHE = 'trolhuizen-fonts';
 const SHELL = [
   './',

@@ -231,6 +231,17 @@ body.touch-ui .in-hint{display:none}
 .armwave{transform-box:view-box;transform-origin:162px 168px;animation:armwave .9s ease-in-out infinite alternate}
 @keyframes armwave{from{transform:rotate(-14deg)}to{transform:rotate(16deg)}}
 @media (prefers-reduced-motion:reduce){.lolly,.mint,.armwave{animation:none}}
+/* kamers Tekenen, Doolhof en Dansen */
+.erase{position:fixed;left:50%;top:138px;transform:translateX(-50%);z-index:2;cursor:pointer;font:inherit;font-size:18px;color:var(--ink)}
+.touch div{align-items:flex-end}
+.touch .dnbtn{display:none}
+body.pad4 .touch .dnbtn{display:block}
+.disco{animation:disco 1.2s steps(1) infinite}
+@keyframes disco{0%{fill:#ff8cc6}25%{fill:#ffd43b}50%{fill:#74c0fc}75%{fill:#8ce99a}}
+.spot{transform-box:view-box;animation:spot 3s ease-in-out infinite alternate}
+@keyframes spot{from{transform:rotate(-14deg)}to{transform:rotate(14deg)}}
+.cardshake{animation:giggle .3s ease-in-out 2}
+@media (prefers-reduced-motion:reduce){.disco,.spot{animation:none}}
 /* kamers Frisdrank en Scheten */
 .drip{animation:drip 1.1s linear infinite}
 @keyframes drip{0%{transform:translateY(0);opacity:0}10%{opacity:1}100%{transform:translateY(200px);opacity:.3}}
@@ -818,11 +829,12 @@ body.touch-ui .in-hint{display:none}
   </div>
   <div class="turn-tip">tip: draai je telefoon, dan zie je meer</div>
   <div class="pill ptimer" id="pTimer" hidden><span id="pLabel">tijd</span><b id="pTime">25</b><span id="pLeft"></span></div>
+  <button class="pill erase" id="eraseBtn" hidden>🧽 wissen</button>
   <div class="balance" id="balance" hidden><span>evenwicht</span><i id="balanceNeedle"></i></div>
   <div class="in-hint">← → lopen · ↑ of spatie springen · Esc naar buiten</div>
   <div class="touch" id="touch">
     <div><button data-k="left" aria-label="Naar links">◀</button><button data-k="right" aria-label="Naar rechts">▶</button></div>
-    <button data-k="jump" class="jump" aria-label="Springen">↑</button>
+    <div><button data-k="down" class="dnbtn" aria-label="Omlaag">▼</button><button data-k="jump" class="jump" aria-label="Springen">↑</button></div>
   </div>
   <div class="card finish" id="finish" hidden>
     <h2>Gehaald!</h2>
@@ -1810,8 +1822,11 @@ const ROOMS = {
   pballon:    { name: 'Ballon',     price: 20, desc: 'Beuk alle heksenhoedjes weg voor de tijd op is!', width: 1900 },
   fris:       { name: 'Frisdrank',  price: 12, desc: 'Drink alle 7 blikjes op, dan scheet je de kamer uit!', width: 1800, deco: { window: false, picture: false } },
   scheet:     { name: 'Scheten',    price: 15, desc: 'Druk heel snel op spatie of \u{1F4A8} en scheet de poepjes weg!', width: 1800, deco: { picture: false } },
+  teken:      { name: 'Tekenen',    price: 0,  desc: 'Teken je eigen weg naar de trampoline!', width: 1800, deco: { window: false, picture: false } },
+  doolhof:    { name: 'Doolhof',    price: 0,  desc: 'Pak de 3 snoepjes en vind de uitgang!', width: 1300, deco: { window: false, picture: false, titleY: 200 } },
+  dans:       { name: 'Dansen',     price: 2,  desc: 'Tik de pijltjes na en maak een dansje!', width: 1700, deco: { window: false, picture: false } },
 };
-const ROOM_ORDER = ['hindernis', 'trampoline', 'weg', 'touw', 'spinnen', 'schommel', 'hoed', 'ogen', 'drank', 'pballon', 'fris', 'scheet'];
+const ROOM_ORDER = ['hindernis', 'trampoline', 'weg', 'touw', 'spinnen', 'schommel', 'hoed', 'ogen', 'drank', 'pballon', 'fris', 'scheet', 'teken', 'doolhof', 'dans'];
 const ROOM_ICONS = {
   hindernis: '<svg viewBox="0 0 60 30" aria-hidden="true"><g fill="none" stroke="#7048e8" stroke-width="3"><circle cx="9" cy="19" r="7"/><circle cx="24" cy="18" r="8"/><circle cx="39" cy="19" r="7"/><circle cx="53" cy="20" r="6"/></g><path d="M0 28 H60" stroke="#7048e8" stroke-width="2.5"/></svg>',
   trampoline: '<svg viewBox="0 0 60 30" aria-hidden="true"><g stroke="#7048e8" stroke-width="2.5" fill="none" stroke-linecap="round"><path d="M23 0 V17 M37 0 V17"/><path d="M12 9 H4 l4 -4 M4 9 l4 4 M48 9 H56 l-4 -4 M56 9 l-4 4"/></g><rect x="16" y="16" width="28" height="7" rx="3.5" fill="#5f3dc4"/></svg>',
@@ -1824,6 +1839,9 @@ const ROOM_ICONS = {
   drank: '<svg viewBox="0 0 60 30" aria-hidden="true"><path d="M2 8 H40" stroke="#8a5a2b" stroke-width="3"/><rect x="5" y="0" width="5" height="8" fill="#38d9a9"/><circle cx="18" cy="5" r="3" fill="#e03131"/><rect x="25" y="1" width="6" height="7" fill="#ffe066" stroke="#1d1d1d" stroke-width=".8"/><path d="M38 14 Q36 28 46 28 H52 Q62 28 60 14 Z" fill="#2b2b2b"/><ellipse cx="49" cy="14" rx="11" ry="3" fill="#69db7c"/></svg>',
   pballon: '<svg viewBox="0 0 60 30" aria-hidden="true"><circle cx="30" cy="13" r="11" fill="#e7f5ff" stroke="#2a1846" stroke-width="1.6"/><circle cx="30" cy="11" r="3.5" fill="#f7c08f"/><path d="M27 15 h6 v5 h-6 z" fill="#7048e8"/><path d="M4 18 L8 8 L12 18 Z M2 18 h12" fill="#242424" stroke="#242424" stroke-width="1.5"/><path d="M47 21 L51 11 L55 21 Z M45 21 h12" fill="#242424" stroke="#242424" stroke-width="1.5"/><circle cx="51" cy="17" r="8" fill="none" stroke="#2a1846" stroke-width="1"/></svg>',
   fris: '<svg viewBox="0 0 60 30" aria-hidden="true"><rect x="5" y="5" width="15" height="22" rx="3" fill="#4dabf7" stroke="#1d1d1d" stroke-width="1.6"/><text x="12.5" y="21" text-anchor="middle" font-size="13" font-family="Patrick Hand, Comic Sans MS, cursive" fill="#1d1d1d">7</text><rect x="23" y="5" width="15" height="22" rx="3" fill="#4dabf7" stroke="#1d1d1d" stroke-width="1.6"/><text x="30.5" y="21" text-anchor="middle" font-size="13" font-family="Patrick Hand, Comic Sans MS, cursive" fill="#1d1d1d">7</text><path d="M43 10 q6 -2 13 0 M42 16 q7 -1 15 1 M43 22 q6 1 13 3" stroke="#2f9e44" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg>',
+  teken: '<svg viewBox="0 0 60 30" aria-hidden="true"><path d="M4 26 Q18 10 34 20" stroke="#e64980" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M4 26 Q18 10 34 20" stroke="#fff" stroke-width="1.5" fill="none" stroke-dasharray="3 3"/><path d="M33 19 L46 6 L51 11 L38 24 Z" fill="#ffd43b" stroke="#2a1846" stroke-width="1.4" stroke-linejoin="round"/><path d="M33 19 L38 24 L31 26 Z" fill="#2a1846"/><rect x="40" y="22" width="18" height="5" rx="2" fill="#7048e8"/></svg>',
+  doolhof: '<svg viewBox="0 0 60 30" aria-hidden="true"><rect x="8" y="2" width="44" height="26" rx="3" fill="#fff0f6" stroke="#7048e8" stroke-width="2.4"/><path d="M8 10 H22 V20 M30 2 V12 H42 M16 28 V20 H30 V28 M38 20 H52 M42 12 V20" stroke="#7048e8" stroke-width="2.4" fill="none"/><circle cx="12" cy="24" r="2.5" fill="#e64980"/><circle cx="47" cy="7" r="2.5" fill="#fcc419"/></svg>',
+  dans: '<svg viewBox="0 0 60 30" aria-hidden="true"><path d="M30 0 V5" stroke="#868e96" stroke-width="1.5"/><circle cx="30" cy="10" r="5.5" fill="#ced4da" stroke="#495057" stroke-width="1.2"/><g fill="none" stroke="#7048e8" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10 22 H2 M5 19 L2 22 L5 25"/><path d="M50 22 H58 M55 19 L58 22 L55 25"/><path d="M22 27 V19 M19 22 L22 19 L25 22"/><path d="M38 19 V27 M35 24 L38 27 L41 24"/></g></svg>',
   scheet: '<svg viewBox="0 0 60 30" aria-hidden="true"><g fill="#8ce99a"><circle cx="9" cy="17" r="6"/><circle cx="17" cy="11" r="5"/><circle cx="18" cy="21" r="5"/></g><path d="M38 10 L33 3 M46 10 L51 3" stroke="#e03131" stroke-width="2.4" stroke-linecap="round"/><path d="M31 27 Q30 21 35 21 Q33 15 39 15 Q37 10 42 8 Q46 11 45 15 Q51 15 48 21 Q54 21 53 27 Z" fill="#8a5a2b" stroke="#4a2c12" stroke-width="1.2"/><circle cx="39" cy="20" r="1.6" fill="#111"/><circle cx="45" cy="20" r="1.6" fill="#111"/></svg>',
 };
 const FLOOR = 820, CEIL = 130, PS = 1.7, HW = 18;
@@ -1831,8 +1849,8 @@ const GRAV = 2700, JUMP_V = 1080, RUN = 380;
 const SLIME = FLOOR + 55;
 const lvlFront = $('lvlFront');
 const inSvg = $('insideSvg'), lvlBg = $('lvlBg'), lvlDyn = $('lvlDyn'), lvlPlayer = $('lvlPlayer'), lvlFx = $('lvlFx');
-const IN = { active: false, t: 0, jumpBuf: 0 };
-const keys = { left: false, right: false, jump: false };
+const IN = { active: false, t: 0, jumpBuf: 0, taps: [], lastDir: null };
+const keys = { left: false, right: false, jump: false, down: false };
 
 /* ---------- kamers kopen in het huis-paneel ---------- */
 function renderRooms(h) {
@@ -2516,6 +2534,460 @@ function updateScheet(dt) {
   }
 }
 
+/* ---------- Tekenen, Doolhof en Dansen (naar kamerschets 5) ---------- */
+const DIRS = { left: [-1, 0], right: [1, 0], up: [0, -1], down: [0, 1] };
+const OPP = { left: 'right', right: 'left', up: 'down', down: 'up' };
+function tapDir(k) {
+  const d = k === 'jump' ? 'up' : k;
+  if (!DIRS[d]) return;
+  IN.taps.push(d); IN.lastDir = d;
+}
+// in het doolhof en bij het dansen heb je vier pijltjes nodig, ook op een telefoon
+function setPad4(on) {
+  document.body.classList.toggle('pad4', on);
+  const b = document.querySelector('#touch .jump');
+  if (on) { b.textContent = '▲'; b.setAttribute('aria-label', 'Omhoog'); }
+  else if (b.textContent === '▲') { b.textContent = '↑'; b.setAttribute('aria-label', 'Springen'); }
+}
+function drawArrow(g, dir, size, color, width) {
+  const rot = { right: 0, down: 90, left: 180, up: -90 }[dir], k = size / 50;
+  return P(g, `M${-24 * k} 0 H${22 * k} M${6 * k} ${-17 * k} L${24 * k} 0 L${6 * k} ${17 * k}`,
+    { stroke: color, 'stroke-width': width, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round', transform: `rotate(${rot})` });
+}
+function drawWrapped(g, k, body, end) {
+  P(g, `M${-14 * k} 0 L${-30 * k} ${-14 * k} L${-34 * k} ${3 * k} L${-28 * k} ${14 * k} Z M${14 * k} 0 L${30 * k} ${-14 * k} L${34 * k} ${3 * k} L${28 * k} ${14 * k} Z`,
+    { fill: end, stroke: '#1d1d1d', 'stroke-width': 2.4 * k, 'stroke-linejoin': 'round' });
+  el('ellipse', { rx: 19 * k, ry: 15 * k, fill: body, stroke: '#1d1d1d', 'stroke-width': 2.6 * k }, g);
+  P(g, `M${-10 * k} ${-6 * k} L${6 * k} ${10 * k} M${-2 * k} ${-12 * k} L${12 * k} ${2 * k}`, { stroke: 'rgba(255,255,255,.55)', 'stroke-width': 3 * k, 'stroke-linecap': 'round' });
+}
+
+// TEKENEN: teken je eigen weg over het slijm naar de trampoline, en spring naar het sterrensnoepje
+const INK = 700;
+BUILDERS.teken = function (L, bg, dyn, ox, w, ri) {
+  const px0 = ox + 300, px1 = ox + 1480;
+  L.pits.push({ x0: px0, x1: px1, type: 'teken' });
+  // het paarse gestreepte platform uit de tekening, waar je begint
+  el('rect', { x: ox + 120, y: FLOOR, width: px0 - ox - 120, height: 260, fill: '#9775fa', stroke: '#5f3dc4', 'stroke-width': 5 }, dyn);
+  for (let x = ox + 150; x < px0 - 10; x += 34) el('rect', { x, y: FLOOR + 14, width: 12, height: 246, fill: '#7048e8' }, dyn);
+  el('rect', { x: ox + 120, y: FLOOR - 6, width: px0 - ox - 120, height: 20, rx: 6, fill: '#b197fc', stroke: '#5f3dc4', 'stroke-width': 4 }, dyn);
+  txt(dyn, ox + 210, FLOOR - 150, 'teken →', 40, WALL_TEXT);
+  // de trampoline op een zuurstokpaal midden in het slijm
+  const tx = ox + 900, tw = 180, ty = FLOOR + 6;   // net onder de vloer: van een rechte weg loop je er zo op
+  const pole = el('g', {}, dyn);
+  el('rect', { x: tx - 34, y: ty + 18, width: 68, height: 400, fill: '#fff', stroke: '#c92a2a', 'stroke-width': 4 }, pole);
+  for (let y = ty + 30; y < ty + 400; y += 44) P(pole, `M${tx - 34} ${y + 22} L${tx + 34} ${y} V${y + 18} L${tx - 34} ${y + 40} Z`, { fill: '#f03e3e' });
+  const g = el('g', {}, dyn);
+  for (const sx of [-60, 60]) P(g, `M${sx} ${ty + 22} L${sx * 1.1} ${ty + 44}`, { stroke: '#343a40', 'stroke-width': 7, 'stroke-linecap': 'round' });
+  const bed = el('g', {}, g);
+  el('rect', { x: -tw / 2, y: ty, width: tw, height: 24, rx: 12, fill: '#e64980', stroke: '#a61e4d', 'stroke-width': 4 }, bed);
+  P(bed, `M${-tw / 2 + 24} ${ty + 8} H${tw / 2 - 30}`, { stroke: '#ffdeeb', 'stroke-width': 5, 'stroke-linecap': 'round' });
+  L.tramps.push({ g, bed, cx0: tx, amp: 0, w: tw, y: ty, period: 1, x: tx, vx: 0, squash: 0, high: true });   // stuitert altijd hoog, ook zonder ↑
+  // de hoge richel met het sterrensnoepje
+  const lx0 = ox + 1050, lx1 = px1, ly = FLOOR - 220;
+  el('rect', { x: lx0, y: ly, width: lx1 - lx0, height: 34, rx: 14, fill: '#ff8cc6', stroke: '#c2255c', 'stroke-width': 4 }, dyn);
+  for (let x = lx0 + 20; x < lx1 - 20; x += 40) P(dyn, `M${x} ${ly + 3} l14 0 l-12 28 l-14 0 Z`, { fill: '#fff', opacity: .75 });
+  const candy = el('g', {}, dyn);
+  const ci = el('g', {}, candy);
+  drawWrapped(ci, 1.5, '#f03e3e', '#ff8787');
+  P(ci, starD(0, -40, 17, 7.5), { class: 'wandstar', fill: '#fcc419', stroke: '#1d1d1d', 'stroke-width': 2.4, 'stroke-linejoin': 'round' });
+  const tk = { room: ri, ox, w, dx0: ox + 250, dx1: ox + 1500, lx0, lx1, ly, cx: ox + 1330, candy, inkG: el('g', {}, dyn), segs: [], ink: INK, got: false };
+  tk.barrier = makeBarrier(dyn, ox + w - 60);
+  L.barriers.push(tk.barrier);
+  L.teken.push(tk);
+  resetTeken(tk, true);
+};
+function resetTeken(tk, wipe) {
+  tk.got = false; tk.shown = null; tk.flyT = 0;
+  tk.candy.removeAttribute('opacity');
+  tk.candy.setAttribute('transform', `translate(${tk.cx} ${tk.ly - 34})`);
+  setBarrier(tk.barrier, false);
+  if (wipe) eraseInk(tk);   // als je doodgaat, blijft je getekende weg gewoon liggen
+}
+function eraseInk(tk) { tk.inkG.replaceChildren(); tk.segs = []; tk.ink = INK; tk.shown = null; }
+const tekenAt = x => IN.L && IN.L.teken.find(tk => x >= tk.ox && x <= tk.ox + tk.w);
+function updateTeken(dt) {
+  const p = IN.p, here = p.mode !== 'finish' ? tekenAt(p.x) : null;
+  const hideErase = !here || here.got;
+  if ($('eraseBtn').hidden !== hideErase) $('eraseBtn').hidden = hideErase;
+  for (const tk of IN.L.teken) {
+    if (tk === here && !tk.got) {
+      const pct = Math.round(tk.ink / INK * 100);
+      if (pct !== tk.shown) { tk.shown = pct; showPTimer('inkt', `${pct}%`, '', pct < 15); }
+    } else if (tk.shown != null) { tk.shown = null; if ($('pLabel').textContent === 'inkt') $('pTimer').hidden = true; }
+    if (!tk.got && p.mode === 'normal' && Math.abs(p.x - tk.cx) < 60 && p.y > tk.ly - 60 && p.y - 130 < tk.ly) {
+      tk.got = true; tk.flyT = 0;
+      setBarrier(tk.barrier, true);
+      floatText('Hoera!', tk.cx, tk.ly - 140);
+      for (const c of ['#fcc419', '#ff8cc6', '#74c0fc']) puffs(tk.cx, tk.ly - 50, 1.2, 6, c, lvlFx);
+      toast('Je hebt het sterrensnoepje! Het hek is open.');
+    }
+    if (tk.got && tk.flyT < 1) {   // het snoepje vliegt draaiend weg
+      tk.flyT += dt;
+      tk.candy.setAttribute('transform', `translate(${tk.cx} ${(tk.ly - 34 - tk.flyT * 260).toFixed(1)}) rotate(${(tk.flyT * 360).toFixed(0)})`);
+      tk.candy.setAttribute('opacity', Math.max(0, 1 - tk.flyT).toFixed(2));
+    }
+  }
+}
+// tekenen met je muis of vinger: een zuurstok-weg waar je op kunt lopen
+let inkDraw = null;
+function inkPoint(e) {
+  return { x: (e.clientX - (IN.camTx || 0)) / IN.scale - VB_PAD, y: IN.y0 + e.clientY / IN.scale };
+}
+function inkPath(tk) {
+  return { outer: P(tk.inkG, 'M0 0', { stroke: '#e64980', 'stroke-width': 15, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }),
+    inner: P(tk.inkG, 'M0 0', { stroke: '#fff', 'stroke-width': 6, fill: 'none', 'stroke-linecap': 'round', 'stroke-dasharray': '10 12' }), d: '' };
+}
+inSvg.addEventListener('pointerdown', e => {
+  if (!IN.active || !IN.p || IN.p.mode === 'dead' || IN.p.mode === 'finish') return;
+  const tk = tekenAt(IN.p.x);
+  if (!tk || tk.got) return;
+  if (tk.ink <= 0) { toast('Je inkt is op! Druk op wissen om opnieuw te tekenen.'); return; }
+  const pt = inkPoint(e);
+  pt.x = clamp(pt.x, tk.dx0, tk.dx1); pt.y = clamp(pt.y, CEIL + 30, FLOOR + 20);
+  e.preventDefault();
+  try { inSvg.setPointerCapture(e.pointerId); } catch (err) { /* tekenen werkt ook zonder capture */ }
+  inkDraw = { tk, id: e.pointerId, last: pt, path: inkPath(tk) };
+  inkDraw.path.d = `M${pt.x.toFixed(1)} ${pt.y.toFixed(1)}`;
+});
+inSvg.addEventListener('pointermove', e => {
+  if (!inkDraw || e.pointerId !== inkDraw.id) return;
+  const tk = inkDraw.tk, a = inkDraw.last, pt = inkPoint(e);
+  pt.x = clamp(pt.x, tk.dx0, tk.dx1); pt.y = clamp(pt.y, CEIL + 30, FLOOR + 20);
+  let d = Math.hypot(pt.x - a.x, pt.y - a.y);
+  if (d < 12 || tk.ink <= 0) return;
+  if (d > tk.ink) { const k = tk.ink / d; pt.x = a.x + (pt.x - a.x) * k; pt.y = a.y + (pt.y - a.y) * k; d = tk.ink; }
+  tk.ink -= d;
+  if (Math.abs(pt.x - a.x) > 1) {
+    const l = a.x < pt.x ? [a, pt] : [pt, a];
+    tk.segs.push({ x0: l[0].x, y0: l[0].y, x1: l[1].x, y1: l[1].y });
+  }
+  inkDraw.path.d += ` L${pt.x.toFixed(1)} ${pt.y.toFixed(1)}`;
+  inkDraw.path.outer.setAttribute('d', inkDraw.path.d); inkDraw.path.inner.setAttribute('d', inkDraw.path.d);
+  inkDraw.last = pt;
+});
+for (const ev of ['pointerup', 'pointercancel']) inSvg.addEventListener(ev, e => { if (inkDraw && e.pointerId === inkDraw.id) inkDraw = null; });
+$('eraseBtn').addEventListener('click', e => {
+  const tk = IN.p && tekenAt(IN.p.x);
+  if (tk) { eraseInk(tk); toast('Alles is weg. Teken een nieuwe weg!'); }
+  e.currentTarget.blur();
+});
+
+// DOOLHOF: elke keer een nieuw doolhof op de muur; pak 3 snoepjes en vind de uitgang
+BUILDERS.doolhof = function (L, bg, dyn, ox, w, ri) {
+  const C = 60, cols = 15, rows = 8, x0 = ox + (w - cols * C) / 2, y0 = 296;
+  el('rect', { x: x0 - 26, y: y0 - 26, width: cols * C + 52, height: rows * C + 52, rx: 28, fill: '#fff0f6', stroke: '#c2255c', 'stroke-width': 8 }, bg);
+  el('rect', { x: x0 - 26, y: y0 - 26, width: cols * C + 52, height: rows * C + 52, rx: 28, fill: 'url(#hatchCandy)' }, bg);
+  const mz = { room: ri, ox, w, x0, y0, C, cols, rows, startX: ox + 140,
+    floorG: el('g', {}, dyn), wallsG: el('g', {}, dyn), itemsG: el('g', {}, dyn), token: el('g', { opacity: 0 }, dyn) };
+  mz.barrier = makeBarrier(dyn, ox + w - 60);
+  L.barriers.push(mz.barrier);
+  L.mazes.push(mz);
+  resetMaze(mz);
+};
+function makeMazeGrid(cols, rows) {
+  const open = Array.from({ length: cols }, () => Array.from({ length: rows }, () => ({ left: false, right: false, up: false, down: false })));
+  const seen = Array.from({ length: cols }, () => Array(rows).fill(false));
+  const stack = [[0, Math.floor(Math.random() * rows)]];
+  seen[stack[0][0]][stack[0][1]] = true;
+  while (stack.length) {   // gangen graven tot alles bereikbaar is
+    const [c, r] = stack[stack.length - 1];
+    const next = Object.keys(DIRS).map(d => [d, c + DIRS[d][0], r + DIRS[d][1]]).filter(([, nc, nr]) => nc >= 0 && nr >= 0 && nc < cols && nr < rows && !seen[nc][nr]);
+    if (!next.length) { stack.pop(); continue; }
+    const [d, nc, nr] = pick(next);
+    open[c][r][d] = true; open[nc][nr][OPP[d]] = true; seen[nc][nr] = true;
+    stack.push([nc, nr]);
+  }
+  // een paar extra doorgangen, dan zijn er soms twee wegen
+  for (let i = 0; i < 8; i++) {
+    const c = Math.floor(rnd(0, cols - 1)), r = Math.floor(rnd(0, rows));
+    const d = Math.random() < .5 || r === rows - 1 ? 'right' : 'down';
+    const nc = c + DIRS[d][0], nr = r + DIRS[d][1];
+    open[c][r][d] = true; open[nc][nr][OPP[d]] = true;
+  }
+  return open;
+}
+function mazeDist(mz, sc, sr) {
+  const dist = Array.from({ length: mz.cols }, () => Array(mz.rows).fill(-1)), q = [[sc, sr]];
+  dist[sc][sr] = 0;
+  while (q.length) {
+    const [c, r] = q.shift();
+    for (const d in DIRS) if (mz.open[c][r][d]) {
+      const nc = c + DIRS[d][0], nr = r + DIRS[d][1];
+      if (nc < 0 || nc >= mz.cols) continue;
+      if (dist[nc][nr] < 0) { dist[nc][nr] = dist[c][r] + 1; q.push([nc, nr]); }
+    }
+  }
+  return dist;
+}
+const mazeXY = (mz, c, r) => ({ x: mz.x0 + (c + .5) * mz.C, y: mz.y0 + (r + .5) * mz.C });
+function resetMaze(mz) {
+  const { cols, rows, C, x0, y0 } = mz;
+  mz.active = false; mz.done = false; mz.shown = null; mz.got = 0; mz.warned = 0;
+  mz.open = makeMazeGrid(cols, rows);
+  mz.sr = Math.floor(rows / 2); mz.er = Math.floor(Math.random() * rows);
+  mz.open[0][mz.sr].left = true; mz.open[cols - 1][mz.er].right = true;
+  // muren van drop met een zuurstokstreepje
+  let d = '';
+  for (let c = 0; c < cols; c++) for (let r = 0; r < rows; r++) {
+    const x = x0 + c * C, y = y0 + r * C, o = mz.open[c][r];
+    if (!o.up) d += `M${x} ${y} H${x + C} `;
+    if (!o.left) d += `M${x} ${y} V${y + C} `;
+    if (c === cols - 1 && !o.right) d += `M${x + C} ${y} V${y + C} `;
+    if (r === rows - 1) d += `M${x} ${y + C} H${x + C} `;
+  }
+  mz.wallsG.replaceChildren();
+  P(mz.wallsG, d, { stroke: '#5f3dc4', 'stroke-width': 13, 'stroke-linecap': 'round', fill: 'none' });
+  P(mz.wallsG, d, { stroke: '#d0bfff', 'stroke-width': 4, 'stroke-linecap': 'round', fill: 'none', 'stroke-dasharray': '6 10' });
+  // de start met het smileytje uit de tekening, en de uitgang met een slotje
+  mz.floorG.replaceChildren();
+  const s = mazeXY(mz, 0, mz.sr), ex = mazeXY(mz, cols - 1, mz.er);
+  el('rect', { x: x0 - 92, y: s.y - 34, width: 84, height: 68, rx: 10, fill: '#fff', stroke: '#1d1d1d', 'stroke-width': 4 }, mz.floorG);
+  txt(mz.floorG, x0 - 50, s.y - 42, 'START', 26, { fill: '#2a1846' });
+  el('circle', { cx: x0 - 50, cy: s.y, r: 20, fill: '#ffe066', stroke: '#1d1d1d', 'stroke-width': 2.5 }, mz.floorG);
+  P(mz.floorG, `M${x0 - 58} ${s.y - 4} v.1 M${x0 - 42} ${s.y - 4} v.1 M${x0 - 58} ${s.y + 6} Q${x0 - 50} ${s.y + 13} ${x0 - 42} ${s.y + 6}`, { stroke: '#1d1d1d', 'stroke-width': 3, fill: 'none', 'stroke-linecap': 'round' });
+  el('rect', { x: x0 + cols * C + 8, y: ex.y - 34, width: 80, height: 68, rx: 8, fill: '#23a55a', stroke: '#0f5a2f', 'stroke-width': 4 }, mz.floorG);
+  txt(mz.floorG, x0 + cols * C + 48, ex.y + 10, 'EXIT', 28, { fill: '#0d220f' });
+  mz.lock = el('g', { transform: `translate(${x0 + cols * C + 48} ${ex.y - 50})` }, mz.floorG);
+  el('rect', { x: -14, y: -10, width: 28, height: 22, rx: 4, fill: '#fcc419', stroke: '#1d1d1d', 'stroke-width': 2.5 }, mz.lock);
+  P(mz.lock, 'M-8 -10 V-17 Q0 -27 8 -17 V-10', { stroke: '#1d1d1d', 'stroke-width': 3, fill: 'none' });
+  // 3 snoepjes ver weg, het liefst in doodlopende gangen
+  const dist = mazeDist(mz, 0, mz.sr), cells = [];
+  for (let c = 0; c < cols; c++) for (let r = 0; r < rows; r++) {
+    const n = Object.values(mz.open[c][r]).filter(Boolean).length;
+    if (!(c === cols - 1 && r === mz.er) && c > 2) cells.push({ c, r, dist: dist[c][r] + (n === 1 ? 30 : 0) + Math.random() * 8 });
+  }
+  cells.sort((a, b) => b.dist - a.dist);
+  const picked = [];
+  for (const cell of cells) {
+    if (picked.length === 3) break;
+    if (picked.every(q => Math.abs(q.c - cell.c) + Math.abs(q.r - cell.r) > 4)) picked.push(cell);
+  }
+  mz.itemsG.replaceChildren();
+  const SWEETS = [['#ff8cc6', '#f783ac'], ['#74c0fc', '#a5d8ff'], ['#ffd43b', '#ffe066']];
+  mz.candies = picked.map(({ c, r }, i) => {
+    const q = mazeXY(mz, c, r), g = el('g', { transform: `translate(${q.x} ${q.y})` }, mz.itemsG);
+    drawWrapped(el('g', { class: 'wandstar' }, g), .75, SWEETS[i][0], SWEETS[i][1]);
+    return { c, r, g, got: false };
+  });
+  mz.me = null;
+  mz.token.setAttribute('opacity', 0);
+  setBarrier(mz.barrier, false);
+}
+function placeMover(mz, m) {
+  const a = mazeXY(mz, m.c, m.r), b = mazeXY(mz, m.tc, m.tr);
+  m.x = a.x + (b.x - a.x) * m.u; m.y = a.y + (b.y - a.y) * m.u;
+  m.g.setAttribute('transform', `translate(${m.x.toFixed(1)} ${m.y.toFixed(1)})`);
+}
+// een stapje verder: ben je bij een vakje aangekomen, dan kies je de volgende kant op
+function stepMover(mz, m, dt, chooser) {
+  if (m.u >= 1) {
+    m.c = m.tc; m.r = m.tr; m.u = 0; m.arrived = true;
+    const d = chooser(m);
+    if (!d) { m.u = 1; return; }
+    m.dir = d; m.tc = m.c + DIRS[d][0]; m.tr = m.r + DIRS[d][1];
+    if (m.tc < 0 || m.tc >= mz.cols) { m.tc = m.c; m.tr = m.r; m.u = 1; m.out = d; return; }
+  }
+  m.u = Math.min(1, m.u + m.speed * dt);
+}
+function startMaze(mz) {
+  const p = IN.p;
+  mz.active = true;
+  mz.me = { g: mz.token, c: 0, r: mz.sr, tc: 0, tr: mz.sr, u: 1, speed: 5.2 };
+  mz.token.replaceChildren();
+  el('circle', { r: 24, fill: '#fff', stroke: '#7048e8', 'stroke-width': 3.5 }, mz.token);
+  LOOKS[state.avatars[worldOf(IN.h)]](el('g', { transform: 'translate(0 17) scale(.42)' }, mz.token), {});
+  mz.token.removeAttribute('opacity');
+  placeMover(mz, mz.me);
+  Object.assign(p, { mode: 'doolhof', maze: mz, vy: 0 });
+  IN.fig.g.setAttribute('opacity', 0);
+  IN.lastDir = null;
+  setPad4(true);
+  toast('Loop met de pijltjes door het doolhof. Pak de 3 snoepjes!');
+}
+function updateMazeMode(dt) {
+  const p = IN.p, mz = p.maze, me = mz.me;
+  me.arrived = false;
+  stepMover(mz, me, dt, m => {
+    // de knop die je het laatst indrukte gaat voor, daarna de andere knoppen die je vasthoudt
+    const held = { left: keys.left, right: keys.right, up: keys.jump, down: keys.down };
+    const order = [IN.lastDir, 'left', 'right', 'up', 'down'].filter((d, i, a) => d && held[d] && a.indexOf(d) === i);
+    return order.find(d => mz.open[m.c][m.r][d]);
+  });
+  placeMover(mz, me);
+  p.x = me.x;
+  if (me.arrived) {
+    for (const cd of mz.candies) if (!cd.got && cd.c === me.c && cd.r === me.r) {
+      cd.got = true; mz.got++;
+      cd.g.setAttribute('opacity', 0);
+      puffs(me.x, me.y, .9, 8, '#ffe066', lvlFx);
+      floatText(mz.got === 3 ? 'Alle 3!' : 'Snoepje!', me.x, me.y - 40);
+      if (mz.got === 3) { mz.lock.setAttribute('opacity', 0); toast('Alle snoepjes! Nu snel naar de uitgang.'); }
+    }
+  }
+  mz.warned = Math.max(0, mz.warned - dt);
+  if (me.out === 'right') {
+    me.out = null;
+    if (mz.got < 3) { if (!mz.warned) toast(`Eerst alle 3 de snoepjes pakken! Je hebt er ${mz.got}.`); mz.warned = 2; }
+    else winMaze(mz);
+  } else if (me.out) me.out = null;
+}
+function winMaze(mz) {
+  const p = IN.p;
+  mz.done = true; mz.active = false;
+  mz.token.setAttribute('opacity', 0);
+  $('pTimer').hidden = true;
+  setBarrier(mz.barrier, true);
+  setPad4(false);
+  Object.assign(p, { mode: 'normal', x: mz.ox + mz.w - 220, y: FLOOR, vy: 0, onGround: true, ground: { type: 'floor' } });
+  IN.fig.g.removeAttribute('opacity');
+  for (const c of ['#ff8cc6', '#fcc419', '#74c0fc', '#8ce99a']) puffs(p.x, p.y - 90, 1.3, 5, c, lvlFx);
+  toast('Je bent het doolhof uit! Het hek is open.');
+}
+function updateMazes() {
+  const p = IN.p;
+  for (const mz of IN.L.mazes) {
+    if (!mz.active && !mz.done && p.mode === 'normal' && p.onGround && p.x > mz.startX && p.x < mz.ox + mz.w - 100) startMaze(mz);
+    if (mz.active) {
+      const key = `${mz.got}`;
+      if (key !== mz.shown) { mz.shown = key; showPTimer('snoepjes', `${mz.got}/3`, '', false); }
+    }
+  }
+}
+
+// DANSEN: tik de pijltjes in de goede volgorde (het ritme maakt niet uit), dan maak je een dansje
+const DANS_LEN = [4, 5, 6];
+BUILDERS.dans = function (L, bg, dyn, ox, w, ri) {
+  const cx = ox + w / 2, bx = cx + 400;   // de discobal hangt rechts van de titel
+  // spotlights en een discobal
+  [['#ff8cc6', -1], ['#74c0fc', 1], ['#ffd43b', -.4]].forEach(([c, k]) => {
+    const sg = el('g', { class: 'spot' }, bg);
+    sg.style.transformOrigin = `${bx}px ${CEIL + 90}px`;
+    sg.style.animationDelay = `${(k * 1.3).toFixed(1)}s`;
+    P(sg, `M${bx} ${CEIL + 90} L${cx + k * 240 - 110} ${FLOOR} H${cx + k * 240 + 110} Z`, { fill: c, opacity: .22 });
+  });
+  P(bg, `M${bx} ${CEIL} V${CEIL + 50}`, { stroke: '#868e96', 'stroke-width': 4 });
+  const ball = el('g', { transform: `translate(${bx} ${CEIL + 90})` }, bg);
+  el('circle', { r: 42, fill: '#ced4da', stroke: '#495057', 'stroke-width': 3 }, ball);
+  for (let y = -36; y <= 36; y += 12) for (let x = -36; x <= 36; x += 12) if (x * x + y * y < 1500) {
+    const f = el('rect', { x: x - 5, y: y - 5, width: 10, height: 10, fill: (x + y) % 24 ? '#e9ecef' : '#adb5bd' }, ball);
+    if ((x * 7 + y * 3) % 5 === 0) { f.setAttribute('class', 'twinkle'); f.setAttribute('fill', '#fff'); f.style.animationDelay = `${(((x + y + 72) % 24) / 10).toFixed(1)}s`; }
+  }
+  // de pijltjesknoppen uit de tekening, als voorbeeld op de muur
+  const pad = el('g', { transform: `translate(${ox + 260} 560)` }, bg);
+  [['left', -66, 0], ['up', 0, -66], ['down', 0, 0], ['right', 66, 0]].forEach(([d, x, y]) => {
+    const kg = el('g', { transform: `translate(${x} ${y})` }, pad);
+    el('rect', { x: -28, y: -28, width: 56, height: 56, rx: 9, fill: '#fff', stroke: '#2a1846', 'stroke-width': 4 }, kg);
+    drawArrow(kg, d, 30, '#2a1846', 6);
+  });
+  // de dansvloer met gekleurde tegels
+  const tiles = el('g', {}, dyn);
+  for (let i = -3; i < 3; i++) {
+    const t = el('rect', { class: 'disco', x: cx + i * 110 + 4, y: FLOOR - 8, width: 102, height: 16, rx: 5, fill: '#ff8cc6', stroke: '#2a1846', 'stroke-width': 3 }, tiles);
+    t.style.animationDelay = `${(i * .3).toFixed(1)}s`;
+  }
+  const ds = { room: ri, cx, ox, w, cardsG: el('g', {}, dyn), cards: [] };
+  ds.barrier = makeBarrier(dyn, ox + w - 60);
+  L.barriers.push(ds.barrier);
+  L.dansen.push(ds);
+  resetDans(ds);
+};
+function resetDans(ds) {
+  ds.active = false; ds.done = false; ds.round = 0; ds.idx = 0; ds.celebrate = 0;
+  ds.cardsG.replaceChildren(); ds.cards = [];
+  setBarrier(ds.barrier, false);
+}
+function dansRound(ds) {
+  ds.round++; ds.idx = 0;
+  const n = DANS_LEN[ds.round - 1], all = Object.keys(DIRS);
+  ds.combo = [];
+  while (ds.combo.length < n) {
+    const d = pick(all);
+    if (ds.combo.length >= 2 && ds.combo.at(-1) === d && ds.combo.at(-2) === d) continue;
+    ds.combo.push(d);
+  }
+  ds.cardsG.replaceChildren();
+  const S = 96, gap = 18, x0 = ds.cx - (n * S + (n - 1) * gap) / 2 + S / 2;
+  ds.cards = ds.combo.map((d, i) => {
+    const outer = el('g', { transform: `translate(${x0 + i * (S + gap)} 430)` }, ds.cardsG);
+    const g = el('g', {}, outer);
+    const box = el('rect', { x: -S / 2, y: -S / 2, width: S, height: S, rx: 14, fill: '#fff', stroke: '#2a1846', 'stroke-width': 5 }, g);
+    const arrow = drawArrow(g, d, 58, '#7048e8', 10);
+    return { g, box, arrow };
+  });
+  markCards(ds);
+  showPTimer('dansje', `${ds.round}/${DANS_LEN.length}`, '', false);
+}
+function markCards(ds) {
+  ds.cards.forEach((c, i) => {
+    const done = i < ds.idx, next = i === ds.idx;
+    c.box.setAttribute('fill', done ? '#b2f2bb' : next ? '#fff3bf' : '#fff');
+    c.box.setAttribute('stroke', done ? '#2f9e44' : next ? '#f08c00' : '#2a1846');
+    c.arrow.setAttribute('stroke', done ? '#2f9e44' : '#7048e8');
+  });
+}
+function startDans(ds) {
+  const p = IN.p;
+  ds.active = true;
+  Object.assign(p, { mode: 'dans', dans: ds, x: ds.cx, y: FLOOR, vy: 0, onGround: true, dir: 1, move: null, moveT: 0 });
+  IN.taps.length = 0;
+  setPad4(true);
+  dansRound(ds);
+  toast('Tik de pijltjes na, in de goede volgorde!');
+}
+function updateDansMode(dt) {
+  const p = IN.p, ds = p.dans;
+  p.moveT = Math.max(0, p.moveT - dt);
+  p.x = ds.cx; p.y = FLOOR;
+  if (ds.celebrate > 0) {
+    ds.celebrate -= dt;
+    if (Math.random() < dt * 10) puffs(p.x + rnd(-120, 120), p.y - rnd(120, 260), .8, 2, pick(['#ff8cc6', '#fcc419', '#74c0fc', '#8ce99a', '#b197fc']), lvlFx);
+    if (ds.celebrate <= 0) {
+      if (ds.round < DANS_LEN.length) dansRound(ds);
+      else winDans(ds);
+    }
+    return;
+  }
+  for (const d of IN.taps) {
+    if (d === ds.combo[ds.idx]) {
+      ds.idx++; p.move = d; p.moveT = .35;
+      floatText('♪', p.x + rnd(-90, 90), p.y - 230);
+      if (ds.idx === ds.combo.length) {
+        ds.celebrate = 1.8; p.moveT = 0;
+        floatText(pick(['Super!', 'Wauw!', 'Wat een dansje!', 'Toppie!']), p.x, p.y - 300);
+        for (const c of ['#ff8cc6', '#fcc419', '#74c0fc', '#8ce99a']) puffs(p.x, p.y - 150, 1.4, 5, c, lvlFx);
+        break;
+      }
+    } else {   // fout: dit dansje begint opnieuw
+      const wrong = ds.cards[ds.idx];
+      if (wrong) replay(wrong.g, 'cardshake');
+      ds.idx = 0; p.move = 'oops'; p.moveT = .5;
+      floatText('Oeps!', p.x, p.y - 270);
+      IN.falls++;
+      break;
+    }
+  }
+  markCards(ds);
+}
+function winDans(ds) {
+  const p = IN.p;
+  ds.done = true; ds.active = false;
+  $('pTimer').hidden = true;
+  ds.cardsG.replaceChildren();
+  setBarrier(ds.barrier, true);
+  setPad4(false);
+  Object.assign(p, { mode: 'normal', onGround: true, ground: { type: 'floor' } });
+  toast('Wat een dansje! Het hek is open.');
+}
+function updateDansen() {
+  const p = IN.p;
+  for (const ds of IN.L.dansen) if (!ds.active && !ds.done && p.mode === 'normal' && p.onGround && Math.abs(p.x - ds.cx) < 120) startDans(ds);
+}
+function danceTilt(p) {
+  if (p.dans.celebrate > 0) return Math.sin(IN.t * 6) * 14;
+  if (p.moveT > 0 && (p.move === 'left' || p.move === 'right')) return p.move === 'left' ? -12 : 12;
+  return 0;
+}
+
 /* ---------- toverhek: dicht tot je de kamer hebt opgelost ---------- */
 function makeBarrier(dyn, x) {
   const g = el('g', {}, dyn);
@@ -2928,7 +3400,7 @@ function spiderHit(p) {
 
 function buildLevel(h) {
   lvlBg.replaceChildren(); lvlDyn.replaceChildren(); lvlFx.replaceChildren(); lvlFront.replaceChildren();
-  const L = { pits: [], balls: [], tramps: [], planks: [], ropes: [], spiders: [], swings: [], scissors: [], hats: [], girls: [], potions: [], prooms: [], fris: [], scheet: [], barriers: [], checkpoints: [{ x: 300, room: -1 }], rooms: [] };
+  const L = { pits: [], balls: [], tramps: [], planks: [], ropes: [], spiders: [], swings: [], scissors: [], hats: [], girls: [], potions: [], prooms: [], fris: [], scheet: [], teken: [], mazes: [], dansen: [], barriers: [], checkpoints: [{ x: 300, room: -1 }], rooms: [] };
   const START_W = 800, END_W = 1000;
   L.width = START_W + h.rooms.reduce((a, k) => a + ROOMS[k].width, 0) + END_W;
   drawShell(lvlBg, L.width, h.wall);
@@ -3046,6 +3518,7 @@ function spawnPlayer(cp) {
     lean: 0, leanV: 0, gust: 0, gustT: 0, dir: 1, phase: 0, deadT: 0, cp, noRope: 0, bloat: 0, kick: 0 };
   setFace(IN.fig.f, false);
   setActionLabel(false);
+  setPad4(false);
   IN.fig.g.removeAttribute('opacity');
   $('balance').hidden = true;
 }
@@ -3059,13 +3532,16 @@ function resetPlanks(fromRoom = -1) {
   for (const pr of L.prooms) if (pr.room >= fromRoom) resetPRoom(pr);
   for (const fr of L.fris) if (fr.room >= fromRoom) resetFris(fr);
   for (const sr of L.scheet) if (sr.room >= fromRoom) resetScheet(sr);
+  for (const tk of L.teken) if (tk.room >= fromRoom) resetTeken(tk, fromRoom < 0);
+  for (const mz of L.mazes) if (mz.room >= fromRoom) resetMaze(mz);
+  for (const ds of L.dansen) if (ds.room >= fromRoom) resetDans(ds);
   for (const s of IN.L.planks) { s.state = 'ok'; s.dy = 0; s.vy = 0; s.rot = 0; s.g.removeAttribute('transform'); s.g.removeAttribute('opacity'); }
   for (const s of IN.L.swings) { s.cut = false; s.boarded = false; s.timer = 0; s.rot = 0; }
   for (const sc of IN.L.scissors) { sc.state = 'idle'; sc.bub.replaceChildren(); }
 }
 
 /* ---------- besturing ---------- */
-const KEYMAP = { ArrowLeft: 'left', a: 'left', A: 'left', ArrowRight: 'right', d: 'right', D: 'right', ArrowUp: 'jump', w: 'jump', W: 'jump', ' ': 'jump' };
+const KEYMAP = { ArrowLeft: 'left', a: 'left', A: 'left', ArrowRight: 'right', d: 'right', D: 'right', ArrowUp: 'jump', w: 'jump', W: 'jump', ' ': 'jump', ArrowDown: 'down', s: 'down', S: 'down' };
 addEventListener('keydown', e => {
   if (!IN.active) return;
   if (e.key === 'Escape') { leaveHouse(); return; }
@@ -3073,13 +3549,14 @@ addEventListener('keydown', e => {
   if (!k) return;
   e.preventDefault();
   if (k === 'jump' && !e.repeat) IN.jumpBuf = 0.14;
+  if (!e.repeat) tapDir(k);
   keys[k] = true;
 });
 addEventListener('keyup', e => { const k = KEYMAP[e.key]; if (k) keys[k] = false; });
-addEventListener('blur', () => { keys.left = keys.right = keys.jump = false; });
+addEventListener('blur', () => { keys.left = keys.right = keys.jump = keys.down = false; });
 document.querySelectorAll('#touch button').forEach(b => {
   const k = b.dataset.k;
-  const on = e => { e.preventDefault(); try { b.setPointerCapture(e.pointerId); } catch (err) { /* geen capture, knop werkt toch */ } keys[k] = true; if (k === 'jump') IN.jumpBuf = 0.14; b.classList.add('down'); };
+  const on = e => { e.preventDefault(); try { b.setPointerCapture(e.pointerId); } catch (err) { /* geen capture, knop werkt toch */ } keys[k] = true; if (k === 'jump') IN.jumpBuf = 0.14; tapDir(k); b.classList.add('down'); };
   const off = () => { keys[k] = false; b.classList.remove('down'); };
   b.addEventListener('pointerdown', on);
   b.addEventListener('pointerup', off); b.addEventListener('pointercancel', off); b.addEventListener('lostpointercapture', off);
@@ -3098,6 +3575,10 @@ function supports(x) {
     for (const s of IN.L.planks) if ((s.state === 'ok' || s.state === 'shake') && x >= s.x0 - 3 && x <= s.x1 + 3) { out.push({ y: FLOOR, type: 'plank', ref: s }); break; }
   }
   for (const s of IN.L.swings) if (!s.cut && Math.abs(x - s.x) < s.w / 2 + 4) out.push({ y: s.y, type: 'swing', ref: s });
+  for (const tk of IN.L.teken) {
+    if (x >= tk.lx0 && x <= tk.lx1) out.push({ y: tk.ly, type: 'ledge' });
+    for (const g of tk.segs) if (x >= g.x0 && x <= g.x1) out.push({ y: g.y0 + (g.y1 - g.y0) * (x - g.x0) / (g.x1 - g.x0), type: 'ink' });
+  }
   for (const b of IN.L.balls) {
     const dx = x - b.cx;
     if (Math.abs(dx) < b.r * 0.97) out.push({ y: b.cy - Math.sqrt(b.r * b.r - dx * dx), type: 'ball', ref: b });
@@ -3210,7 +3691,7 @@ function updateNormal(dt) {
   }
   if (!p.onGround) {
     p.coyote -= dt;
-    if (!keys.jump && p.vy < -480) p.vy = -480;   // kort tikken = klein sprongetje
+    if (!keys.jump && !p.highBounce && p.vy < -480) p.vy = -480;   // kort tikken = klein sprongetje
     p.vy = Math.min(p.vy + GRAV * dt, 1700);
     const ny = p.y + p.vy * dt;
     if (p.vy < 0) {
@@ -3226,7 +3707,7 @@ function updateNormal(dt) {
     if (p.vy >= 0) {
       for (const t of L.tramps) {
         if (Math.abs(p.x - t.x) < t.w / 2 + 8 && prevY <= t.y + 4 && ny >= t.y) {
-          p.y = t.y; p.vy = -(1250 + (keys.jump ? 200 : 0)); p.carry = t.vx * 0.85; t.squash = 1;
+          p.y = t.y; p.vy = -(1250 + (keys.jump ? 200 : 0)); p.carry = t.vx * 0.85; t.squash = 1; p.highBounce = !!t.high;
           return;
         }
       }
@@ -3235,7 +3716,7 @@ function updateNormal(dt) {
       let land = null;
       for (const s of supports(p.x)) if (s.y >= p.y - 14 && s.y <= ny + .01 && (!land || s.y < land.y)) land = s;
       if (land) {
-        p.y = land.y; p.vy = 0; p.onGround = true; p.carry = 0; p.ground = land;
+        p.y = land.y; p.vy = 0; p.onGround = true; p.carry = 0; p.ground = land; p.highBounce = false;
         touchSupport(land, true);
         puffs(p.x, p.y, .8, 5, '#f1e3d0', lvlFx);
       } else p.y = ny;
@@ -3280,6 +3761,23 @@ function renderPlayer(dt) {
     const k = p.kick || 0;   // zitten met de beentjes naar voren; bij een scheet de armen omhoog
     applyPose(f, -80, -70, k > .2 ? 150 : f.armBase + 30, k > .2 ? -150 : -f.armBase - 30);
     lift = -k * 16;
+  } else if (p.mode === 'dans') {
+    const ds = p.dans, t = IN.t;
+    if (ds.celebrate > 0) {   // rondje draaien en springen
+      p.dir = Math.sin(t * 12) > 0 ? 1 : -1;
+      const s2 = Math.sin(t * 14) * 30;
+      applyPose(f, s2, -s2, 150 + s2 * .6, -150 + s2 * .6);
+      lift = -Math.abs(Math.sin(t * 7)) * 40;
+    } else if (p.moveT > 0) {
+      const m = p.move, k = p.moveT / .35;
+      if (m === 'left' || m === 'right') { p.dir = m === 'left' ? -1 : 1; applyPose(f, -30, 28, 100, 15); lift = -6 * k; }
+      else if (m === 'up') { applyPose(f, 12, -12, 165, -165); lift = -34 * k; }
+      else if (m === 'down') { applyPose(f, 42, -42, 75, -75); lift = 12 * k; }
+      else { const wv = Math.sin(t * 30) * 25; applyPose(f, 20, -20, 150 + wv, -150 + wv); }
+    } else {
+      applyPose(f, 0, 0, f.armBase, -f.armBase);
+      lift = -Math.abs(Math.sin(t * 4)) * 4;
+    }
   } else if (p.mode === 'fartfly') {
     if (p.fly.t < p.fly.rumble) { applyPose(f, 6, -6, 150, -150); lift = rnd(-3, 3); }
     else applyPose(f, 45, 62, -125, -110);   // als een superheld op een scheetwolk
@@ -3291,7 +3789,7 @@ function renderPlayer(dt) {
     lift = walking ? -Math.abs(Math.sin(p.phase)) * 3 : 0;
   }
   IN.fig.lift.setAttribute('transform', `translate(0 ${lift.toFixed(1)})`);
-  const tilt = p.mode === 'fartfly' && p.fly.t >= p.fly.rumble ? 28 : p.lean * 38;
+  const tilt = p.mode === 'fartfly' && p.fly.t >= p.fly.rumble ? 28 : p.mode === 'dans' ? danceTilt(p) : p.lean * 38;
   IN.fig.rot.setAttribute('transform', `rotate(${tilt.toFixed(1)})`);
   IN.fig.body.setAttribute('transform', `scale(${p.dir} 1)`);
   const fat = 1 + (p.bloat || 0) * .4;   // van al die frisdrank word je dikker
@@ -3350,6 +3848,8 @@ function updateInside(dt) {
   else if (p.mode === 'balloon') updateBalloon(dt);
   else if (p.mode === 'fartfly') updateFartFly(dt);
   else if (p.mode === 'scheet') updateSitFart(dt);
+  else if (p.mode === 'doolhof') updateMazeMode(dt);
+  else if (p.mode === 'dans') updateDansMode(dt);
   else if (p.mode === 'normal') {
     updateNormal(dt);
     if (IN.p.mode === 'normal' && spiderHit(IN.p)) die('spin');
@@ -3361,6 +3861,10 @@ function updateInside(dt) {
   updatePRooms(dt);
   updateFris(dt);
   updateScheet(dt);
+  updateTeken(dt);
+  updateMazes(dt);
+  updateDansen(dt);
+  IN.taps.length = 0;
   for (const r of L.ropes) {
     const on = IN.p.mode === 'rope' && IN.p.rope === r;
     const px = on ? IN.p.x : (r.x0 + r.x1) / 2, sy = on ? IN.p.y : r.ropeY + 12;
@@ -3432,7 +3936,7 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || ['localho
   });
 }
 
-if (location.search.includes('debug')) window.__trol = { enterHouse, IN, keys, LOOKS, applyPose, el, get state() { return state; } };
+if (location.search.includes('debug')) window.__trol = { enterHouse, IN, keys, LOOKS, applyPose, el, inSvg, VB_PAD, FLOOR, DIRS, get state() { return state; } };
 
 /* ---------- werelden wisselen ---------- */
 function showWorld() {
